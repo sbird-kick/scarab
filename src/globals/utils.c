@@ -46,6 +46,230 @@ void breakpoint(const char file[], const int line) {
 }
 
 
+const char* starlab_get_opcode_string(int op_type) {
+    // Static array of strings
+    static const char* op_strings[] = {
+        "INV",
+        "NOP",
+        "CF",
+        "MOV",
+        "CMOV",
+        "LDA",
+        "IMEM",
+        "IADD",
+        "IMUL",
+        "IDIV",
+        "ICMP",
+        "LOGIC",
+        "SHIFT",
+        "FMEM",
+        "FCVT",
+        "FADD",
+        "FMUL",
+        "FMA",
+        "FDIV",
+        "FCMP",
+        "FCMOV",
+        "GATHER",
+        "SCATTER",
+        "PIPELINED_FAST",
+        "PIPELINED_MEDIUM",
+        "PIPELINED_SLOW",
+        "NOTPIPELINED_MEDIUM",
+        "NOTPIPELINED_SLOW",
+        "NOTPIPELINED_VERY_SLOW"
+    };
+
+    // Number of valid op types
+    static const int num_op_types = sizeof(op_strings) / sizeof(op_strings[0]);
+
+    // Check if the op_type is within the valid range
+    if (op_type >= 0 && op_type < num_op_types) {
+        return op_strings[op_type];
+    } else {
+        return "Unknown opcode";
+    }
+}
+
+unsigned int starlab_hash(const char *key, int table_size) {
+    unsigned int hash = 0;
+    while (*key) {
+        hash = (hash << 5) + *key++;
+    }
+    return hash % table_size;
+}
+
+starlab_hash_table* starlab_create_table(int size, size_t value_size) {
+    starlab_hash_table *hashtable = (starlab_hash_table *) malloc(sizeof(starlab_hash_table));
+    hashtable->table = (starlab_hash_node**) malloc(sizeof(starlab_hash_node *) * size);
+    for (int i = 0; i < size; i++) {
+        hashtable->table[i] = NULL;
+    }
+    hashtable->size = size;
+    hashtable->count = 0;
+    hashtable->value_size = value_size;
+    return hashtable;
+}
+
+void starlab_resize_table(starlab_hash_table *hashtable) {
+    printf("resizing hash table\n");
+    int new_size = hashtable->size * 2;
+    starlab_hash_node **new_table = (starlab_hash_node**) malloc(sizeof(starlab_hash_node *) * new_size);
+    for (int i = 0; i < new_size; i++) {
+        new_table[i] = NULL;
+    }
+
+    for (int i = 0; i < hashtable->size; i++) {
+        starlab_hash_node *node = hashtable->table[i];
+        while (node) {
+            unsigned int new_index = starlab_hash(node->key, new_size);
+            starlab_hash_node *next_node = node->next;
+            node->next = new_table[new_index];
+            new_table[new_index] = node;
+            node = next_node;
+        }
+    }
+
+    free(hashtable->table);
+    hashtable->table = new_table;
+    hashtable->size = new_size;
+}
+
+void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value) {
+    if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
+        starlab_resize_table(hashtable);
+    }
+
+    unsigned int index = starlab_hash(key, hashtable->size);
+    starlab_hash_node *node = hashtable->table[index];
+    while (node) {
+        if (strcmp(node->key, key) == 0) {
+            memcpy(node->value, value, hashtable->value_size);
+            return;
+        }
+        node = node->next;
+    }
+
+    starlab_hash_node *new_node = (starlab_hash_node*) malloc(sizeof(starlab_hash_node));
+    new_node->key = strdup(key);
+    new_node->value = malloc(hashtable->value_size);
+    memcpy(new_node->value, value, hashtable->value_size);
+    new_node->next = hashtable->table[index];
+    hashtable->table[index] = new_node;
+    hashtable->count++;
+}
+
+void* starlab_search(starlab_hash_table *hashtable, const char *key) {
+    unsigned int index = starlab_hash(key, hashtable->size);
+    starlab_hash_node *node = hashtable->table[index];
+    while (node) {
+        if (strcmp(node->key, key) == 0) {
+            return node->value;
+        }
+        node = node->next;
+    }
+    return NULL; // Indicates that the key is not found
+}
+
+void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
+    unsigned int index = starlab_hash(key, hashtable->size);
+    starlab_hash_node *node = hashtable->table[index];
+    starlab_hash_node *prev = NULL;
+    
+    while (node && strcmp(node->key, key) != 0) {
+        prev = node;
+        node = node->next;
+    }
+    
+    if (node == NULL) {
+        return; // Key not found
+    }
+    
+    if (prev == NULL) {
+        hashtable->table[index] = node->next;
+    } else {
+        prev->next = node->next;
+    }
+    
+    free(node->key);
+    free(node->value);
+    free(node);
+    hashtable->count--;
+}
+
+void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *)) {
+    for (int i = 0; i < hashtable->size; i++) {
+        starlab_hash_node *node = hashtable->table[i];
+        while (node) {
+            printf("Key: %s, Value: ", node->key);
+            print_value(node->value);
+            node = node->next;
+        }
+    }
+}
+
+int compare_key_value_pairs(const void *a, const void *b) {
+    KeyValuePair *pairA = (KeyValuePair *)a;
+    KeyValuePair *pairB = (KeyValuePair *)b;
+    return (*(int*)pairB->value - *(int*)pairA->value);  // Adjust this comparison based on the actual type of the value
+}
+
+
+
+void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, void ***values) {
+    int count = hashtable->count;
+    
+    // Allocate memory for keys and values arrays
+    *keys = (char **)malloc(count * sizeof(char *));
+    *values = (void **)malloc(count * sizeof(void *));
+    
+    KeyValuePair *pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
+    
+    int index = 0;
+    for (int i = 0; i < hashtable->size; i++) {
+        starlab_hash_node *node = hashtable->table[i];
+        while (node) {
+            pairs[index].key = node->key;
+            pairs[index].value = node->value;
+            index++;
+            node = node->next;
+        }
+    }
+    
+    // Sort the key-value pairs by value
+    qsort(pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+    
+    // Fill the keys and values arrays
+    for (int i = 0; i < count; i++) {
+        (*keys)[i] = pairs[i].key;
+        (*values)[i] = pairs[i].value;
+    }
+    
+    free(pairs);
+}
+
+int get_count(starlab_hash_table* hashtable)
+{
+  if(hashtable == NULL)
+    return 0;
+  return hashtable->count;
+}
+
+void starlab_free_table(starlab_hash_table *hashtable) {
+    for (int i = 0; i < hashtable->size; i++) {
+        starlab_hash_node *node = hashtable->table[i];
+        while (node) {
+            starlab_hash_node *temp = node;
+            node = node->next;
+            free(temp->key);
+            free(temp->value);
+            free(temp);
+        }
+    }
+    free(hashtable->table);
+    free(hashtable);
+}
+
 /**************************************************************************************/
 /* reverse_bits: */
 

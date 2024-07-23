@@ -60,6 +60,14 @@ extern int   mystatus_fd;
 extern Flag frontend_gated;
 extern uns  num_fetched_lowconf_brs;
 
+extern void* voided_global_starlab_ht_ptr;
+extern void* voided_global_starlab_types_ht;
+
+extern unsigned long long prev_instruction_time;
+extern char prev_instruction_class[128];
+
+extern char prev_address_as_string[128];
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */
