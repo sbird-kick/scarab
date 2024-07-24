@@ -111,9 +111,54 @@ Flag frontend_can_fetch_op(uns proc_id) {
   return frontend->can_fetch_op(proc_id);
 }
 
-void frontend_fetch_op(uns proc_id, Op* op) {
-  frontend->fetch_op(proc_id, op);
-  collect_op_stats(op);
+// static long long prev_addr = 0; 
+// static int prev_op_type = 0;
+static Op* prev_op = NULL;
+
+void frontend_fetch_op(uns proc_id, Op* op) 
+{
+  // Received an instruction from the frontend
+  // See if prev_op is already allocated 
+
+  if(prev_op == NULL)
+  {
+    // This is the first instruction in the trace
+    // Store the current instruction as the previous one and don't pass it yet
+    prev_op = op;
+    return;
+  }
+
+  // Check if the previous instruction is a MOV instruction
+  if (prev_op->table_info->op_type == 3) 
+  {
+    // Check if the current instruction is also a MOV instruction
+    if (op->table_info->op_type == 3) 
+    {
+      // Pass only the first MOV instruction of the pair
+      frontend->fetch_op(proc_id, prev_op);
+      collect_op_stats(prev_op);
+      // Update prev_op to the current MOV instruction
+      prev_op = op;
+      return;
+    }
+    else 
+    {
+      // Pass the previous MOV instruction if the current one is not a MOV
+      frontend->fetch_op(proc_id, prev_op);
+      collect_op_stats(prev_op);
+    }
+  }
+
+  else 
+  {
+    // Pass the previous instruction if it was not a MOV instruction
+    frontend->fetch_op(proc_id, prev_op);
+    collect_op_stats(prev_op);
+  }
+
+  // Store the current instruction as the previous one
+  prev_op = op;
+
 }
 
 void frontend_redirect(uns proc_id, uns64 inst_uid, Addr fetch_addr) {
