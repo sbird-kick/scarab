@@ -113,6 +113,22 @@ Flag frontend_can_fetch_op(uns proc_id) {
 
 void frontend_fetch_op(uns proc_id, Op* op) {
   frontend->fetch_op(proc_id, op);
+  static int prev_was_mov = 0;
+  if (prev_was_mov == 1 && op->table_info->op_type == OP_IMEM)
+  {
+    prev_was_mov = 0;
+    op->table_info->op_type = OP_NOP;  
+    op->table_info->mem_type = NOT_MEM;  
+    op->table_info->cf_type = NOT_CF;
+    op->table_info->bar_type = NOT_BAR;
+    // printf("went here\n");
+  }
+  else if(op->table_info->op_type == OP_IMEM)
+  {
+      prev_was_mov = 1;  
+  }
+  else
+      prev_was_mov = 0; 
   collect_op_stats(op);
 }
 

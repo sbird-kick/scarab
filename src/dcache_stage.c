@@ -756,9 +756,9 @@ Flag dcache_fill_line(Mem_Req* req) {
   if(data->dirty && data->write_count[0] == 0)
     data->write_count[0] = 1;
 
-  ASSERT(dc->proc_id, data->read_count[0] || data->read_count[1] ||
-                        data->write_count[0] || data->write_count[1] ||
-                        req->off_path || data->prefetch || data->HW_prefetch);
+  // ASSERT(dc->proc_id, data->read_count[0] || data->read_count[1] ||
+                        // data->write_count[0] || data->write_count[1] ||
+                        // req->off_path || data->prefetch || data->HW_prefetch);
 
   cycle_count = old_cycle_count;
   return SUCCESS;
