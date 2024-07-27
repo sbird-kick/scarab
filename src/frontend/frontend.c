@@ -111,54 +111,81 @@ Flag frontend_can_fetch_op(uns proc_id) {
   return frontend->can_fetch_op(proc_id);
 }
 
-// static long long prev_addr = 0; 
-// static int prev_op_type = 0;
-static Op* prev_op = NULL;
+static Op* prev_metadata = NULL;
 
 void frontend_fetch_op(uns proc_id, Op* op) 
 {
-  // Received an instruction from the frontend
-  // See if prev_op is already allocated 
-
-  if(prev_op == NULL)
-  {
-    // This is the first instruction in the trace
-    // Store the current instruction as the previous one and don't pass it yet
-    prev_op = op;
-    return;
-  }
-
-  // Check if the previous instruction is a MOV instruction
-  if (prev_op->table_info->op_type == 3) 
-  {
-    // Check if the current instruction is also a MOV instruction
-    if (op->table_info->op_type == 3) 
+  frontend->fetch_op(proc_id, op);
+  collect_op_stats(op);
+  if (prev_metadata == NULL)
+      {
+          // This is the first instruction
+          prev_metadata = op;
+      }
+     else
     {
-      // Pass only the first MOV instruction of the pair
-      frontend->fetch_op(proc_id, prev_op);
-      collect_op_stats(prev_op);
-      // Update prev_op to the current MOV instruction
-      prev_op = op;
-      return;
+        if (prev_metadata->table_info->op_type == OP_MOV && op->table_info->op_type == OP_MOV)
+        {
+            // Check if the source and destination register counts match
+            int prev_num_srcs = prev_metadata->table_info->num_src_regs;
+            int prev_num_dests = prev_metadata->table_info->num_dest_regs;
+            int curr_num_srcs = op->table_info->num_src_regs;
+            int curr_num_dests = op->table_info->num_dest_regs;
+
+            if (prev_num_srcs == curr_num_srcs && prev_num_dests == curr_num_dests)
+            {
+                // Check if the source registers of the previous op are the same as the destination registers of the current op
+                for (int i = 0; i < prev_num_srcs; i++)
+                {
+                    if (prev_metadata->inst_info->srcs[i].reg == op->inst_info->dests[0].reg)
+                    {
+                        printf("Src to Dest: Prev Src Reg Num: %d, Type: %d | Curr Dest Reg Num: %d, Type: %d\n",
+                               prev_metadata->inst_info->srcs[i].reg, prev_metadata->inst_info->srcs[i].type,
+                               op->inst_info->dests[0].reg, op->inst_info->dests[0].type);
+                    }
+                }
+
+                // Check if the source registers of the previous op are the same as the source registers of the current op
+                for (int i = 0; i < prev_num_srcs; i++)
+                {
+                    if (prev_metadata->inst_info->srcs[i].reg == op->inst_info->srcs[i].reg)
+                    {
+                        printf("Src to Src: Prev Src Reg Num: %d, Type: %d | Curr Src Reg Num: %d, Type: %d\n",
+                               prev_metadata->inst_info->srcs[i].reg, prev_metadata->inst_info->srcs[i].type,
+                               op->inst_info->srcs[i].reg, op->inst_info->srcs[i].type);
+                    }
+                }
+
+                // Check if the destination registers of the previous op are the same as the source registers of the current op
+                for (int i = 0; i < prev_num_dests; i++)
+                {
+                    if (prev_metadata->inst_info->dests[i].reg == op->inst_info->srcs[i].reg)
+                    {
+                        printf("Dest to Src: Prev Dest Reg Num: %d, Type: %d | Curr Src Reg Num: %d, Type: %d\n",
+                               prev_metadata->inst_info->dests[i].reg, prev_metadata->inst_info->dests[i].type,
+                               op->inst_info->srcs[i].reg, op->inst_info->srcs[i].type);
+                    }
+                }
+
+                // Check if the destination registers of the previous op are the same as the destination registers of the current op
+                for (int i = 0; i < prev_num_dests; i++)
+                {
+                    if (prev_metadata->inst_info->dests[i].reg == op->inst_info->dests[i].reg)
+                    {
+                        printf("Dest to Dest: Prev Dest Reg Num: %d, Type: %d | Curr Dest Reg Num: %d, Type: %d\n",
+                               prev_metadata->inst_info->dests[i].reg, prev_metadata->inst_info->dests[i].type,
+                               op->inst_info->dests[i].reg, op->inst_info->dests[i].type);
+                    }
+                }
+            }
+            else
+            {
+                printf("Mismatch in number of source or destination registers between previous and current ops.\n");
+            }
+        }
     }
-    else 
-    {
-      // Pass the previous MOV instruction if the current one is not a MOV
-      frontend->fetch_op(proc_id, prev_op);
-      collect_op_stats(prev_op);
-    }
-  }
 
-  else 
-  {
-    // Pass the previous instruction if it was not a MOV instruction
-    frontend->fetch_op(proc_id, prev_op);
-    collect_op_stats(prev_op);
-  }
-
-  // Store the current instruction as the previous one
-  prev_op = op;
-
+    prev_metadata = op;
 }
 
 void frontend_redirect(uns proc_id, uns64 inst_uid, Addr fetch_addr) {
