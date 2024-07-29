@@ -181,6 +181,10 @@ void frontend_get_src_dst_count(Op* prev_op, Op* curr_op, Metadata* counts)
                                 counts->src_to_dst_extra_reg_count++;
                                 break;
 
+                            case NUM_REG_MAPS:
+                                counts->src_to_dst_num_reg_maps++;
+                                break;
+
                             default:
                                 break;
                         }
@@ -227,6 +231,10 @@ void frontend_get_dst_src_count(Op* prev_op, Op* curr_op, Metadata* counts)
 
                             case EXTRA_REG:
                                 counts->dst_to_src_extra_reg_count++;
+                                break;
+
+                            case NUM_REG_MAPS:
+                                counts->dst_to_src_num_reg_maps++;
                                 break;
 
                             default:
@@ -277,6 +285,10 @@ void frontend_get_src_src_count(Op* prev_op, Op* curr_op, Metadata* counts)
                                 counts->src_to_src_extra_reg_count++;
                                 break;
 
+                            case NUM_REG_MAPS:
+                                counts->src_to_src_num_reg_maps++;
+                                break;
+
                             default:
                                 break;
                         }
@@ -321,6 +333,10 @@ void frontend_get_dst_dst_count(Op* prev_op, Op* curr_op, Metadata* counts)
 
                             case EXTRA_REG:
                                 counts->dst_to_dst_extra_reg_count++;
+                                break;
+
+                            case NUM_REG_MAPS:
+                                counts->dst_to_dst_num_reg_maps++;
                                 break;
 
                             default:

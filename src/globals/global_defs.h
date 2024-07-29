@@ -65,6 +65,10 @@
 #undef UNUSED
 #define UNUSED(X) (void)(X)
 
+#define COLOR_RESET "\033[0m"
+#define COLOR_YELLOW "\033[1;33m" // Yellow color
+#define COLOR_RED "\033[1;31m"    // Red color
+
 /**************************************************************************************/
 
 #ifndef NULL
