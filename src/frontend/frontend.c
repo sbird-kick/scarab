@@ -161,13 +161,37 @@ void frontend_get_src_dst_count(Op* prev_op, Op* curr_op, Metadata* counts)
                     counts->src_to_dst_count_reg_num++;
 
                     if(prev_op->inst_info->srcs[i].type == curr_op->inst_info->dests[j].type) {
-                        counts->src_to_dst_count_reg_type++; 
+
+                        counts->src_to_dst_count_reg_type++;
+
+                        switch (curr_op->inst_info->dests[j].type) {
+                            case INT_REG:
+                                counts->src_to_dst_int_reg_count++;
+                                break;
+
+                            case FP_REG:
+                                counts->src_to_dst_fp_reg_count++;
+                                break;
+
+                            case SPEC_REG:
+                                counts->src_to_dst_spec_reg_count++;
+                                break;
+
+                            case EXTRA_REG:
+                                counts->src_to_dst_extra_reg_count++;
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        }
                     }
                 }
             }
         }
-    }
 }
+
 
 void frontend_get_dst_src_count(Op* prev_op, Op* curr_op, Metadata* counts)
 { 
@@ -187,6 +211,29 @@ void frontend_get_dst_src_count(Op* prev_op, Op* curr_op, Metadata* counts)
 
           if(prev_op->inst_info->dests[i].type == curr_op->inst_info->srcs[j].type) {
             counts->dst_to_src_count_reg_type++;
+
+            switch (curr_op->inst_info->srcs[j].type) {
+                            case INT_REG:
+                                counts->dst_to_src_int_reg_count++;
+                                break;
+
+                            case FP_REG:
+                                counts->dst_to_src_fp_reg_count++;
+                                break;
+
+                            case SPEC_REG:
+                                counts->dst_to_src_spec_reg_count++;
+                                break;
+
+                            case EXTRA_REG:
+                                counts->dst_to_src_extra_reg_count++;
+                                break;
+
+                            default:
+                                break;
+                        }
+
+            
           }
         }
       }
@@ -212,6 +259,27 @@ void frontend_get_src_src_count(Op* prev_op, Op* curr_op, Metadata* counts)
 
           if(prev_op->inst_info->srcs[i].type == curr_op->inst_info->srcs[j].type) {
             counts->src_to_src_count_reg_type++;
+
+            switch (curr_op->inst_info->srcs[j].type) {
+                            case INT_REG:
+                                counts->src_to_src_int_reg_count++;
+                                break;
+
+                            case FP_REG:
+                                counts->src_to_src_fp_reg_count++;
+                                break;
+
+                            case SPEC_REG:
+                                counts->src_to_src_spec_reg_count++;
+                                break;
+
+                            case EXTRA_REG:
+                                counts->src_to_src_extra_reg_count++;
+                                break;
+
+                            default:
+                                break;
+                        }
         }
       }
     }
@@ -237,6 +305,27 @@ void frontend_get_dst_dst_count(Op* prev_op, Op* curr_op, Metadata* counts)
 
           if(prev_op->inst_info->dests[i].type == curr_op->inst_info->dests[j].type) {
             counts->dst_to_dst_count_reg_type++;
+
+             switch (curr_op->inst_info->srcs[j].type) {
+                            case INT_REG:
+                                counts->dst_to_dst_int_reg_count++;
+                                break;
+
+                            case FP_REG:
+                                counts->dst_to_dst_fp_reg_count++;
+                                break;
+
+                            case SPEC_REG:
+                                counts->dst_to_dst_spec_reg_count++;
+                                break;
+
+                            case EXTRA_REG:
+                                counts->dst_to_dst_extra_reg_count++;
+                                break;
+
+                            default:
+                                break;
+                        }
           }
         }
       }

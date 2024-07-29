@@ -315,12 +315,47 @@ int main(int argc, char* argv[], char* envp[]) {
           break;
     }
 
-  printf("Total Instructions: %d\n", global_metadata.total_instructions);
-  printf("Total Fusion Pairs: %d\n", global_metadata.total_fusion_pairs);
-  printf("Source to Destination Similar Register Count: %d\n", global_metadata.src_to_dst_count_reg_num);
-  printf("Destination to Source Similar Register Count: %d\n", global_metadata.dst_to_src_count_reg_num);
-  printf("Source to Source Similar Register Count: %d\n", global_metadata.src_to_src_count_reg_num);
-  printf("Destination to Destination Similar Register Count: %d\n", global_metadata.dst_to_dst_count_reg_num);
+   // Print total counts
+    // Total counts
+    printf("Total Instructions       : %d\n", global_metadata.total_instructions);
+    printf("Total Fusion Pairs       : %d\n", global_metadata.total_fusion_pairs);
+     printf("Raw Count:\n");
+    printf("Source to Destination Similar Register Count: %d\n", global_metadata.src_to_dst_count_reg_num);
+    printf("Destination to Source Similar Register Count: %d\n", global_metadata.dst_to_src_count_reg_num);
+    printf("Source to Source Similar Register Count: %d\n", global_metadata.src_to_src_count_reg_num);
+    printf("Destination to Destination Similar Register Count: %d\n", global_metadata.dst_to_dst_count_reg_num);
+
+    printf("Percentages Relative to Fusion Pairs:\n");
+    printf("  Src to Dst Similar Register Count: %.2f%%\n",
+           (global_metadata.total_fusion_pairs > 0) ? (100.0 * global_metadata.src_to_dst_count_reg_num / global_metadata.total_fusion_pairs) : 0.0);
+    printf("  Dst to Src Similar Register Count: %.2f%%\n",
+           (global_metadata.total_fusion_pairs > 0) ? (100.0 * global_metadata.dst_to_src_count_reg_num / global_metadata.total_fusion_pairs) : 0.0);
+    printf("  Src to Src Similar Register Count: %.2f%%\n",
+           (global_metadata.total_fusion_pairs > 0) ? (100.0 * global_metadata.src_to_src_count_reg_num / global_metadata.total_fusion_pairs) : 0.0);
+    printf("  Dst to Dst Similar Register Count: %.2f%%\n",
+           (global_metadata.total_fusion_pairs > 0) ? (100.0 * global_metadata.dst_to_dst_count_reg_num / global_metadata.total_fusion_pairs) : 0.0);
+
+    // Print percentages relative to total instructions
+    printf("\nPercentages Relative to Total Instructions:\n");
+    printf("  Src to Dst Similar Register Count: %.2f%%\n",
+           (global_metadata.total_instructions > 0) ? (100.0 * global_metadata.src_to_dst_count_reg_num / global_metadata.total_instructions) : 0.0);
+    printf("  Dst to Src Similar Register Count: %.2f%%\n",
+           (global_metadata.total_instructions > 0) ? (100.0 * global_metadata.dst_to_src_count_reg_num / global_metadata.total_instructions) : 0.0);
+    printf("  Src to Src Similar Register Count: %.2f%%\n",
+           (global_metadata.total_instructions > 0) ? (100.0 * global_metadata.src_to_src_count_reg_num / global_metadata.total_instructions) : 0.0);
+    printf("  Dst to Dst Similar Register Count: %.2f%%\n",
+           (global_metadata.total_instructions > 0) ? (100.0 * global_metadata.dst_to_dst_count_reg_num / global_metadata.total_instructions) : 0.0);
+
+    // Register Types
+    printf("\nPercentages of Register Types Relative to Fusion Pairs:\n");
+    printf("  Src to Dst Integer Register Count: %.2f%%\n",
+           (global_metadata.total_fusion_pairs > 0) ? (100.0 * global_metadata.src_to_dst_int_reg_count / global_metadata.total_fusion_pairs) : 0.0);
+    printf("  Src to Dst Floating Point Register Count: %.2f%%\n",
+            (global_metadata.total_fusion_pairs > 0) ? (100.0 * global_metadata.src_to_dst_fp_reg_count / global_metadata.total_fusion_pairs) : 0.0);
+    printf("  Src to Dst Special Register Count: %.2f%%\n",
+            (global_metadata.total_fusion_pairs > 0) ? (100.0 * global_metadata.src_to_dst_spec_reg_count / global_metadata.total_fusion_pairs) : 0.0);
+    printf("  Dst to Src Integer Register Count: %.2f%%\n",
+            (global_metadata.total_fusion_pairs > 0) ? (100.0 * global_metadata.dst_to_src_int_reg_count / global_metadata.total_fusion_pairs) : 0.0);
 
   return 0;
 }

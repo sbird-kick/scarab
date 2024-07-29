@@ -97,6 +97,26 @@ typedef struct Metadata_struct
   unsigned int dst_to_dst_count_reg_num;
   unsigned int dst_to_dst_count_reg_type;
 
+  unsigned int src_to_dst_int_reg_count;
+  unsigned int src_to_dst_fp_reg_count;
+  unsigned int src_to_dst_spec_reg_count;
+  unsigned int src_to_dst_extra_reg_count;
+
+  unsigned int dst_to_src_int_reg_count;
+  unsigned int dst_to_src_fp_reg_count;
+  unsigned int dst_to_src_spec_reg_count;
+  unsigned int dst_to_src_extra_reg_count;
+
+  unsigned int src_to_src_int_reg_count;
+  unsigned int src_to_src_fp_reg_count;
+  unsigned int src_to_src_spec_reg_count;
+  unsigned int src_to_src_extra_reg_count;
+
+  unsigned int dst_to_dst_int_reg_count;
+  unsigned int dst_to_dst_fp_reg_count;
+  unsigned int dst_to_dst_spec_reg_count;
+  unsigned int dst_to_dst_extra_reg_count;
+
   // ToDo: What is the most frequently used register type?
 } Metadata;
 
