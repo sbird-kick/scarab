@@ -221,6 +221,11 @@ Scarab's source code is organized as follows:
 void* voided_global_starlab_ht_ptr = NULL;
 void* voided_global_starlab_types_ht = NULL;
 
+Op* prev_op = NULL; 
+
+// Initialize the global metadata structure
+Metadata global_metadata = {0};
+
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
 char prev_address_as_string[128];
@@ -309,6 +314,13 @@ int main(int argc, char* argv[], char* envp[]) {
         if(running_cc_count > ((total_cc_count*90)/100)) 
           break;
     }
+
+  printf("Total Instructions: %d\n", global_metadata.total_instructions);
+  printf("Total Fusion Pairs: %d\n", global_metadata.total_fusion_pairs);
+  printf("Source to Destination Similar Register Count: %d\n", global_metadata.src_to_dst_count_reg_num);
+  printf("Destination to Source Similar Register Count: %d\n", global_metadata.dst_to_src_count_reg_num);
+  printf("Source to Source Similar Register Count: %d\n", global_metadata.src_to_src_count_reg_num);
+  printf("Destination to Destination Similar Register Count: %d\n", global_metadata.dst_to_dst_count_reg_num);
 
   return 0;
 }

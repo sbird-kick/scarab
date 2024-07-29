@@ -56,6 +56,7 @@ static void collect_op_stats(Op* op);
 
 extern int op_type_delays[];
 
+
 void frontend_init() {
   ASSERT(0, ST_OP_INV + NUM_OP_TYPES == ST_NOT_CF);
   frontend_intf_init();
@@ -111,82 +112,138 @@ Flag frontend_can_fetch_op(uns proc_id) {
   return frontend->can_fetch_op(proc_id);
 }
 
-static Op* prev_metadata = NULL;
+void update_prev_op(Op* op)
+{
+  prev_op = op;
+}
 
 void frontend_fetch_op(uns proc_id, Op* op) 
 {
+  global_metadata.total_instructions++;
+
   frontend->fetch_op(proc_id, op);
-  collect_op_stats(op);
-  if (prev_metadata == NULL)
-      {
-          // This is the first instruction
-          prev_metadata = op;
-      }
-     else
+  if(prev_op == NULL)
+  {
+    update_prev_op(op);
+  }
+
+  else 
+  {
+    if(prev_op->table_info->op_type==OP_MOV && op->table_info->op_type==OP_MOV)
     {
-        if (prev_metadata->table_info->op_type == OP_MOV && op->table_info->op_type == OP_MOV)
-        {
-            // Check if the source and destination register counts match
-            int prev_num_srcs = prev_metadata->table_info->num_src_regs;
-            int prev_num_dests = prev_metadata->table_info->num_dest_regs;
-            int curr_num_srcs = op->table_info->num_src_regs;
-            int curr_num_dests = op->table_info->num_dest_regs;
+      global_metadata.total_fusion_pairs++;
+      frontend_get_src_dst_count(prev_op, op, &global_metadata);
+      frontend_get_dst_src_count(prev_op, op, &global_metadata);
+      frontend_get_src_src_count(prev_op, op, &global_metadata);
+      frontend_get_dst_dst_count(prev_op, op, &global_metadata);
+      update_prev_op(op);
+    }
+  }
 
-            if (prev_num_srcs == curr_num_srcs && prev_num_dests == curr_num_dests)
-            {
-                // Check if the source registers of the previous op are the same as the destination registers of the current op
-                for (int i = 0; i < prev_num_srcs; i++)
-                {
-                    if (prev_metadata->inst_info->srcs[i].reg == op->inst_info->dests[0].reg)
-                    {
-                        printf("Src to Dest: Prev Src Reg Num: %d, Type: %d | Curr Dest Reg Num: %d, Type: %d\n",
-                               prev_metadata->inst_info->srcs[i].reg, prev_metadata->inst_info->srcs[i].type,
-                               op->inst_info->dests[0].reg, op->inst_info->dests[0].type);
+  collect_op_stats(op);
+
+}
+
+void frontend_get_src_dst_count(Op* prev_op, Op* curr_op, Metadata* counts) 
+{
+    if (prev_op == NULL || curr_op == NULL || counts == NULL) {
+        return; // Invalid input
+    }
+
+    int prev_num_srcs = prev_op->table_info->num_src_regs;
+    int curr_num_dsts = curr_op->table_info->num_dest_regs;
+
+    // Check if the previous op has source registers and the current op has destination registers
+    if (prev_num_srcs > 0 && curr_num_dsts > 0) {
+        for (int i = 0; i < prev_num_srcs; i++) {
+            for (int j = 0; j < curr_num_dsts; j++) {
+                if (prev_op->inst_info->srcs[i].reg == curr_op->inst_info->dests[j].reg) {
+                    counts->src_to_dst_count_reg_num++;
+
+                    if(prev_op->inst_info->srcs[i].type == curr_op->inst_info->dests[j].type) {
+                        counts->src_to_dst_count_reg_type++; 
                     }
                 }
-
-                // Check if the source registers of the previous op are the same as the source registers of the current op
-                for (int i = 0; i < prev_num_srcs; i++)
-                {
-                    if (prev_metadata->inst_info->srcs[i].reg == op->inst_info->srcs[i].reg)
-                    {
-                        printf("Src to Src: Prev Src Reg Num: %d, Type: %d | Curr Src Reg Num: %d, Type: %d\n",
-                               prev_metadata->inst_info->srcs[i].reg, prev_metadata->inst_info->srcs[i].type,
-                               op->inst_info->srcs[i].reg, op->inst_info->srcs[i].type);
-                    }
-                }
-
-                // Check if the destination registers of the previous op are the same as the source registers of the current op
-                for (int i = 0; i < prev_num_dests; i++)
-                {
-                    if (prev_metadata->inst_info->dests[i].reg == op->inst_info->srcs[i].reg)
-                    {
-                        printf("Dest to Src: Prev Dest Reg Num: %d, Type: %d | Curr Src Reg Num: %d, Type: %d\n",
-                               prev_metadata->inst_info->dests[i].reg, prev_metadata->inst_info->dests[i].type,
-                               op->inst_info->srcs[i].reg, op->inst_info->srcs[i].type);
-                    }
-                }
-
-                // Check if the destination registers of the previous op are the same as the destination registers of the current op
-                for (int i = 0; i < prev_num_dests; i++)
-                {
-                    if (prev_metadata->inst_info->dests[i].reg == op->inst_info->dests[i].reg)
-                    {
-                        printf("Dest to Dest: Prev Dest Reg Num: %d, Type: %d | Curr Dest Reg Num: %d, Type: %d\n",
-                               prev_metadata->inst_info->dests[i].reg, prev_metadata->inst_info->dests[i].type,
-                               op->inst_info->dests[i].reg, op->inst_info->dests[i].type);
-                    }
-                }
-            }
-            else
-            {
-                printf("Mismatch in number of source or destination registers between previous and current ops.\n");
             }
         }
     }
-
-    prev_metadata = op;
 }
+
+void frontend_get_dst_src_count(Op* prev_op, Op* curr_op, Metadata* counts)
+{ 
+   if (prev_op == NULL || curr_op == NULL || counts == NULL) {
+        return;
+    }
+
+  int prev_num_dsts = prev_op->table_info->num_dest_regs;
+  int curr_num_srcs = curr_op->table_info->num_src_regs;
+
+  // Check if the previous op has destination registers and the current op has source registers
+  if (prev_num_dsts > 0 && curr_num_srcs > 0) {
+    for (int i = 0; i < prev_num_dsts; i++) {
+      for (int j = 0; j < curr_num_srcs; j++) {
+        if (prev_op->inst_info->dests[i].reg == curr_op->inst_info->srcs[j].reg) {
+          counts->dst_to_src_count_reg_num++;
+
+          if(prev_op->inst_info->dests[i].type == curr_op->inst_info->srcs[j].type) {
+            counts->dst_to_src_count_reg_type++;
+          }
+        }
+      }
+    }
+  }
+}
+
+void frontend_get_src_src_count(Op* prev_op, Op* curr_op, Metadata* counts)
+{
+  if (prev_op == NULL || curr_op == NULL || counts == NULL) {
+    return; // Invalid input
+  }
+
+  int prev_num_srcs = prev_op->table_info->num_src_regs;
+  int curr_num_srcs = curr_op->table_info->num_src_regs;
+
+  // Check if the previous op has source registers and the current op has source registers
+  if (prev_num_srcs > 0 && curr_num_srcs > 0) {
+    for (int i = 0; i < prev_num_srcs; i++) {
+      for (int j = 0; j < curr_num_srcs; j++) {
+        if (prev_op->inst_info->srcs[i].reg == curr_op->inst_info->srcs[j].reg) {
+          counts->src_to_src_count_reg_num++;
+
+          if(prev_op->inst_info->srcs[i].type == curr_op->inst_info->srcs[j].type) {
+            counts->src_to_src_count_reg_type++;
+        }
+      }
+    }
+  }
+}
+}
+
+void frontend_get_dst_dst_count(Op* prev_op, Op* curr_op, Metadata* counts)
+{
+  if (prev_op == NULL || curr_op == NULL || counts == NULL) {
+    return; // Invalid input
+  }
+
+  int prev_num_dsts = prev_op->table_info->num_dest_regs;
+  int curr_num_dsts = curr_op->table_info->num_dest_regs;
+
+  // Check if the previous op has destination registers and the current op has destination registers
+  if (prev_num_dsts > 0 && curr_num_dsts > 0) {
+    for (int i = 0; i < prev_num_dsts; i++) {
+      for (int j = 0; j < curr_num_dsts; j++) {
+        if (prev_op->inst_info->dests[i].reg == curr_op->inst_info->dests[j].reg) {
+          counts->dst_to_dst_count_reg_num++;
+
+          if(prev_op->inst_info->dests[i].type == curr_op->inst_info->dests[j].type) {
+            counts->dst_to_dst_count_reg_type++;
+          }
+        }
+      }
+    }
+  }
+}
+
 
 void frontend_redirect(uns proc_id, uns64 inst_uid, Addr fetch_addr) {
   DEBUG(proc_id, "Redirect after op_num %lld to 0x%08llx\n",

@@ -28,12 +28,15 @@
 #ifndef __FRONTEND_H__
 #define __FRONTEND_H__
 
-#include "globals/global_types.h"
+#include "../globals/global_types.h"
+#include "../globals/global_vars.h"
+
 
 /*************************************************************/
 /* External frontend interface */
 
 struct Op_struct;
+
 
 /* Initialize the external frontend to run application specified by
    argv (expect argv to end with NULL) */
@@ -58,6 +61,16 @@ void frontend_recover(uns proc_id, uns64 inst_uid);
 
 /* Let the frontend know that this instruction is retired) */
 void frontend_retire(uns proc_id, uns64 inst_uid);
+
+/* Tract the previous op */
+void update_prev_op(Op* op);
+
+/* Get the count of access to the same registers */
+void frontend_get_src_dst_count(Op* prev_op, Op* curr_op, Metadata* counts);
+void frontend_get_dst_src_count(Op* prev_op, Op* curr_op, Metadata* counts);
+void frontend_get_src_src_count(Op* prev_op, Op* curr_op, Metadata* counts);
+void frontend_get_dst_dst_count(Op* prev_op, Op* curr_op, Metadata* counts);
+
 
 /*************************************************************/
 

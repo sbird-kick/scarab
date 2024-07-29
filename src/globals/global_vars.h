@@ -68,6 +68,8 @@ extern char prev_instruction_class[128];
 
 extern char prev_address_as_string[128];
 
+extern Op* prev_op;
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */
