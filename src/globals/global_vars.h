@@ -76,6 +76,14 @@ extern Uop_Queue_Fill_Time uop_queue_fill_time;
 
 extern Flag roi_dump_began;
 extern Counter roi_dump_ID;
+
+extern void* voided_global_starlab_ht_ptr;
+extern void* voided_global_starlab_types_ht;
+
+extern unsigned long long prev_instruction_time;
+extern char prev_instruction_class[128];
+
+extern char prev_address_as_string[128];
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */

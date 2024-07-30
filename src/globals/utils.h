@@ -379,6 +379,46 @@ int   parse_double_array(double dest[], const void* str, int max_num);
 int   parse_string_array(char dest[][MAX_STR_LENGTH + 1], const void* str,
                          int max_num);
 
+#define INITIAL_TABLE_SIZE 100000
+#define LOAD_FACTOR_THRESHOLD 0.75
+
+typedef struct starlab_hash_node {
+    char *key;
+    void *value;
+    struct starlab_hash_node *next;
+} starlab_hash_node;
+
+typedef struct starlab_hash_table {
+    starlab_hash_node **table;
+    int size;
+    int count;
+    size_t value_size;
+} starlab_hash_table;
+
+typedef struct starlab_table_value {
+    unsigned long prev_fetch;
+    unsigned long this_fetch;
+} starlab_table_value;
+
+typedef struct {
+    char *key;
+    void *value;
+} KeyValuePair;
+
+// starlab_hash_table* global_starlab_ht_ptr;
+const char* starlab_get_opcode_string(int op_type);
+unsigned int starlab_hash(const char *key, int table_size);
+starlab_hash_table* starlab_create_table(int size, size_t value_size);
+void starlab_resize_table(starlab_hash_table *hashtable);
+void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value);
+void* starlab_search(starlab_hash_table *hashtable, const char *key);
+void starlab_delete_key(starlab_hash_table *hashtable, const char *key);
+void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *));
+void starlab_free_table(starlab_hash_table *hashtable);
+void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, void ***values);
+int compare_key_value_pairs(const void *a, const void *b);
+int get_count(starlab_hash_table* hashtable);
+
 /* for use in qsort */
 int compare_uns64(const void*, const void*);
 
