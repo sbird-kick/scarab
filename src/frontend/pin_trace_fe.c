@@ -131,33 +131,27 @@ Flag trace_can_fetch_op(uns proc_id) {
 void trace_fetch_op(uns proc_id, Op* op) {
 
   static int prev_was_move = 0;
-  static int do_nop = 0;
 
   if(uop_generator_get_bom(proc_id)) {
     ASSERT(proc_id, !trace_read_done[proc_id] && !reached_exit[proc_id]);
-    uop_generator_get_uop(proc_id, op, &next_pi[proc_id]);
+    ctype_pin_inst* starlab_pi = &next_pi[proc_id];
+    if(starlab_pi->is_move && (prev_was_move == 0))
+    {
+      prev_was_move = 1;
+    }
+    else if (starlab_pi->is_move && (prev_was_move == 1))
+    {
+      prev_was_move = 0;
+      starlab_pi->num_ld = 0;
+      starlab_pi->has_push = 0;
+      starlab_pi->has_pop = 0;
+      starlab_pi->num_st = 0;
+      starlab_pi->cf_type = NOT_CF;
+    }
 
-      ctype_pin_inst* starlab_pi = &next_pi[proc_id];
-      if(starlab_pi->is_move && (prev_was_move == 0))
-      {
-        prev_was_move = 1;
-        do_nop = 0;
-      }
-      else if (starlab_pi->is_move && (prev_was_move == 1))
-      {
-        prev_was_move = 0;
-        do_nop = 1;
-        op->exec_cycle = (unsigned long long) -2;
-      }
-      else
-      {
-        prev_was_move = 0;
-        do_nop = 0;
-      }
+    uop_generator_get_uop(proc_id, op, &next_pi[proc_id]);
   } else {
     uop_generator_get_uop(proc_id, op, NULL);
-    if(do_nop)
-      op->exec_cycle = (unsigned long long) -2;
   }
 
   if(uop_generator_get_eom(proc_id)) {
