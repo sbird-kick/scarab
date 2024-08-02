@@ -506,6 +506,8 @@ void update_dcache_stage(Stage_Data* src_sd) {
           STAT_EVENT(op->proc_id, DCACHE_MISS_WAITMEM);
         }
       } else {  // store request
+        if(op->table_info->mem_type != MEM_ST)
+          printf("op was %s\n", starlab_get_opcode_string(op->table_info->op_type));
         ASSERT(dc->proc_id, op->table_info->mem_type == MEM_ST);
 
         if(((model->mem == MODEL_MEM) &&
