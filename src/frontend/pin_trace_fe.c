@@ -142,10 +142,11 @@ void trace_fetch_op(uns proc_id, Op* op) {
     else if (starlab_pi->is_move && (prev_was_move == 1))
     {
       prev_was_move = 0;
-      starlab_pi->num_ld = 0;
+      starlab_pi->is_move = 0;
+      starlab_pi->num_ld = starlab_pi->num_ld > 1 ? 1 : starlab_pi->num_ld;
       starlab_pi->has_push = 0;
       starlab_pi->has_pop = 0;
-      starlab_pi->num_st = 0;
+      starlab_pi->num_st = starlab_pi->num_st > 1 ? 1 : starlab_pi->num_st;
       starlab_pi->cf_type = NOT_CF;
     }
 
