@@ -366,6 +366,12 @@ typedef struct {
     void *value;
 } KeyValuePair;
 
+typedef struct address_to_op_type
+{
+  Addr fetch_address;
+  int op_type;
+} address_to_op_type;
+
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);

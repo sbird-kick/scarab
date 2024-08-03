@@ -171,6 +171,7 @@ void update_decode_stage(Stage_Data* src_sd) {
     prev->ops      = temp;
     cur->op_count  = prev->op_count;
     prev->op_count = 0;
+
   }
 
   /* do the first decode stage */
