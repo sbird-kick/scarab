@@ -1,7 +1,7 @@
 --mode full
 --model cmp
 --frontend trace
---inst_limit 50
+--inst_limit 100
 --sim_limit none
 --dump_params 1
 --dump_stats 1
@@ -141,7 +141,7 @@ Parameter status at compile time and values supplied on the command line:
 SIM_MODE                                 0                               full
 SIM_MODEL                                0                               cmp
 FRONTEND                                 FE_PIN_EXEC_DRIVEN              trace
-INST_LIMIT                               NULL                            50
+INST_LIMIT                               NULL                            100
 SIM_LIMIT                                "none"                          none
 FORWARD_PROGRESS_LIMIT                   100000000                       
 FORWARD_PROGRESS_INTERVAL                10000                           
