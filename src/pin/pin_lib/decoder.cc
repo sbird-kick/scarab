@@ -562,6 +562,7 @@ void init_reg_xed_to_pin_map() {
   reg_xed_to_pin_map[XED_REG_R13]     = REG_R13;
   reg_xed_to_pin_map[XED_REG_R14]     = REG_R14;
   reg_xed_to_pin_map[XED_REG_R15]     = REG_R15;
+  
 
   /*
   //  reg_xed_to_pin_map[XED_REG_GR_LAST]   = REG_RAX;
