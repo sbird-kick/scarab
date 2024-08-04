@@ -128,34 +128,13 @@ Flag trace_can_fetch_op(uns proc_id) {
   return !(uop_generator_get_eom(proc_id) && trace_read_done[proc_id]);
 }
 
-void trace_fetch_op(unsigned proc_id, Op* op)
-{
-    static int prev_was_move = 0;
+void trace_fetch_op(uns proc_id, Op* op) {
 
-    starlab_hash_table* global_address_to_op_type_ht_ptr = (starlab_hash_table*) voided_global_address_to_op_type_ht_ptr;
+  static int prev_was_move = 0;
 
-    if (global_address_to_op_type_ht_ptr == NULL) 
-    {
-        global_address_to_op_type_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(address_to_op_type));
-        // Store the newly created hash table in the global void pointer
-        voided_global_address_to_op_type_ht_ptr = (void*) global_address_to_op_type_ht_ptr;
-    } 
-
-    if (uop_generator_get_bom(proc_id)) 
-    {
-        ASSERT(proc_id, !trace_read_done[proc_id] && !reached_exit[proc_id]);
-        ctype_pin_inst* starlab_pi = &next_pi[proc_id];
-
-        address_to_op_type entry;
-        entry.fetch_address = starlab_pi->instruction_addr;
-        entry.op_type = starlab_pi->op_type;
-
-        char key[128];
-        snprintf(key, sizeof(key), "%016llX", entry.fetch_address);
-
-        starlab_insert(global_address_to_op_type_ht_ptr, key, &entry);
-
-
+  if(uop_generator_get_bom(proc_id)) {
+    ASSERT(proc_id, !trace_read_done[proc_id] && !reached_exit[proc_id]);
+    ctype_pin_inst* starlab_pi = &next_pi[proc_id];
     if(starlab_pi->is_move && (prev_was_move == 0))
     {
       prev_was_move = 1;

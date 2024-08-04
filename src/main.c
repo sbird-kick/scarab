@@ -221,8 +221,6 @@ Scarab's source code is organized as follows:
 void* voided_global_starlab_ht_ptr = NULL;
 void* voided_global_starlab_types_ht = NULL;
 
-void* voided_global_address_to_op_type_ht_ptr = NULL;
-
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
 char prev_address_as_string[128];
@@ -294,23 +292,6 @@ int main(int argc, char* argv[], char* envp[]) {
 
   if(opt2_in_use())
     opt2_sim_complete();
-
-  char **keys;
-  void **values_array;
-
-  starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
-    unsigned long total_cc_count = 0;
-    for (int i = 0; i < (get_count(voided_global_starlab_types_ht)); i++) {
-        total_cc_count+=*(int *)values_array[i];
-    }
-
-    unsigned long running_cc_count = 0;
-    for (int i = 0; i < (get_count(voided_global_starlab_types_ht)); i++) {
-        printf("inst tuple: %s, cumulative CCs: %.2f%%\n", keys[i], ((double) *(int *)values_array[i])/((double)total_cc_count) * 100);
-        running_cc_count+=*(int *)values_array[i];
-        if(running_cc_count > ((total_cc_count*90)/100)) 
-          break;
-    }
 
   return 0;
 }

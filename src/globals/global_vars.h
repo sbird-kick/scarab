@@ -63,8 +63,6 @@ extern uns  num_fetched_lowconf_brs;
 extern void* voided_global_starlab_ht_ptr;
 extern void* voided_global_starlab_types_ht;
 
-extern void* voided_global_address_to_op_type_ht_ptr;
-
 extern unsigned long long prev_instruction_time;
 extern char prev_instruction_class[128];
 
