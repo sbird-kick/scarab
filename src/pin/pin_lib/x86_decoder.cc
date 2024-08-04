@@ -753,6 +753,7 @@ void init_pin_opcode_convert(void) {
   iclass_to_scarab_map[XED_ICLASS_BTR_LOCK]  = {OP_LOGIC, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_BTS]       = {OP_LOGIC, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_BTS_LOCK]  = {OP_LOGIC, -1, 1, NONE};
+  iclass_to_scarab_map[XED_ICLASS_BZHI]      = {OP_LOGIC, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_CALL_FAR]  = {OP_IADD, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_CALL_NEAR] = {OP_IADD, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_CBW]       = {OP_LOGIC, -1, 1, NONE};
@@ -961,6 +962,9 @@ void init_pin_opcode_convert(void) {
   iclass_to_scarab_map[XED_ICLASS_KMOVD]    = {OP_MOV, 4, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_KMOVQ]    = {OP_MOV, 8, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_KMOVW]    = {OP_MOV, 2, 1, NONE};
+  iclass_to_scarab_map[XED_ICLASS_KORTESTD] = {OP_LOGIC, 0, 0, NONE};
+  iclass_to_scarab_map[XED_ICLASS_KUNPCKBW] = {OP_LOGIC, 0, 0, NONE};
+  iclass_to_scarab_map[XED_ICLASS_KUNPCKDQ] = {OP_LOGIC, 0, 0, NONE};
   iclass_to_scarab_map[XED_ICLASS_LDDQU]    = {OP_MOV, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_LDMXCSR]  = {OP_NOTPIPELINED_MEDIUM, -1, 1,
                                               NONE};
@@ -1057,6 +1061,7 @@ void init_pin_opcode_convert(void) {
   iclass_to_scarab_map[XED_ICLASS_PABSB]     = {OP_LOGIC, 1, -1, NONE};
   iclass_to_scarab_map[XED_ICLASS_PABSD]     = {OP_LOGIC, 4, -1, NONE};
   iclass_to_scarab_map[XED_ICLASS_PABSW]     = {OP_LOGIC, 2, -1, NONE};
+  iclass_to_scarab_map[XED_ICLASS_PACKUSWB] = {OP_LOGIC, 0, 0, NONE};
   iclass_to_scarab_map[XED_ICLASS_PADDB]     = {OP_IADD, 1, -1, NONE};
   iclass_to_scarab_map[XED_ICLASS_PADDD]     = {OP_IADD, 4, -1, NONE};
   iclass_to_scarab_map[XED_ICLASS_PADDQ]     = {OP_IADD, 8, -1, NONE};
@@ -1622,6 +1627,7 @@ void init_pin_opcode_convert(void) {
                                                  NONE};
   iclass_to_scarab_map[XED_ICLASS_VPCMPISTRM] = {OP_NOTPIPELINED_SLOW, 1, -1,
                                                  NONE};
+  iclass_to_scarab_map[XED_ICLASS_VPCMPUB] = {OP_ICMP, -1, 1, NONE};                                             
   iclass_to_scarab_map[XED_ICLASS_VPERM2F128] = {OP_MOV, 16, 1,
                                                  NONE};  // TODO: Move or shift?
   iclass_to_scarab_map[XED_ICLASS_VPERM2I128] = {OP_MOV, 16, 1,
@@ -1773,6 +1779,8 @@ void init_pin_opcode_convert(void) {
   iclass_to_scarab_map[XED_ICLASS_VPTERNLOGD]  = {OP_LOGIC, 4, -1, NONE};
   iclass_to_scarab_map[XED_ICLASS_VPTERNLOGQ]  = {OP_LOGIC, 8, -1, NONE};
   iclass_to_scarab_map[XED_ICLASS_VPTEST]      = {OP_LOGIC, -1, 1, NONE};
+  iclass_to_scarab_map[XED_ICLASS_VPTESTMB]    = {OP_LOGIC, -1, 1, NONE};
+  iclass_to_scarab_map[ XED_ICLASS_VPTESTMD]   = {OP_LOGIC, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_VPUNPCKHBW]  = {OP_MOV, 1, -1, NONE};
   iclass_to_scarab_map[XED_ICLASS_VPUNPCKHDQ]  = {OP_MOV, 4, -1, NONE};
   iclass_to_scarab_map[XED_ICLASS_VPUNPCKHQDQ] = {OP_MOV, 8, -1, NONE};

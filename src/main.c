@@ -218,23 +218,8 @@ Scarab's source code is organized as follows:
 
 #include "general.param.h"
 
-
-#define KNRM  "\x1B[0m"
-#define KRED  "\x1B[31m"
-#define KGRN  "\x1B[32m"
-#define KYEL  "\x1B[33m"
-#define KBLU  "\x1B[34m"
-#define KMAG  "\x1B[35m"
-#define KCYN  "\x1B[36m"
-#define KWHT  "\x1B[37m"
-
 void* voided_global_starlab_ht_ptr = NULL;
 void* voided_global_starlab_types_ht = NULL;
-
-Op* prev_op = NULL; 
-
-// Initialize the global metadata structure
-Metadata global_metadata = {0};
 
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
@@ -307,87 +292,6 @@ int main(int argc, char* argv[], char* envp[]) {
 
   if(opt2_in_use())
     opt2_sim_complete();
-
-  char **keys;
-  void **values_array;
-
-  starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
-    unsigned long total_cc_count = 0;
-    for (int i = 0; i < (get_count(voided_global_starlab_types_ht)); i++) {
-        total_cc_count+=*(int *)values_array[i];
-    }
-
-    unsigned long running_cc_count = 0;
-    for (int i = 0; i < (get_count(voided_global_starlab_types_ht)); i++) {
-        printf("inst tuple: %s, cumulative CCs: %.2f%%\n", keys[i], ((double) *(int *)values_array[i])/((double)total_cc_count) * 100);
-        running_cc_count+=*(int *)values_array[i];
-        if(running_cc_count > ((total_cc_count*90)/100)) 
-          break;
-    }
-
-  printf("Total Instructions       : %d\n", global_metadata.total_instructions);
-  printf("Total Fusion Pairs       : %d\n", global_metadata.total_fusion_pairs);
-
-
-  printf("%s [-------------------------------Src -> Dest-------------------------------------]\n", KYEL);
-  printf("Source Reg Num in Inst A and Dest Reg Num in Inst B, Count: %d\n", global_metadata.src_to_dst_count_reg_num);
-  printf("Percentage Normalized to Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_dst_count_reg_num / global_metadata.total_fusion_pairs));
-  printf("Percentage Normalized to Total Instructions: %.2f%%\n", (100.0 * global_metadata.src_to_dst_count_reg_num / global_metadata.total_instructions));
-  printf("INT Reg Type Count: %d\n", global_metadata.src_to_dst_int_reg_count);
-  printf("FP Reg Type Count: %d\n", global_metadata.src_to_dst_fp_reg_count);
-  printf("Special Reg Type Count: %d\n", global_metadata.src_to_dst_spec_reg_count);
-  printf("Extra Reg Type Count: %d\n", global_metadata.src_to_dst_extra_reg_count);
-  printf("Num Reg Maps: %d\n", global_metadata.src_to_dst_num_reg_maps);
-  printf("INT Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_dst_int_reg_count / global_metadata.total_fusion_pairs));
-  printf("FP Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_dst_fp_reg_count / global_metadata.total_fusion_pairs));
-  printf("Special Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_dst_spec_reg_count / global_metadata.total_fusion_pairs));
-  printf("Extra Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_dst_extra_reg_count / global_metadata.total_fusion_pairs));
-  printf("Num Reg Maps, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_dst_num_reg_maps / global_metadata.total_fusion_pairs));
-
-  printf("%s [-------------------------------Dst -> Src-------------------------------------]\n", KCYN);
-  printf("Dest Reg Num in Inst A and Source Reg Num in Inst B, Count: %d\n", global_metadata.dst_to_src_count_reg_num);
-  printf("Percentage Normalized to Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_src_count_reg_num / global_metadata.total_fusion_pairs));
-  printf("Percentage Normalized to Total Instructions: %.2f%%\n", (100.0 * global_metadata.dst_to_src_count_reg_num / global_metadata.total_instructions));
-  printf("INT Reg Type Count: %d\n", global_metadata.dst_to_src_int_reg_count);
-  printf("FP Reg Type Count: %d\n", global_metadata.dst_to_src_fp_reg_count);
-  printf("Special Reg Type Count: %d\n", global_metadata.dst_to_src_spec_reg_count);
-  printf("Extra Reg Type Count: %d\n", global_metadata.dst_to_src_extra_reg_count);
-  printf("Num Reg Maps: %d\n", global_metadata.dst_to_src_num_reg_maps);
-  printf("INT Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_src_int_reg_count / global_metadata.total_fusion_pairs));
-  printf("FP Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_src_fp_reg_count / global_metadata.total_fusion_pairs));
-  printf("Special Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_src_spec_reg_count / global_metadata.total_fusion_pairs));
-  printf("Extra Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_src_extra_reg_count / global_metadata.total_fusion_pairs));
-  printf("Num Reg Maps, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_src_num_reg_maps / global_metadata.total_fusion_pairs));
-
-  printf("%s [-------------------------------Src -> Src-------------------------------------]\n", KGRN);
-  printf("Source Reg Num in Inst A and Source Reg Num in Inst B, Count: %d\n", global_metadata.src_to_src_count_reg_num);
-  printf("Percentage Normalized to Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_src_count_reg_num / global_metadata.total_fusion_pairs));
-  printf("Percentage Normalized to Total Instructions: %.2f%%\n", (100.0 * global_metadata.src_to_src_count_reg_num / global_metadata.total_instructions));
-  printf("INT Reg Type Count: %d\n", global_metadata.src_to_src_int_reg_count);
-  printf("FP Reg Type Count: %d\n", global_metadata.src_to_src_fp_reg_count);
-  printf("Special Reg Type Count: %d\n", global_metadata.src_to_src_spec_reg_count);
-  printf("Extra Reg Type Count: %d\n", global_metadata.src_to_src_extra_reg_count);
-  printf("Num Reg Maps: %d\n", global_metadata.src_to_src_num_reg_maps);
-  printf("INT Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_src_int_reg_count / global_metadata.total_fusion_pairs));
-  printf("FP Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_src_fp_reg_count / global_metadata.total_fusion_pairs));
-  printf("Special Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_src_spec_reg_count / global_metadata.total_fusion_pairs));
-  printf("Extra Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_src_extra_reg_count / global_metadata.total_fusion_pairs));
-  printf("Num Reg Maps, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.src_to_src_num_reg_maps / global_metadata.total_fusion_pairs));
-
-  printf("%s [-------------------------------Dst -> Dst-------------------------------------]\n", KRED);
-  printf("Dest Reg Num in Inst A and Dest Reg Num in Inst B, Count: %d\n", global_metadata.dst_to_dst_count_reg_num);
-  printf("Percentage Normalized to Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_dst_count_reg_num / global_metadata.total_fusion_pairs));
-  printf("Percentage Normalized to Total Instructions: %.2f%%\n", (100.0 * global_metadata.dst_to_dst_count_reg_num / global_metadata.total_instructions));
-  printf("INT Reg Type Count: %d\n", global_metadata.dst_to_dst_int_reg_count);
-  printf("FP Reg Type Count: %d\n", global_metadata.dst_to_dst_fp_reg_count);
-  printf("Special Reg Type Count: %d\n", global_metadata.dst_to_dst_spec_reg_count);
-  printf("Extra Reg Type Count: %d\n", global_metadata.dst_to_dst_extra_reg_count);
-  printf("Num Reg Maps: %d\n", global_metadata.dst_to_dst_num_reg_maps);
-  printf("INT Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_dst_int_reg_count / global_metadata.total_fusion_pairs));
-  printf("FP Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_dst_fp_reg_count / global_metadata.total_fusion_pairs));
-  printf("Special Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_dst_spec_reg_count / global_metadata.total_fusion_pairs));
-  printf("Extra Reg Type, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_dst_extra_reg_count / global_metadata.total_fusion_pairs));
-  printf("Num Reg Maps, Normalized to Total Fusion Pairs: %.2f%%\n", (100.0 * global_metadata.dst_to_dst_num_reg_maps / global_metadata.total_fusion_pairs));
 
   return 0;
 }

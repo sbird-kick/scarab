@@ -49,8 +49,6 @@ typedef struct Table_Info_struct    Table_Info;
 typedef struct HWP_struct           HWP;
 typedef struct HWP_Info_struct      HWP_Info;
 
-typedef struct Metadata_struct      Metadata;
-
 /* Renames -- Try to use these rather than built-in C types in order to preserve
  * portability */
 typedef unsigned           uns;
@@ -84,47 +82,6 @@ typedef uns32 ULong;
 typedef uns16 UWord;
 typedef uns8  UByte;
 
-typedef struct Metadata_struct 
-{
-  unsigned int total_instructions;
-  unsigned int total_fusion_pairs;
-  unsigned int src_to_dst_count_reg_num;
-  unsigned int src_to_dst_count_reg_type;
-  unsigned int dst_to_src_count_reg_num;
-  unsigned int dst_to_src_count_reg_type;
-  unsigned int src_to_src_count_reg_num;
-  unsigned int src_to_src_count_reg_type;
-  unsigned int dst_to_dst_count_reg_num;
-  unsigned int dst_to_dst_count_reg_type;
-
-  unsigned int src_to_dst_int_reg_count;
-  unsigned int src_to_dst_fp_reg_count;
-  unsigned int src_to_dst_spec_reg_count;
-  unsigned int src_to_dst_extra_reg_count;
-  unsigned int src_to_dst_num_reg_maps;
-
-  unsigned int dst_to_src_int_reg_count;
-  unsigned int dst_to_src_fp_reg_count;
-  unsigned int dst_to_src_spec_reg_count;
-  unsigned int dst_to_src_extra_reg_count;
-  unsigned int dst_to_src_num_reg_maps;
-
-  unsigned int src_to_src_int_reg_count;
-  unsigned int src_to_src_fp_reg_count;
-  unsigned int src_to_src_spec_reg_count;
-  unsigned int src_to_src_extra_reg_count;
-  unsigned int src_to_src_num_reg_maps;
-
-  unsigned int dst_to_dst_int_reg_count;
-  unsigned int dst_to_dst_fp_reg_count;
-  unsigned int dst_to_dst_spec_reg_count;
-  unsigned int dst_to_dst_extra_reg_count;
-  unsigned int dst_to_dst_num_reg_maps;
-
-  // ToDo: What is the most frequently used register type?
-} Metadata;
-
-extern Metadata global_metadata;
 
 /**************************************************************************************/
 
