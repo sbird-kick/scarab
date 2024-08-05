@@ -578,6 +578,7 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
     if(previous_fetch_address_as_string[0] == '\0')
     {
       sprintf(previous_fetch_address_as_string, "%016llX%s", op->fetch_addr, starlab_get_opcode_string(op->table_info->op_type));
+
       sprintf(previous_iclass, "%s", starlab_get_opcode_string(op->table_info->op_type));
       previous_fetch_cycle = op->fetch_cycle;
       previous_macro_inst_fetch_cycle = op->fetch_cycle;
@@ -619,35 +620,47 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
       }
 
     // Different macro-instruction
-    else
-    {
-        // Add this entry to the hash table
-        snprintf(current_iclass, sizeof(current_iclass), "%s", starlab_get_opcode_string(op->table_info->op_type));
-        current_fetch_cycle = op->fetch_cycle;
-        current_exec_cycle = op->exec_cycle;
+  else
+  {
+      // Add this entry to the hash table
+      snprintf(current_iclass, sizeof(current_iclass), "%s", starlab_get_opcode_string(op->table_info->op_type));
+      current_fetch_cycle = op->fetch_cycle;
+      current_exec_cycle = op->exec_cycle;
 
-        starlab_table_macro_inst macro_value;
-        strncpy(macro_value.iclass, current_iclass, sizeof(macro_value.iclass));
-        macro_value.fetch_cycle = current_fetch_cycle;
-        macro_value.exec_cycle = current_exec_cycle;
-        starlab_insert(global_starlab_ht_ptr, current_fetch_address_as_string, &macro_value);
+      starlab_table_macro_inst macro_value;
+      strncpy(macro_value.iclass, current_iclass, sizeof(macro_value.iclass));
+      macro_value.fetch_cycle = current_fetch_cycle;
+      macro_value.exec_cycle = current_exec_cycle;
+      starlab_insert(global_starlab_ht_ptr, current_fetch_address_as_string, &macro_value);
 
-        // Form the tuple of types for the previous and current macro-instructions
-        snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", previous_iclass, current_iclass);
-        
-        // Process the tuple as needed (e.g., insert into starlab_types_table_ptr)
-        unsigned long* search_val = (unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types);
-        if(search_val == NULL)
-        {
-            unsigned long insert_val = current_exec_cycle - previous_macro_inst_exec_cycle;
-            starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-        }
-        else
-        {
-            unsigned long insert_val = *search_val + (current_exec_cycle - previous_macro_inst_exec_cycle);
-            starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-        }
-    }
+      // Form the tuple of types for the previous and current macro-instructions
+      snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", previous_iclass, current_iclass);
+      
+    
+
+      // Process the tuple as needed (e.g., insert into starlab_types_table_ptr)
+      unsigned long* search_val = (unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types);
+      if (search_val == NULL)
+      {
+          unsigned long insert_val = current_exec_cycle - previous_macro_inst_exec_cycle;
+          starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+
+
+          // printf("Tuple not found in types table. Inserting new value:\n");
+          // printf("Tuple: %s\n", tuple_of_types);
+          // printf("Inserted Value: %lu\n", insert_val);
+      }
+      else
+      {
+          unsigned long insert_val = *search_val + (current_exec_cycle - previous_macro_inst_exec_cycle);
+          starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+
+          // printf("Tuple found in types table. Updating value:\n");
+          // printf("Tuple: %s\n", tuple_of_types);
+          // printf("Existing Value: %lu\n", *search_val);
+          // printf("Updated Value: %lu\n", insert_val);
+      }
+  }
 
         // Update the previous instruction
         strncpy(previous_fetch_address_as_string, current_fetch_address_as_string, sizeof(previous_fetch_address_as_string));
