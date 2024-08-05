@@ -567,6 +567,8 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
 
     char tuple_of_types[TUPLE_BUFFER_SIZE] = {0};  
     char fetch_address_as_string[128] = {0};
+    Counter cc_taken_by_tuple = 0;
+
 
     sprintf(fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
 
@@ -589,7 +591,7 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
       if(strcmp(prev_fetch_addr_str, current_fetch_address_as_string) == 0)  // Same macro-instruction
       {
         curr_macro_inst_fetch_cycle = op->fetch_cycle;
-        curr_macro_inst_exec_cycle = op->exec_cycle;     
+        curr_macro_inst_exec_cycle = op->exec_cycle; 
       }
 
       else // Different macro-instruction
@@ -598,11 +600,18 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
         sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
         curr_macro_inst_fetch_cycle = op->fetch_cycle;
         curr_macro_inst_exec_cycle = op->exec_cycle;  
+        if(curr_macro_inst_fetch_cycle == prev_macro_inst_fetch_cycle)
+        {
+          cc_taken_by_tuple = curr_macro_inst_fetch_cycle; 
+        }
+        else
+        {
+           cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_macro_inst_fetch_cycle;
+        }
       }
 
       snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
-      printf("Tuple of types: %s\n", tuple_of_types);
-      unsigned long cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_macro_inst_fetch_cycle;
+      
 
       if (!starlab_search(starlab_types_table_ptr, tuple_of_types))
       {
@@ -614,6 +623,7 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
           unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
           starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
       }
+
 
       strncpy(prev_fetch_addr_str, current_fetch_address_as_string, sizeof(prev_fetch_addr_str));
       strncpy(prev_instr_optype, curr_instr_optype, sizeof(prev_instr_optype));
