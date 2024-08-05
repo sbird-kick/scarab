@@ -366,6 +366,13 @@ typedef struct {
     void *value;
 } KeyValuePair;
 
+typedef struct {
+  char iclass[128];
+  unsigned long fetch_cycle;
+  unsigned long exec_cycle;  
+} starlab_table_macro_inst;
+
+
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);

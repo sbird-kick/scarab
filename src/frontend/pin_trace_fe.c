@@ -128,11 +128,36 @@ Flag trace_can_fetch_op(uns proc_id) {
   return !(uop_generator_get_eom(proc_id) && trace_read_done[proc_id]);
 }
 
-void trace_fetch_op(uns proc_id, Op* op) {
-  if(uop_generator_get_bom(proc_id)) {
+void trace_fetch_op(uns proc_id, Op* op) 
+{ 
+  static Addr macro_inst_addr = 0;
+  static int macro_op_type = 0;
+
+  if(uop_generator_get_bom(proc_id)) 
+{
     ASSERT(proc_id, !trace_read_done[proc_id] && !reached_exit[proc_id]);
+    ctype_pin_inst* starlab_pi = &next_pi[proc_id];
+
+    starlab_hash_table* addr_to_op_type_ht_ptr = (starlab_hash_table*) voided_addr_to_op_type_ht_ptr;
+
+    if(addr_to_op_type_ht_ptr == NULL) 
+    {
+      addr_to_op_type_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(macro_op_type)); // Check with HUMZA
+      voided_addr_to_op_type_ht_ptr = addr_to_op_type_ht_ptr;
+    }
+
+    macro_inst_addr = starlab_pi->instruction_addr;
+    macro_op_type = starlab_pi->op_type;
+
+    char address_as_string[128] = {0};
+    sprintf(address_as_string, "%016llX%s", macro_inst_addr, starlab_get_opcode_string(macro_op_type));
+    starlab_insert(addr_to_op_type_ht_ptr, address_as_string, (void *)(intptr_t)macro_op_type);
+
     uop_generator_get_uop(proc_id, op, &next_pi[proc_id]);
-  } else {
+
+  } 
+  else 
+  {
     uop_generator_get_uop(proc_id, op, NULL);
   }
 
