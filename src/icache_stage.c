@@ -635,21 +635,20 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
       macro_value.exec_cycle = curr_macro_inst_exec_cycle;
       starlab_insert(global_starlab_ht_ptr, current_fetch_address_as_string, &macro_value);
 
+      unsigned long cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_macro_inst_fetch_cycle;
+
       // Form the tuple of types for the previous and current macro-instructions
       snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
-      
-      // Process the tuple as needed (e.g., insert into starlab_types_table_ptr)
-      unsigned long* search_val = (unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types);
-      if (search_val == NULL)
+
+      if (!starlab_search(starlab_types_table_ptr, tuple_of_types))
       {
-          unsigned long insert_val = curr_macro_inst_exec_cycle - prev_macro_inst_exec_cycle;
+          unsigned long insert_val = cc_taken_by_tuple;
           starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
       }
       else
       {
-          unsigned long insert_val = *search_val + (curr_macro_inst_exec_cycle - prev_macro_inst_exec_cycle);
+          unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
           starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-
       }
   }
         // Update the previous instruction

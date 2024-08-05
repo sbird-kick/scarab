@@ -418,21 +418,20 @@ void update_exec_stage(Stage_Data* src_sd) {
         macro_value.exec_cycle = curr_macro_inst_exec_cycle;
         starlab_insert(global_starlab_ht_ptr, current_fetch_address_as_string, &macro_value);
 
+        // ****************** Tuple Generation and Insertion ******************
+
+        unsigned long cc_taken_by_tuple = curr_macro_inst_exec_cycle - prev_macro_inst_fetch_cycle;
         snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
 
-        printf("Debug: Created tuple_of_types: %s\n", tuple_of_types);
 
-        unsigned long* search_val = (unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types);
-        if (search_val == NULL)
+        if (!starlab_search(starlab_types_table_ptr, tuple_of_types))
         {
-            unsigned long insert_val = curr_macro_inst_exec_cycle - prev_macro_inst_exec_cycle;
-            printf("Debug: Inserting new value for tuple_of_types: %lu\n", insert_val); // Debug statement
+            unsigned long insert_val = cc_taken_by_tuple;
             starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
         }
         else
         {
-            unsigned long insert_val = *search_val + (curr_macro_inst_exec_cycle - prev_macro_inst_exec_cycle);
-            printf("Debug: Updating existing value for tuple_of_types: %lu -> %lu\n", *search_val, insert_val); // Debug statement
+            unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
             starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
         }
 
@@ -440,14 +439,6 @@ void update_exec_stage(Stage_Data* src_sd) {
         strncpy(prev_instr_optype, curr_instr_optype, sizeof(prev_instr_optype));
         prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
     }
-    printf("Processing new entry:\n");
-    printf("Previous Instruction Class: %s\n", prev_instr_optype);
-    printf("Current Instruction Class: %s\n", curr_instr_optype);
-    printf("Previous Fetch Address: %s\n", prev_fetch_addr_str);
-    printf("Current Fetch Address: %s\n", current_fetch_address_as_string);
-    printf("Previous Execution Cycle: %lu\n", prev_macro_inst_exec_cycle);
-    printf("Current Execution Cycle: %lu\n", curr_macro_inst_exec_cycle);
-    printf("Tuple of Types: %s\n", tuple_of_types);
 }
 
     voided_global_starlab_ht_ptr = (void*) global_starlab_ht_ptr;
