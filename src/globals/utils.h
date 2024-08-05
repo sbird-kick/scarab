@@ -387,7 +387,6 @@ void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, v
 int compare_key_value_pairs(const void *a, const void *b);
 int get_count(starlab_hash_table* hashtable);
 
-
 uns64 reverse64(uns64);
 uns32 reverse32(uns32);
 uns64 reverse(uns64, uns);

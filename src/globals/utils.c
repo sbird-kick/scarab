@@ -171,6 +171,28 @@ void* starlab_search(starlab_hash_table *hashtable, const char *key) {
     return NULL; // Indicates that the key is not found
 }
 
+// void* starlab_search(starlab_hash_table *hashtable, const char *key) {
+//     unsigned int index = starlab_hash(key, hashtable->size);
+//     printf("Searching for key: %s at index: %u\n", key, index);
+
+//     if (index >= hashtable->size) {
+//         printf("Index out of bounds: %u\n", index);
+//         return NULL; // Invalid index
+//     }
+
+//     starlab_hash_node *node = hashtable->table[index];
+//     while (node) {
+//         printf("Checking node with key: %s\n", node->key);
+//         if (strcmp(node->key, key) == 0) {
+//             printf("Key found! Value: %p\n", node->value);
+//             return node->value;
+//         }
+//         node = node->next;
+//     }
+//     printf("Key not found.\n");
+//     return NULL;
+// }
+
 void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
     unsigned int index = starlab_hash(key, hashtable->size);
     starlab_hash_node *node = hashtable->table[index];
