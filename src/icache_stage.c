@@ -547,19 +547,13 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
 
     static char prev_fetch_addr_str[128] = {0};
     static char prev_instr_optype[128] = {0};
-    static unsigned long prev_macro_inst_fetch_cycle = 0;
-    static unsigned long prev_macro_inst_exec_cycle = 0;
+    static Counter prev_macro_inst_fetch_cycle = 0;
+    static Counter prev_macro_inst_exec_cycle = 0;
 
     static char current_fetch_address_as_string[128] = {0};
     static char curr_instr_optype[128] = {0};
-    static unsigned long curr_macro_inst_fetch_cycle = 0;
-    static unsigned long curr_macro_inst_exec_cycle = 0;
-
-    starlab_hash_table* global_starlab_ht_ptr = (starlab_hash_table*) voided_global_starlab_ht_ptr;
-    if(global_starlab_ht_ptr == NULL)
-    {
-      global_starlab_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(starlab_table_macro_inst));
-    }
+    static Counter curr_macro_inst_fetch_cycle = 0;
+    static Counter curr_macro_inst_exec_cycle = 0;
 
     starlab_hash_table* starlab_types_table_ptr = (starlab_hash_table*) voided_global_starlab_types_ht;
     if(starlab_types_table_ptr == NULL)
@@ -574,7 +568,6 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
     char tuple_of_types[TUPLE_BUFFER_SIZE] = {0};  
     char fetch_address_as_string[128] = {0};
 
-    // Convert op->fetch_addr to long unsigned from long long unsigned
     sprintf(fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
 
     int* macro_inst_op_type_ptr = (int*) starlab_search(macro_inst_ht, fetch_address_as_string);
@@ -587,58 +580,29 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
       sprintf(prev_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
       prev_macro_inst_fetch_cycle = op->fetch_cycle;
       prev_macro_inst_exec_cycle = op->exec_cycle;
-
-      starlab_table_macro_inst macro_value;
-      strcpy(macro_value.iclass, prev_instr_optype);
-      macro_value.fetch_cycle = prev_macro_inst_fetch_cycle;
-      macro_value.exec_cycle = prev_macro_inst_exec_cycle;
-      
-      starlab_insert(global_starlab_ht_ptr, prev_fetch_addr_str, &macro_value);
     }
 
     // Not the first instruction in the trace
     else
     {
       sprintf(current_fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
-
-      if(strcmp(prev_fetch_addr_str,current_fetch_address_as_string) == 0) // Same macro-instruction
+      if(strcmp(prev_fetch_addr_str, current_fetch_address_as_string) == 0)  // Same macro-instruction
       {
-        // Update existing entry in the hash table
-        starlab_table_macro_inst* macro_ptr = (starlab_table_macro_inst*) starlab_search(global_starlab_ht_ptr, prev_fetch_addr_str);
-        if(macro_ptr)
-        {
-          macro_ptr->fetch_cycle = op->fetch_cycle;
-          macro_ptr->exec_cycle = op->exec_cycle;    
-        }
-
-        else 
-        {
-          starlab_table_macro_inst macro_value;
-          strcpy(macro_value.iclass, prev_instr_optype);
-          macro_value.fetch_cycle = prev_macro_inst_fetch_cycle;
-          macro_value.exec_cycle = prev_macro_inst_exec_cycle;
-          starlab_insert(global_starlab_ht_ptr, prev_fetch_addr_str, &macro_value);
-        }
+        curr_macro_inst_fetch_cycle = op->fetch_cycle;
+        curr_macro_inst_exec_cycle = op->exec_cycle;     
       }
 
-    // Different macro-instruction
-  else
-  {
-      // Add this entry to the hash table
-      snprintf(curr_instr_optype, sizeof(curr_instr_optype), "%s", starlab_get_opcode_string(macro_inst_op_type));
-      curr_macro_inst_fetch_cycle = op->fetch_cycle;
-      curr_macro_inst_exec_cycle = op->exec_cycle;
+      else // Different macro-instruction
+      {
+        // Delete prev macro-inst in the execution stage
+        sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
+        curr_macro_inst_fetch_cycle = op->fetch_cycle;
+        curr_macro_inst_exec_cycle = op->exec_cycle;  
+      }
 
-      starlab_table_macro_inst macro_value;
-      strncpy(macro_value.iclass, curr_instr_optype, sizeof(macro_value.iclass));
-      macro_value.fetch_cycle = curr_macro_inst_fetch_cycle;
-      macro_value.exec_cycle = curr_macro_inst_exec_cycle;
-      starlab_insert(global_starlab_ht_ptr, current_fetch_address_as_string, &macro_value);
-
-      unsigned long cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_macro_inst_fetch_cycle;
-
-      // Form the tuple of types for the previous and current macro-instructions
       snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
+      printf("Tuple of types: %s\n", tuple_of_types);
+      unsigned long cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_macro_inst_fetch_cycle;
 
       if (!starlab_search(starlab_types_table_ptr, tuple_of_types))
       {
@@ -650,15 +614,14 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
           unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
           starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
       }
-  }
-        // Update the previous instruction
-        strncpy(prev_fetch_addr_str, current_fetch_address_as_string, sizeof(prev_fetch_addr_str));
-        strncpy(prev_instr_optype, curr_instr_optype, sizeof(prev_instr_optype));
-        prev_macro_inst_fetch_cycle = curr_macro_inst_fetch_cycle;
-        prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
+
+      strncpy(prev_fetch_addr_str, current_fetch_address_as_string, sizeof(prev_fetch_addr_str));
+      strncpy(prev_instr_optype, curr_instr_optype, sizeof(prev_instr_optype));
+      prev_macro_inst_fetch_cycle = curr_macro_inst_fetch_cycle;
+      prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
     }
 
-    voided_global_starlab_ht_ptr = (void*) global_starlab_ht_ptr;
+    voided_macro_inst_ht = (void*) macro_inst_ht;
     voided_global_starlab_types_ht = (void *) starlab_types_table_ptr;
 
     // ***************************************************************************************
