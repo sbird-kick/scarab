@@ -128,39 +128,23 @@ Flag trace_can_fetch_op(uns proc_id) {
   return !(uop_generator_get_eom(proc_id) && trace_read_done[proc_id]);
 }
 
-void trace_fetch_op(uns proc_id, Op* op) 
-{ 
-
-  if (uop_generator_get_bom(proc_id)) 
-  {
+void trace_fetch_op(uns proc_id, Op* op) {
+  if(uop_generator_get_bom(proc_id)) {
     ASSERT(proc_id, !trace_read_done[proc_id] && !reached_exit[proc_id]);
-
-    // **********************************************
     ctype_pin_inst* starlab_pi = &next_pi[proc_id];
 
-    static char fetch_address_as_string[128] = {0};
-    if (voided_macro_inst_ht == NULL) 
+    static char fetch_macro_addr[128];
+    if(voided_macro_inst_ht == NULL)
     {
-        voided_macro_inst_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(int));
-        if (voided_macro_inst_ht == NULL) 
-        {
-            fprintf(stderr, "Failed to create hash table\n");
-            exit(EXIT_FAILURE);
-        }
+       voided_macro_inst_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(int));
     }
 
-    int starlab_addr_to_optype = starlab_pi->op_type;
-    sprintf(fetch_address_as_string, "%016lX", starlab_pi->instruction_addr);
-
-    starlab_insert(voided_macro_inst_ht, fetch_address_as_string, &starlab_addr_to_optype);
-
-    // **********************************************
+    int macro_addr_optype = starlab_pi->op_type;
+    sprintf(fetch_macro_addr, "%016lX", starlab_pi->instruction_addr);
+    starlab_insert(voided_macro_inst_ht, fetch_macro_addr, &macro_addr_optype);
 
     uop_generator_get_uop(proc_id, op, &next_pi[proc_id]);
-
-  } 
-  else 
-  {
+  } else {
     uop_generator_get_uop(proc_id, op, NULL);
   }
 

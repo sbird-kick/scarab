@@ -171,28 +171,6 @@ void* starlab_search(starlab_hash_table *hashtable, const char *key) {
     return NULL; // Indicates that the key is not found
 }
 
-// void* starlab_search(starlab_hash_table *hashtable, const char *key) {
-//     unsigned int index = starlab_hash(key, hashtable->size);
-//     printf("Searching for key: %s at index: %u\n", key, index);
-
-//     if (index >= hashtable->size) {
-//         printf("Index out of bounds: %u\n", index);
-//         return NULL; // Invalid index
-//     }
-
-//     starlab_hash_node *node = hashtable->table[index];
-//     while (node) {
-//         printf("Checking node with key: %s\n", node->key);
-//         if (strcmp(node->key, key) == 0) {
-//             printf("Key found! Value: %p\n", node->value);
-//             return node->value;
-//         }
-//         node = node->next;
-//     }
-//     printf("Key not found.\n");
-//     return NULL;
-// }
-
 void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
     unsigned int index = starlab_hash(key, hashtable->size);
     starlab_hash_node *node = hashtable->table[index];
@@ -204,6 +182,7 @@ void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
     }
     
     if (node == NULL) {
+      printf("Key not found\n");
         return; // Key not found
     }
     
@@ -217,6 +196,22 @@ void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
     free(node->value);
     free(node);
     hashtable->count--;
+}
+
+
+
+void validate_hash_table(starlab_hash_table *hashtable) {
+    for (unsigned int i = 0; i < hashtable->size; i++) {
+        starlab_hash_node *node = hashtable->table[i];
+        while (node) {
+            if (node->key == NULL || node->value == NULL) {
+                printf("Error: Invalid node at index %u\n", i);
+                return;
+            }
+            node = node->next;
+        }
+    }
+    printf("Hash table state is valid\n");
 }
 
 void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *)) {

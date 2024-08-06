@@ -61,6 +61,7 @@
 
 #define STAGE_MAX_OP_COUNT ISSUE_WIDTH
 
+
 #define MAX_INSTR_CLASS_SIZE 128
 #define TUPLE_BUFFER_SIZE (2 * MAX_INSTR_CLASS_SIZE + 5)
 
@@ -543,17 +544,15 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
 
     // printf("[%016llX] fetch cycle: %lld with OP_TYPE: %s\n", op->fetch_addr, op->fetch_cycle, starlab_get_opcode_string(op->table_info->op_type));
 
-    // **************************************************************************************
-
     static char prev_fetch_addr_str[128] = {0};
     static char prev_instr_optype[128] = {0};
-    static Counter prev_macro_inst_fetch_cycle = 0;
-    static Counter prev_macro_inst_exec_cycle = 0;
+    static unsigned long prev_macro_inst_fetch_cycle = 0;
+    static unsigned long prev_macro_inst_exec_cycle = 0;
 
     static char current_fetch_address_as_string[128] = {0};
     static char curr_instr_optype[128] = {0};
-    static Counter curr_macro_inst_fetch_cycle = 0;
-    static Counter curr_macro_inst_exec_cycle = 0;
+    static unsigned long curr_macro_inst_fetch_cycle = 0;
+    static unsigned long curr_macro_inst_exec_cycle = 0;
 
     starlab_hash_table* starlab_types_table_ptr = (starlab_hash_table*) voided_global_starlab_types_ht;
     if(starlab_types_table_ptr == NULL)
@@ -565,7 +564,7 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
 
     char tuple_of_types[TUPLE_BUFFER_SIZE] = {0};  
     char fetch_address_as_string[128] = {0};
-    Counter cc_taken_by_tuple = 0;
+    unsigned long cc_taken_by_tuple = 0;
 
     sprintf(fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
 
@@ -593,8 +592,6 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
 
       else // Different macro-instruction
       {
-         // Delete prev macro-inst in the execution stage
-        starlab_delete_key(starlab_types_table_ptr, prev_instr_optype);
         sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
         curr_macro_inst_fetch_cycle = op->fetch_cycle;
         curr_macro_inst_exec_cycle = op->exec_cycle;  
@@ -620,8 +617,11 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
       prev_macro_inst_fetch_cycle = curr_macro_inst_fetch_cycle;
       prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
     }
+  
+  voided_macro_inst_ht = (void*) macro_inst_ht;
+  voided_global_starlab_types_ht = (void*) starlab_types_table_ptr;
 
-    // ***************************************************************************************
+
     ic->sd.ops[ic->sd.op_count] = op; /* put op in the exit list */
     op_count[ic->proc_id]++;          /* increment instruction counters */
     unique_count_per_core[ic->proc_id]++;
