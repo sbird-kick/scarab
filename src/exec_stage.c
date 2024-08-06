@@ -380,27 +380,23 @@ void update_exec_stage(Stage_Data* src_sd) {
       }
       else // Different macro-instruction
       {
-        // Delete prev macro-inst in the execution stage
-        starlab_delete_key(starlab_types_table_ptr, prev_instr_optype);
         sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
         curr_macro_inst_fetch_cycle = op->fetch_cycle;
         curr_macro_inst_exec_cycle = op->exec_cycle;  
         cc_taken_by_tuple = curr_macro_inst_exec_cycle - prev_macro_inst_fetch_cycle;
-      }
+      
+        snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
 
-      snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
-
-      if (!starlab_search(starlab_types_table_ptr, tuple_of_types))
-      {
-          unsigned long insert_val = cc_taken_by_tuple;
-          starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-          printf("Updating tuple: %s with value: %lu in exec \n", tuple_of_types, insert_val);
-      }
-      else
-      {
-          unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
-          starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-          printf("Updating tuple: %s with value: %lu in exec \n", tuple_of_types, insert_val);
+        if (!starlab_search(starlab_types_table_ptr, tuple_of_types))
+        {
+            unsigned long insert_val = cc_taken_by_tuple;
+            starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+        }
+        else
+        {
+            unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
+            starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+        }
       }
       
       strncpy(prev_fetch_addr_str, current_fetch_address_as_string, sizeof(prev_fetch_addr_str));
@@ -409,8 +405,6 @@ void update_exec_stage(Stage_Data* src_sd) {
       prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
 
     }
-
-   
 
     // **************************************************************************************
 
