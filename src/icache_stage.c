@@ -61,6 +61,9 @@
 
 #define STAGE_MAX_OP_COUNT ISSUE_WIDTH
 
+#define MAX_INSTR_CLASS_SIZE 128
+#define TUPLE_BUFFER_SIZE (2 * MAX_INSTR_CLASS_SIZE + 5)
+
 
 /**************************************************************************************/
 /* Global Variables */
@@ -539,13 +542,18 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
     op->fetch_cycle = cycle_count;
 
     // printf("[%016llX] fetch cycle: %lld with OP_TYPE: %s\n", op->fetch_addr, op->fetch_cycle, starlab_get_opcode_string(op->table_info->op_type));
-    
 
-    starlab_hash_table* global_starlab_ht_ptr = (starlab_hash_table*) voided_global_starlab_ht_ptr;
-    if(global_starlab_ht_ptr == NULL)
-    {
-      global_starlab_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(starlab_table_value));
-    }
+    // **************************************************************************************
+
+    static char prev_fetch_addr_str[128] = {0};
+    static char prev_instr_optype[128] = {0};
+    static Counter prev_macro_inst_fetch_cycle = 0;
+    static Counter prev_macro_inst_exec_cycle = 0;
+
+    static char current_fetch_address_as_string[128] = {0};
+    static char curr_instr_optype[128] = {0};
+    static Counter curr_macro_inst_fetch_cycle = 0;
+    static Counter curr_macro_inst_exec_cycle = 0;
 
     starlab_hash_table* starlab_types_table_ptr = (starlab_hash_table*) voided_global_starlab_types_ht;
     if(starlab_types_table_ptr == NULL)
@@ -553,69 +561,76 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
       starlab_types_table_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
 
-    char address_as_string[128] = {0};
-    sprintf(address_as_string, "%016llX%s", op->fetch_addr, starlab_get_opcode_string(op->table_info->op_type));
+    starlab_hash_table* macro_inst_ht = (starlab_hash_table*) voided_macro_inst_ht;
 
-    if(!starlab_search(global_starlab_ht_ptr,address_as_string))
-    {
-      // printf("Address %s not found [%016llX]\n", address_as_string, op->fetch_addr);
-      starlab_table_value temp_val_to_insert = {op->fetch_cycle, op->fetch_cycle};
-      starlab_insert(global_starlab_ht_ptr, address_as_string, &temp_val_to_insert);
-      strncpy(prev_address_as_string, address_as_string, 128);
+    char tuple_of_types[TUPLE_BUFFER_SIZE] = {0};  
+    char fetch_address_as_string[128] = {0};
+    Counter cc_taken_by_tuple = 0;
+
+    sprintf(fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
+
+    int* macro_inst_op_type_ptr = (int*) starlab_search(macro_inst_ht, fetch_address_as_string);
+    int macro_inst_op_type = *macro_inst_op_type_ptr;
+
+    // First instruction in the trace
+    if(prev_fetch_addr_str[0] == '\0')
+    {      
+      sprintf(prev_fetch_addr_str, "%016lX", (unsigned long)op->fetch_addr);
+      sprintf(prev_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
+      prev_macro_inst_fetch_cycle = op->fetch_cycle;
+      prev_macro_inst_exec_cycle = op->exec_cycle;
+      // Instr Addr + Op-type + Fetch Cycle + Exec Cycle
+      printf("ICACHE: First instruction in the trace: %s %s %lld %lld\n", prev_fetch_addr_str, prev_instr_optype, prev_macro_inst_fetch_cycle, prev_macro_inst_exec_cycle);
     }
+
+    // Not the first instruction in the trace
     else
     {
-      unsigned long prev_inst_prev_fetch;
-      if(starlab_search(global_starlab_ht_ptr, prev_address_as_string) == NULL)
+      sprintf(current_fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
+      if(strcmp(prev_fetch_addr_str, current_fetch_address_as_string) == 0)  // Same macro-instruction
       {
-        prev_inst_prev_fetch = op->fetch_cycle;
-      }
-      else
-        prev_inst_prev_fetch = ((starlab_table_value *) starlab_search(global_starlab_ht_ptr, prev_address_as_string))->prev_fetch;
-
-      unsigned long this_fetch_cc = op->fetch_cycle;
-      unsigned long cc_taken_by_tuple = this_fetch_cc - prev_inst_prev_fetch;
-
-      unsigned long this_inst_prev_fetch;
-      if(starlab_search(global_starlab_ht_ptr, address_as_string) == NULL)
-      {
-        this_inst_prev_fetch = op->fetch_cycle;
-      }
-      else
-        this_inst_prev_fetch = ((starlab_table_value *) starlab_search(global_starlab_ht_ptr, address_as_string))->this_fetch;
-
-
-      starlab_table_value temp_val_to_insert = {this_inst_prev_fetch, op->fetch_cycle};
-
-      starlab_insert(global_starlab_ht_ptr, address_as_string, &temp_val_to_insert);
-
-      // printf("Address %s,%s FOUND! [%ld, %ld, %ld] -> <%s,%s>\n", prev_address_as_string, address_as_string, prev_inst_prev_fetch, this_inst_prev_fetch, cc_taken_by_tuple, prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type));
-
-      starlab_insert(global_starlab_ht_ptr, address_as_string, &this_fetch_cc);
-
-      char tuple_of_types[256] = {0};
-      sprintf(tuple_of_types, "<%s,%s>", prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type));
-
-      if(!starlab_search(starlab_types_table_ptr, tuple_of_types))
-      {
-        unsigned long insert_val = cc_taken_by_tuple;
-        starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-      }
-      else
-      {
-        unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
-        starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+        curr_macro_inst_fetch_cycle = op->fetch_cycle;
+        curr_macro_inst_exec_cycle = op->exec_cycle; 
+          // Instr Addr + Op-type + Fetch Cycle + Exec Cycle
+        printf("ICACHE: Same macro-instruction: %s %s %lld %lld\n", current_fetch_address_as_string, prev_instr_optype, curr_macro_inst_fetch_cycle, curr_macro_inst_exec_cycle);
       }
 
-      prev_instruction_time = this_inst_prev_fetch;
-      strncpy(prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type), 100);
-      strncpy(prev_address_as_string, address_as_string, 128);
+      else // Different macro-instruction
+      {
+         // Delete prev macro-inst in the execution stage
+        starlab_delete_key(starlab_types_table_ptr, prev_instr_optype);
+        sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
+        curr_macro_inst_fetch_cycle = op->fetch_cycle;
+        curr_macro_inst_exec_cycle = op->exec_cycle;  
+        cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_macro_inst_fetch_cycle;
+          // Instr Addr + Op-type + Fetch Cycle + Exec Cycle
+        printf("ICACHE: Different macro-instruction: %s %s %lld %lld\n", current_fetch_address_as_string, curr_instr_optype, curr_macro_inst_fetch_cycle, curr_macro_inst_exec_cycle);
+     
+        snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
+        
+        // min fetch, and max for exec
+
+        if (!starlab_search(starlab_types_table_ptr, tuple_of_types))
+        {
+            unsigned long insert_val = cc_taken_by_tuple;
+            starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+            printf("ICACHE: Inserting tuple: %s with value: %lu\n", tuple_of_types, insert_val);
+        }
+        else
+        {
+            unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
+            starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+        }
+
+      }
+
+      strncpy(prev_fetch_addr_str, current_fetch_address_as_string, sizeof(prev_fetch_addr_str));
+      strncpy(prev_instr_optype, curr_instr_optype, sizeof(prev_instr_optype));
+      prev_macro_inst_fetch_cycle = curr_macro_inst_fetch_cycle;
+      prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
     }
 
-    voided_global_starlab_ht_ptr = (void *) global_starlab_ht_ptr;
-    voided_global_starlab_types_ht = (void *) starlab_types_table_ptr;
-
-
+    // ***************************************************************************************
     ic->sd.ops[ic->sd.op_count] = op; /* put op in the exit list */
     op_count[ic->proc_id]++;          /* increment instruction counters */
     unique_count_per_core[ic->proc_id]++;

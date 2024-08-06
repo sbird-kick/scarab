@@ -22,7 +22,7 @@
 /***************************************************************************************
  * File         : exec_stage.c
  * Author       : HPS Research Group
- * Date         : 1/27/1999
+ * Date         : 1/27/1999a
  * Description  : CMP support
  ***************************************************************************************/
 
@@ -54,6 +54,11 @@
 /* Macros */
 
 #define DEBUG(proc_id, args...) _DEBUG(proc_id, DEBUG_EXEC_STAGE, ##args)
+#define MAX_INSTR_CLASS_SIZE 128
+#define TUPLE_BUFFER_SIZE (2 * MAX_INSTR_CLASS_SIZE + 5) 
+
+#define MAX_INSTR_CLASS_SIZE 128
+#define TUPLE_BUFFER_SIZE (2 * MAX_INSTR_CLASS_SIZE + 5)
 
 
 /**************************************************************************************/
@@ -329,63 +334,87 @@ void update_exec_stage(Stage_Data* src_sd) {
     op->exec_cycle = cycle_count + MAX2(latency, -latency);
 
     // printf("[%016llX] exec cycle: %lld with OP_TYPE: %s\n", op->fetch_addr, op->exec_cycle, starlab_get_opcode_string(op->table_info->op_type) );
+    // ***********************************************************************************************
+    static char prev_fetch_addr_str[128] = {0};
+    static char prev_instr_optype[128] = {0};
+    static Counter prev_macro_inst_fetch_cycle = 0;
+    static Counter prev_macro_inst_exec_cycle = 0;
 
-    starlab_hash_table* global_starlab_ht_ptr = (starlab_hash_table*) voided_global_starlab_ht_ptr;
+    static char current_fetch_address_as_string[128] = {0};
+    static char curr_instr_optype[128] = {0};
+    static Counter curr_macro_inst_fetch_cycle = 0;
+    static Counter curr_macro_inst_exec_cycle = 0;
 
-    if(global_starlab_ht_ptr == NULL)
-    {
-      global_starlab_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(starlab_table_value));
-    }
     starlab_hash_table* starlab_types_table_ptr = (starlab_hash_table*) voided_global_starlab_types_ht;
     if(starlab_types_table_ptr == NULL)
     {
       starlab_types_table_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
 
-    char address_as_string[128] = {0};
-    sprintf(address_as_string, "%016llX%s", op->fetch_addr, starlab_get_opcode_string(op->table_info->op_type));
-    if(!starlab_search(global_starlab_ht_ptr,address_as_string))
-    {
-      // printf("Address ret %s not found [%016llX]\n", address_as_string, op->fetch_addr);
-      starlab_table_value temp_val_to_insert = {op->fetch_cycle, op->fetch_cycle};
-      starlab_insert(global_starlab_ht_ptr, address_as_string, &temp_val_to_insert);
-      strncpy(prev_address_as_string, address_as_string, 128);
-    }
-    else
-    {
-      unsigned long prev_inst_prev_fetch;
-      if(starlab_search(global_starlab_ht_ptr, prev_address_as_string) == NULL)
-      {
-        prev_inst_prev_fetch = prev_instruction_time;
-      }
-      else
-        prev_inst_prev_fetch = ((starlab_table_value *) starlab_search(global_starlab_ht_ptr, prev_address_as_string))->prev_fetch;
+    starlab_hash_table* macro_inst_ht = (starlab_hash_table*) voided_macro_inst_ht;
 
-      // unsigned long this_fetch_cc = op->fetch_cycle;
-      unsigned long cc_taken_by_tuple = op->exec_cycle - prev_inst_prev_fetch;      
-      // printf("Address %s, %s FOUND ret! [%ld, %lld, %ld] -> <%s,%s>\n", prev_address_as_string, address_as_string, prev_inst_prev_fetch, op->exec_cycle, cc_taken_by_tuple, prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type));
-      starlab_delete_key(global_starlab_ht_ptr, address_as_string);
+    char tuple_of_types[TUPLE_BUFFER_SIZE] = {0};  
+    char fetch_address_as_string[128] = {0};
+    Counter cc_taken_by_tuple = 0;
 
-      char tuple_of_types[256] = {0};
-      sprintf(tuple_of_types, "<%s,%s>", prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type));
+    sprintf(fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
+    int* macro_inst_op_type_ptr = (int*) starlab_search(macro_inst_ht, fetch_address_as_string);
+    int macro_inst_op_type = *macro_inst_op_type_ptr;
 
-      if(!starlab_search(starlab_types_table_ptr, tuple_of_types))
-      {
-        unsigned long insert_val = cc_taken_by_tuple;
-        starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-      }
-      else
-      {
-        unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
-        starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-      }
-      prev_instruction_time = op->fetch_cycle;
-      strncpy(prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type), 100);
-      strncpy(prev_address_as_string, address_as_string, 128);
+    // First instruction in the trace
+    if(prev_fetch_addr_str[0] == '\0')
+    {      
+      sprintf(prev_fetch_addr_str, "%016lX", (unsigned long)op->fetch_addr);
+      sprintf(prev_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
+      prev_macro_inst_fetch_cycle = op->fetch_cycle;
+      prev_macro_inst_exec_cycle = op->exec_cycle;
+        // Instr Addr + Op-type + Fetch Cycle + Exec Cycle
+      printf("EXEC: First instruction in the trace: %s %s %lld %lld\n", prev_fetch_addr_str, prev_instr_optype, prev_macro_inst_fetch_cycle, prev_macro_inst_exec_cycle);
     }
 
-    voided_global_starlab_ht_ptr = (void *) global_starlab_ht_ptr;
-    voided_global_starlab_types_ht = (void *) starlab_types_table_ptr;
+    else 
+    {
+      sprintf(current_fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
+      if(strcmp(prev_fetch_addr_str, current_fetch_address_as_string) == 0)  // Same macro-instruction
+      {
+        curr_macro_inst_fetch_cycle = op->fetch_cycle;
+        curr_macro_inst_exec_cycle = op->exec_cycle; 
+          // Instr Addr + Op-type + Fetch Cycle + Exec Cycle
+        printf("EXEC: Same macro-instruction: %s %s %lld %lld\n", current_fetch_address_as_string, prev_instr_optype, curr_macro_inst_fetch_cycle, curr_macro_inst_exec_cycle);
+      }
+      else // Different macro-instruction
+      {
+        sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
+        curr_macro_inst_fetch_cycle = op->fetch_cycle;
+        curr_macro_inst_exec_cycle = op->exec_cycle;  
+        cc_taken_by_tuple = curr_macro_inst_exec_cycle - prev_macro_inst_fetch_cycle;
+        printf("EXEC: Different macro-instruction: %s %s %lld %lld\n", current_fetch_address_as_string, curr_instr_optype, curr_macro_inst_fetch_cycle, curr_macro_inst_exec_cycle);
+      }
+
+      snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
+
+      if (!starlab_search(starlab_types_table_ptr, tuple_of_types))
+      {
+          unsigned long insert_val = cc_taken_by_tuple;
+          starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+          printf("EXEC: Inserting tuple: %s with value: %lu\n", tuple_of_types, insert_val);
+      }
+      else
+      {
+          unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
+          starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+      }
+
+      strcpy(prev_fetch_addr_str, current_fetch_address_as_string);
+      strcpy(prev_instr_optype, curr_instr_optype);
+      prev_macro_inst_fetch_cycle = curr_macro_inst_fetch_cycle;
+      prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
+
+    }
+
+   
+
+    // **************************************************************************************
 
     op->exec_count++;
 
