@@ -600,6 +600,7 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
         sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
         curr_macro_inst_fetch_cycle = op->fetch_cycle;
         curr_macro_inst_exec_cycle = op->exec_cycle;  
+<<<<<<< Updated upstream
         if(curr_macro_inst_fetch_cycle == prev_macro_inst_fetch_cycle)
         {
           cc_taken_by_tuple = curr_macro_inst_fetch_cycle; 
@@ -610,6 +611,12 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
         }
       }
 
+=======
+        cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_macro_inst_fetch_cycle;
+
+      }
+
+>>>>>>> Stashed changes
       snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
       
 

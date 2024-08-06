@@ -22,7 +22,7 @@
 /***************************************************************************************
  * File         : exec_stage.c
  * Author       : HPS Research Group
- * Date         : 1/27/1999
+ * Date         : 1/27/1999a
  * Description  : CMP support
  ***************************************************************************************/
 
@@ -56,6 +56,9 @@
 #define DEBUG(proc_id, args...) _DEBUG(proc_id, DEBUG_EXEC_STAGE, ##args)
 #define MAX_INSTR_CLASS_SIZE 128
 #define TUPLE_BUFFER_SIZE (2 * MAX_INSTR_CLASS_SIZE + 5) 
+
+#define MAX_INSTR_CLASS_SIZE 128
+#define TUPLE_BUFFER_SIZE (2 * MAX_INSTR_CLASS_SIZE + 5)
 
 
 /**************************************************************************************/
@@ -331,13 +334,21 @@ void update_exec_stage(Stage_Data* src_sd) {
     op->exec_cycle = cycle_count + MAX2(latency, -latency);
 
     // printf("[%016llX] exec cycle: %lld with OP_TYPE: %s\n", op->fetch_addr, op->exec_cycle, starlab_get_opcode_string(op->table_info->op_type) );
+    // ***********************************************************************************************
+    static char prev_fetch_addr_str[128] = {0};
+    static char prev_instr_optype[128] = {0};
+    static Counter prev_macro_inst_fetch_cycle = 0;
+    static Counter prev_macro_inst_exec_cycle = 0;
 
+<<<<<<< Updated upstream
     // **************************************************************************************
     static char prev_fetch_addr_str[128] = {0};
     static char prev_instr_optype[128] = {0};
     static Counter prev_macro_inst_fetch_cycle = 0;
     static Counter prev_macro_inst_exec_cycle = 0;
 
+=======
+>>>>>>> Stashed changes
     static char current_fetch_address_as_string[128] = {0};
     static char curr_instr_optype[128] = {0};
     static Counter curr_macro_inst_fetch_cycle = 0;
@@ -351,14 +362,20 @@ void update_exec_stage(Stage_Data* src_sd) {
 
     starlab_hash_table* macro_inst_ht = (starlab_hash_table*) voided_macro_inst_ht;
 
+<<<<<<< Updated upstream
     // **************************************************************************************
 
+=======
+>>>>>>> Stashed changes
     char tuple_of_types[TUPLE_BUFFER_SIZE] = {0};  
     char fetch_address_as_string[128] = {0};
     Counter cc_taken_by_tuple = 0;
 
     sprintf(fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
     int* macro_inst_op_type_ptr = (int*) starlab_search(macro_inst_ht, fetch_address_as_string);
     int macro_inst_op_type = *macro_inst_op_type_ptr;
 
@@ -369,16 +386,23 @@ void update_exec_stage(Stage_Data* src_sd) {
       sprintf(prev_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
       prev_macro_inst_fetch_cycle = op->fetch_cycle;
       prev_macro_inst_exec_cycle = op->exec_cycle;
+<<<<<<< Updated upstream
 
     }
     
     // Not the first instruction in the trace
     else
+=======
+    }
+
+    else 
+>>>>>>> Stashed changes
     {
       sprintf(current_fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
       if(strcmp(prev_fetch_addr_str, current_fetch_address_as_string) == 0)  // Same macro-instruction
       {
         curr_macro_inst_fetch_cycle = op->fetch_cycle;
+<<<<<<< Updated upstream
         curr_macro_inst_exec_cycle = op->exec_cycle;
       }
 
@@ -392,6 +416,22 @@ void update_exec_stage(Stage_Data* src_sd) {
       }
 
       snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
+=======
+        curr_macro_inst_exec_cycle = op->exec_cycle; 
+      }
+      else // Different macro-instruction
+      {
+        // Delete prev macro-inst in the execution stage
+        starlab_delete_key(starlab_types_table_ptr, prev_instr_optype);
+        sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
+        curr_macro_inst_fetch_cycle = op->fetch_cycle;
+        curr_macro_inst_exec_cycle = op->exec_cycle;  
+        cc_taken_by_tuple = curr_macro_inst_exec_cycle - prev_macro_inst_fetch_cycle;
+      }
+
+      snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
+      
+>>>>>>> Stashed changes
 
       if (!starlab_search(starlab_types_table_ptr, tuple_of_types))
       {
@@ -403,15 +443,26 @@ void update_exec_stage(Stage_Data* src_sd) {
           unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
           starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
       }
+<<<<<<< Updated upstream
 
+=======
+      
+>>>>>>> Stashed changes
       strncpy(prev_fetch_addr_str, current_fetch_address_as_string, sizeof(prev_fetch_addr_str));
       strncpy(prev_instr_optype, curr_instr_optype, sizeof(prev_instr_optype));
       prev_macro_inst_fetch_cycle = curr_macro_inst_fetch_cycle;
       prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
+<<<<<<< Updated upstream
     }
 
     voided_macro_inst_ht = (void*) macro_inst_ht;
     voided_global_starlab_types_ht = (void *) starlab_types_table_ptr;
+=======
+
+    }
+
+   
+>>>>>>> Stashed changes
 
     // **************************************************************************************
 

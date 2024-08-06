@@ -220,7 +220,11 @@ Scarab's source code is organized as follows:
 
 void* voided_global_starlab_ht_ptr = NULL;
 void* voided_global_starlab_types_ht = NULL;
+<<<<<<< Updated upstream
 void* voided_addr_to_op_type_ht_ptr = NULL;
+=======
+void* voided_macro_inst_ht = NULL;
+>>>>>>> Stashed changes
 
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];

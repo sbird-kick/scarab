@@ -62,7 +62,11 @@ extern uns  num_fetched_lowconf_brs;
 
 extern void* voided_global_starlab_ht_ptr;
 extern void* voided_global_starlab_types_ht;
+<<<<<<< Updated upstream
 extern void* voided_addr_to_op_type_ht_ptr;
+=======
+extern void* voided_macro_inst_ht;
+>>>>>>> Stashed changes
 
 extern unsigned long long prev_instruction_time;
 extern char prev_instruction_class[128];
