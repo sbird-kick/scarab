@@ -600,35 +600,23 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
         sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
         curr_macro_inst_fetch_cycle = op->fetch_cycle;
         curr_macro_inst_exec_cycle = op->exec_cycle;  
-<<<<<<< Updated upstream
-        if(curr_macro_inst_fetch_cycle == prev_macro_inst_fetch_cycle)
-        {
-          cc_taken_by_tuple = curr_macro_inst_fetch_cycle; 
-        }
-        else
-        {
-           cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_macro_inst_fetch_cycle;
-        }
-      }
-
-=======
         cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_macro_inst_fetch_cycle;
 
       }
 
->>>>>>> Stashed changes
       snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
       
-
       if (!starlab_search(starlab_types_table_ptr, tuple_of_types))
       {
           unsigned long insert_val = cc_taken_by_tuple;
           starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+          printf("Inserting tuple: %s with value: %lu in icache\n", tuple_of_types, insert_val);
       }
       else
       {
           unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
           starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+          printf("Updating tuple: %s with value: %lu in icache\n", tuple_of_types, insert_val);
       }
 
 
