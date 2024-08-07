@@ -2,10 +2,16 @@
 
 # Directory to read files from
 directory="/simpoint_traces/"
+# scarab directory with PARAMS.in also present
 pathToScarabDir="/home/humza/scarab/src/"
+
+# copy over the baseline CLI options here
 baseline_options=" "
+
 INST_LIMIT=100000000
 WARMUP_INSTS=45000000
+
+# Set this equal to the maximum threads on your device
 max_simul_proc=23
 
 currdir=$(pwd)
