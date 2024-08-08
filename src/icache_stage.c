@@ -548,6 +548,7 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
     static char prev_instr_optype[128] = {0};
     static unsigned long prev_macro_inst_fetch_cycle = 0;
     static unsigned long prev_macro_inst_exec_cycle = 0;
+    static unsigned long prev_inst_prev_fetch = 0;
 
     static char current_fetch_addr_str[128] = {0};
     static char curr_instr_optype[128] = {0};
@@ -555,7 +556,7 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
     static unsigned long curr_macro_inst_exec_cycle = 0;
     static int count_second_inst = 0;
     char tuple_of_types[TUPLE_BUFFER_SIZE] = {0};  
-    char fetch_address_as_string[128] = {0};
+    // char fetch_address_as_string[128] = {0};
     unsigned long cc_taken_by_tuple = 0;
   
 
@@ -573,156 +574,172 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
 
     starlab_hash_table* macro_inst_ht = (starlab_hash_table*) voided_macro_inst_ht;
 
-    starlab_table_value temp;
-
-
-    sprintf(fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
-
-    int* macro_inst_op_type_ptr = (int*) starlab_search(macro_inst_ht, fetch_address_as_string);
+    sprintf(current_fetch_addr_str, "%016lX", (unsigned long)op->fetch_addr);
+    int* macro_inst_op_type_ptr = (int*) starlab_search(macro_inst_ht, current_fetch_addr_str);
     int macro_inst_op_type = *macro_inst_op_type_ptr;
+    sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
 
-    if (prev_fetch_addr_str[0] == '\0') // First instruction
+    // First Instruction in the Trace
+    if(prev_fetch_addr_str[0] == '\0')
     {
-        sprintf(prev_fetch_addr_str, "%016lX", (unsigned long)op->fetch_addr);
         sprintf(current_fetch_addr_str, "%016lX", (unsigned long)op->fetch_addr);
-        sprintf(prev_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
-        sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
-        prev_macro_inst_fetch_cycle = op->fetch_cycle;
-        prev_macro_inst_exec_cycle = op->exec_cycle;
-         
-        temp.prev_fetch = 0;
-        temp.this_fetch = op->fetch_cycle;
+        curr_macro_inst_fetch_cycle = op->fetch_cycle;
+        curr_macro_inst_exec_cycle = op->exec_cycle;
 
-        starlab_insert(voided_global_starlab_ht_ptr, fetch_address_as_string, &temp);
-        printf("Inserted address %s\n", fetch_address_as_string);
+        sprintf(prev_fetch_addr_str, "%016lX", (unsigned long)op->fetch_addr);
+        sprintf(prev_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
+        prev_macro_inst_fetch_cycle = op->fetch_cycle;
+
+        starlab_table_value temp_val_to_insert;
+        temp_val_to_insert.prev_fetch = 0;
+        temp_val_to_insert.this_fetch = op->fetch_cycle;
+        starlab_insert(voided_global_starlab_ht_ptr, current_fetch_addr_str, &temp_val_to_insert);
+        strncpy(prev_fetch_addr_str, current_fetch_addr_str, 128);    
+
+        // Deepanjali Debugging
+
+        unsigned long this_fetch = ((starlab_table_value *) starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str))->this_fetch;
+        unsigned long prev_fetch = ((starlab_table_value *) starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str))->prev_fetch;
+
+        // Instruction Address + Previous Fetch Cycle + Current Fetch Cycle
+        printf("Instruction Address: %s, Previous Fetch Cycle: %lu, This Fetch Cycle: %lu\n", current_fetch_addr_str, prev_fetch, this_fetch);
+
     }
 
     else 
+
     {
         sprintf(current_fetch_addr_str, "%016lX", (unsigned long)op->fetch_addr);
+
         if (strcmp(prev_fetch_addr_str, current_fetch_addr_str) == 0) // Same macro instruction
         {
             curr_macro_inst_fetch_cycle = op->fetch_cycle;
             curr_macro_inst_exec_cycle = op->exec_cycle;
         }
 
-        else // Different macro instruction
+         else // Different macro instruction
         {
             sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
             curr_macro_inst_fetch_cycle = op->fetch_cycle;
             curr_macro_inst_exec_cycle = op->exec_cycle;
 
-            if (count_second_inst == 0)
+            if (count_second_inst == 0) // Does not have a previous instance
             {
-                temp.prev_fetch = 0; // Second instruction that does not have a previous instance
-                temp.this_fetch = op->fetch_cycle;
-                
-                starlab_insert(voided_global_starlab_ht_ptr, current_fetch_addr_str, &temp);
-                count_second_inst++;
+              starlab_table_value temp_val_to_insert;
+              temp_val_to_insert.prev_fetch = 0;
+              temp_val_to_insert.this_fetch = op->fetch_cycle;
+              starlab_insert(voided_global_starlab_ht_ptr, current_fetch_addr_str, &temp_val_to_insert);
+              count_second_inst++;
 
-                cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_macro_inst_fetch_cycle;
-                snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
-                unsigned long insert_val = cc_taken_by_tuple;
-                starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+              cc_taken_by_tuple = curr_macro_inst_fetch_cycle; // Does not have a previous instance
 
-                // Debug Statements
-                // Inserted Address + Previous Fetch Cycle + Current Fetch Cycle
-                printf("Inserted address %s with previous fetch cycle %lu and current fetch cycle %lu\n", current_fetch_addr_str, temp.prev_fetch, temp.this_fetch);
-      
+              // Deepanjali Debugging
+
+              unsigned long this_fetch = ((starlab_table_value *) starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str))->this_fetch;
+              unsigned long prev_fetch = ((starlab_table_value *) starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str))->prev_fetch;
+
+              // Instruction Address + Previous Fetch Cycle + Current Fetch Cycle
+              printf("Second Instruction Address: %s, Previous Fetch Cycle: %lu, This Fetch Cycle: %lu\n", current_fetch_addr_str, prev_fetch, this_fetch);
+
+            }
+
+            else 
+            {
+              // Not first or second instruction, just check if this instruction has a previous instance
+              starlab_table_value* temp_val = (starlab_table_value*) starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str);
+              if(temp_val == NULL)
+              {
+
+                  starlab_table_value temp_val_to_insert;
+                  temp_val_to_insert.prev_fetch = 0;
+                  temp_val_to_insert.this_fetch = op->fetch_cycle;
+                  starlab_insert(voided_global_starlab_ht_ptr, current_fetch_addr_str, &temp_val_to_insert);
+
+                  // Previous instruction's previous fetch cycle
+                  prev_inst_prev_fetch = ((starlab_table_value *) starlab_search(voided_global_starlab_ht_ptr, prev_fetch_addr_str))->prev_fetch;
+                  if(prev_inst_prev_fetch == 0)
+                  {
+                      cc_taken_by_tuple = curr_macro_inst_fetch_cycle;
+                  }
+
+                  else
+                  {
+                      cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_inst_prev_fetch;
+                  }
+
+                  // Deepanjali Debugging
+
+                  printf("Does not have a previous instance\n");
+                  unsigned long this_fetch = ((starlab_table_value *) starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str))->this_fetch;
+                  unsigned long prev_fetch = ((starlab_table_value *) starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str))->prev_fetch;
+
+                  // Instruction Address + Previous Fetch Cycle + Current Fetch Cycle
+                  printf("Instruction Address: %s, Previous Fetch Cycle: %lu, This Fetch Cycle: %lu\n", current_fetch_addr_str, prev_fetch, this_fetch);
+
+              }
+
+              else
+              {
+                  unsigned long this_fetch_value = ((starlab_table_value *) starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str))->this_fetch;
+                  starlab_table_value temp_val_to_insert;
+                  temp_val_to_insert.prev_fetch = this_fetch_value;
+                  temp_val_to_insert.this_fetch = op->fetch_cycle;
+                  starlab_insert(voided_global_starlab_ht_ptr, current_fetch_addr_str, &temp_val_to_insert);
+
+                  // Previous instruction's previous fetch cycle
+                  prev_inst_prev_fetch = ((starlab_table_value *) starlab_search(voided_global_starlab_ht_ptr, prev_fetch_addr_str))->prev_fetch;
+
+                  if(prev_inst_prev_fetch == 0)
+                  {
+                      cc_taken_by_tuple = curr_macro_inst_fetch_cycle;
+                  }
+
+                  else
+                  {
+                      cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_inst_prev_fetch;
+                  }
+
+                  cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_inst_prev_fetch;
+
+                  // Deepanjali Debugging
+
+                  printf("Has a previous instance\n");
+                  unsigned long this_fetch = ((starlab_table_value *) starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str))->this_fetch;
+                  unsigned long prev_fetch = ((starlab_table_value *) starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str))->prev_fetch;
+
+                  // Instruction Address + Previous Fetch Cycle + Current Fetch Cycle
+                  printf("Instruction Address: %s, Previous Fetch Cycle: %lu, This Fetch Cycle: %lu\n", current_fetch_addr_str, prev_fetch, this_fetch);
+  
+              }
+            }
+
+            // Clock Cycles Measurement
+
+            sprintf(tuple_of_types, "<%s,%s>", prev_instr_optype, starlab_get_opcode_string(op->table_info->op_type));
+
+            if(!starlab_search(starlab_types_table_ptr, tuple_of_types))
+            {
+              unsigned long insert_val = cc_taken_by_tuple;
+              starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
             }
 
             else
             {
-              // Check for a previous instance of the current instruction
-              void* search_curr_inst_struct = starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str);
-
-              if(search_curr_inst_struct != NULL) // A previous instance of the current instruction exists, update it
-              {
-                temp.prev_fetch = temp.this_fetch;
-                temp.this_fetch = op->fetch_cycle;
-                starlab_insert(voided_global_starlab_ht_ptr, current_fetch_addr_str, &temp);
-                // Debug Statements
-                // Inserted Address + Previous Fetch Cycle + Current Fetch Cycle
-                printf("Prev instance exists: Inserted address %s with previous fetch cycle %lu and current fetch cycle %lu\n", current_fetch_addr_str, temp.prev_fetch, temp.this_fetch);
-      
-
-              }
-
-              else
-              {
-                temp.prev_fetch = 0;
-                temp.this_fetch = op->fetch_cycle;
-                starlab_insert(voided_global_starlab_ht_ptr, current_fetch_addr_str, &temp);
-
-                // Debug Statements
-                // Inserted Address + Previous Fetch Cycle + Current Fetch Cycle
-                printf("Inserted address %s with previous fetch cycle %lu and current fetch cycle %lu\n", current_fetch_addr_str, temp.prev_fetch, temp.this_fetch);
-      
-
-              }
-
+              unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
+              starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
             }
+            // Update the previous instruction
+            strncpy(prev_fetch_addr_str, current_fetch_addr_str, 128);
+            sprintf(prev_instr_optype, "%s", curr_instr_optype);
+            prev_macro_inst_fetch_cycle = curr_macro_inst_fetch_cycle;
+            prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
+        }
 
-              
-          }
+  }
 
-              // Clock cycles computation
-
-               sprintf(prev_fetch_addr_str, "%016lX", (unsigned long)op->fetch_addr);
-               starlab_table_value* search_fetch_struct = starlab_search(voided_global_starlab_ht_ptr, prev_fetch_addr_str);
-
-               if(search_fetch_struct != NULL)
-               {
-                 // Previous instance of the previous instruction exists, fetch its previous fetch cycle
-                 unsigned long prev_fetch_cycle_prev_addr = search_fetch_struct->prev_fetch;
-
-                 cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_fetch_cycle_prev_addr;
-                 
-              
-                 // Debug Statements
-                //  printf("Previous Fetch Cycle of the Previous Instruction: %lu\n", prev_fetch_cycle_prev_addr);
-                //  printf("Current Fetch Cycle of the Current Instruction: %lu\n", curr_macro_inst_fetch_cycle);
-                //  printf("CC Taken is calculated as: %lu - %lu = %lu\n", curr_macro_inst_fetch_cycle, prev_fetch_cycle_prev_addr, curr_macro_inst_fetch_cycle - prev_fetch_cycle_prev_addr);
- 
-              
-               }
-
-               else 
-               {
-                  cc_taken_by_tuple = curr_macro_inst_fetch_cycle;
-               }
-
-              snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
-              if(!starlab_search(starlab_types_table_ptr, tuple_of_types))
-              {
-                unsigned long insert_val = cc_taken_by_tuple;
-                starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-
-                // Did not find the tuple in the hash table
-                // printf("Tuple of Types Not Found: %s,insering it with value: %lu\n", tuple_of_types, cc_taken_by_tuple);
-                
-              }
-              else
-              {
-                unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
-                starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-
-                // Found the tuple in the hash table
-                // printf("Tuple of Types Found: %s, updating it with value: %lu\n", tuple_of_types, insert_val);
-              }
-
-              // printf("\n\n");
-
-        strncpy(prev_fetch_addr_str, current_fetch_addr_str, sizeof(prev_fetch_addr_str));
-        strncpy(prev_instr_optype, curr_instr_optype, sizeof(prev_instr_optype));
-        prev_macro_inst_fetch_cycle = curr_macro_inst_fetch_cycle;
-        prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
-    
-    }
-
-  voided_macro_inst_ht = (void*) macro_inst_ht;
-  voided_global_starlab_types_ht = (void*) starlab_types_table_ptr;
-  voided_global_starlab_ht_ptr = (void*) voided_global_starlab_ht;
+    voided_macro_inst_ht = (void*) macro_inst_ht;
+    voided_global_starlab_types_ht = (void*) starlab_types_table_ptr;
+    voided_global_starlab_ht_ptr = (void*) voided_global_starlab_ht;
 
     ic->sd.ops[ic->sd.op_count] = op; /* put op in the exit list */
     op_count[ic->proc_id]++;          /* increment instruction counters */
