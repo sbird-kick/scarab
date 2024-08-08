@@ -568,27 +568,33 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
     starlab_hash_table* voided_global_starlab_ht_ptr = (starlab_hash_table*) voided_global_starlab_ht;
     if(voided_global_starlab_ht_ptr == NULL)
     {
-      voided_global_starlab_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
+      voided_global_starlab_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(starlab_table_value));
     }
 
     starlab_hash_table* macro_inst_ht = (starlab_hash_table*) voided_macro_inst_ht;
 
     starlab_table_value temp;
 
+
     sprintf(fetch_address_as_string, "%016lX", (unsigned long)op->fetch_addr);
+
     int* macro_inst_op_type_ptr = (int*) starlab_search(macro_inst_ht, fetch_address_as_string);
     int macro_inst_op_type = *macro_inst_op_type_ptr;
 
     if (prev_fetch_addr_str[0] == '\0') // First instruction
     {
         sprintf(prev_fetch_addr_str, "%016lX", (unsigned long)op->fetch_addr);
+        sprintf(current_fetch_addr_str, "%016lX", (unsigned long)op->fetch_addr);
         sprintf(prev_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
+        sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
         prev_macro_inst_fetch_cycle = op->fetch_cycle;
         prev_macro_inst_exec_cycle = op->exec_cycle;
-
+         
         temp.prev_fetch = 0;
         temp.this_fetch = op->fetch_cycle;
-        starlab_insert_dee(voided_global_starlab_ht_ptr, fetch_address_as_string, &temp);
+
+        starlab_insert(voided_global_starlab_ht_ptr, fetch_address_as_string, &temp);
+        printf("Inserted address %s\n", fetch_address_as_string);
     }
 
     else 
@@ -613,18 +619,33 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
                 
                 starlab_insert(voided_global_starlab_ht_ptr, current_fetch_addr_str, &temp);
                 count_second_inst++;
+
+                cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_macro_inst_fetch_cycle;
+                snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
+                unsigned long insert_val = cc_taken_by_tuple;
+                starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+
+                // Debug Statements
+                // Inserted Address + Previous Fetch Cycle + Current Fetch Cycle
+                printf("Inserted address %s with previous fetch cycle %lu and current fetch cycle %lu\n", current_fetch_addr_str, temp.prev_fetch, temp.this_fetch);
+      
             }
 
             else
             {
-
-              starlab_table_value* search_curr_inst_struct = starlab_search(voided_global_starlab_ht_ptr, prev_fetch_addr_str);
+              // Check for a previous instance of the current instruction
+              void* search_curr_inst_struct = starlab_search(voided_global_starlab_ht_ptr, current_fetch_addr_str);
 
               if(search_curr_inst_struct != NULL) // A previous instance of the current instruction exists, update it
               {
                 temp.prev_fetch = temp.this_fetch;
                 temp.this_fetch = op->fetch_cycle;
                 starlab_insert(voided_global_starlab_ht_ptr, current_fetch_addr_str, &temp);
+                // Debug Statements
+                // Inserted Address + Previous Fetch Cycle + Current Fetch Cycle
+                printf("Prev instance exists: Inserted address %s with previous fetch cycle %lu and current fetch cycle %lu\n", current_fetch_addr_str, temp.prev_fetch, temp.this_fetch);
+      
+
               }
 
               else
@@ -632,7 +653,18 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
                 temp.prev_fetch = 0;
                 temp.this_fetch = op->fetch_cycle;
                 starlab_insert(voided_global_starlab_ht_ptr, current_fetch_addr_str, &temp);
+
+                // Debug Statements
+                // Inserted Address + Previous Fetch Cycle + Current Fetch Cycle
+                printf("Inserted address %s with previous fetch cycle %lu and current fetch cycle %lu\n", current_fetch_addr_str, temp.prev_fetch, temp.this_fetch);
+      
+
               }
+
+            }
+
+              
+          }
 
               // Clock cycles computation
 
@@ -643,7 +675,16 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
                {
                  // Previous instance of the previous instruction exists, fetch its previous fetch cycle
                  unsigned long prev_fetch_cycle_prev_addr = search_fetch_struct->prev_fetch;
-                 cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_fetch_cycle_prev_addr;      
+
+                 cc_taken_by_tuple = curr_macro_inst_fetch_cycle - prev_fetch_cycle_prev_addr;
+                 
+              
+                 // Debug Statements
+                //  printf("Previous Fetch Cycle of the Previous Instruction: %lu\n", prev_fetch_cycle_prev_addr);
+                //  printf("Current Fetch Cycle of the Current Instruction: %lu\n", curr_macro_inst_fetch_cycle);
+                //  printf("CC Taken is calculated as: %lu - %lu = %lu\n", curr_macro_inst_fetch_cycle, prev_fetch_cycle_prev_addr, curr_macro_inst_fetch_cycle - prev_fetch_cycle_prev_addr);
+ 
+              
                }
 
                else 
@@ -656,20 +697,27 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
               {
                 unsigned long insert_val = cc_taken_by_tuple;
                 starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+
+                // Did not find the tuple in the hash table
+                // printf("Tuple of Types Not Found: %s,insering it with value: %lu\n", tuple_of_types, cc_taken_by_tuple);
+                
               }
               else
               {
                 unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
                 starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
+
+                // Found the tuple in the hash table
+                // printf("Tuple of Types Found: %s, updating it with value: %lu\n", tuple_of_types, insert_val);
               }
 
-            }
-        }
- 
+              // printf("\n\n");
+
         strncpy(prev_fetch_addr_str, current_fetch_addr_str, sizeof(prev_fetch_addr_str));
         strncpy(prev_instr_optype, curr_instr_optype, sizeof(prev_instr_optype));
         prev_macro_inst_fetch_cycle = curr_macro_inst_fetch_cycle;
         prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
+    
     }
 
   voided_macro_inst_ht = (void*) macro_inst_ht;
