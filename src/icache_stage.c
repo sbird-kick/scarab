@@ -667,12 +667,14 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
                     unsigned long this_fetch = temp_val_to_insert.this_fetch;
                     unsigned long prev_fetch = temp_val_to_insert.prev_fetch;
                     printf("Instruction Address: %s, Previous Fetch Cycle: %lu, This Fetch Cycle: %lu\n", current_fetch_addr_str, prev_fetch, this_fetch);
+                    printf("Previous Instruction: %s, Previous Fetch Cycle: %lu\n", prev_fetch_addr_str, prev_inst_prev_fetch);
+                    printf("CC taken by tuple: %lu - %lu = %lu\n", curr_macro_inst_fetch_cycle, prev_inst_prev_fetch, cc_taken_by_tuple);
                 }
            }
         
        
             snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
-            printf("[DEBUG] Generated tuple_of_types: <%s,%s>\n", prev_instr_optype, starlab_get_opcode_string(op->table_info->op_type));
+            printf("[DEBUG] Generated tuple_of_types: <%s,%s>\n", prev_instr_optype, curr_instr_optype);
 
             if (!starlab_search(starlab_types_table_ptr, tuple_of_types)) 
             {
@@ -691,6 +693,8 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
                 starlab_insert(starlab_types_table_ptr, tuple_of_types, &updated_val);
                 printf("[DEBUG] Updated tuple <%s> in starlab_types_table_ptr with new value %lu\n", tuple_of_types, updated_val);
             }
+
+          printf("\n\n");
 
       
     }
