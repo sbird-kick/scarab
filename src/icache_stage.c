@@ -602,15 +602,16 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
 
     else 
     {
-       
         if (strcmp(prev_fetch_addr_str, current_fetch_addr_str) == 0) // Same macro instruction
         {  
             curr_macro_inst_fetch_cycle = op->fetch_cycle;
             curr_macro_inst_exec_cycle = op->exec_cycle;
+
+            // Don't do anything
         } 
         else // Different macro instruction
         {  
-            // sprintf(curr_instr_optype, "%s", curr_instr_optype);
+            sprintf(curr_instr_optype, "%s", starlab_get_opcode_string(macro_inst_op_type));
             curr_macro_inst_fetch_cycle = op->fetch_cycle;
             curr_macro_inst_exec_cycle = op->exec_cycle;
 
@@ -669,7 +670,8 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
                 }
            }
         
-            sprintf(tuple_of_types, "<%s,%s>", prev_instr_optype, starlab_get_opcode_string(op->table_info->op_type));
+       
+            snprintf(tuple_of_types, sizeof(tuple_of_types), "<%s,%s>", prev_instr_optype, curr_instr_optype);
             printf("[DEBUG] Generated tuple_of_types: <%s,%s>\n", prev_instr_optype, starlab_get_opcode_string(op->table_info->op_type));
 
             if (!starlab_search(starlab_types_table_ptr, tuple_of_types)) 
@@ -690,11 +692,12 @@ static inline Icache_State icache_issue_ops(Break_Reason* break_fetch,
                 printf("[DEBUG] Updated tuple <%s> in starlab_types_table_ptr with new value %lu\n", tuple_of_types, updated_val);
             }
 
+      
+    }
         strncpy(prev_fetch_addr_str, current_fetch_addr_str, 128);
         sprintf(prev_instr_optype, "%s", curr_instr_optype);
         prev_macro_inst_fetch_cycle = curr_macro_inst_fetch_cycle;
         prev_macro_inst_exec_cycle = curr_macro_inst_exec_cycle;
-    }
 }
 
     // Update global pointers
