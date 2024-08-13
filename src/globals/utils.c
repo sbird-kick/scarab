@@ -187,7 +187,7 @@ unsigned int starlab_hash(const char *key, int table_size) {
     return hash % table_size;
 }
 
-starlab_hash_table* starlab_create_table(int size, size_t value_size) {
+starlab_hash_table* starlab_create_table(long size, size_t value_size) {
     starlab_hash_table *hashtable = (starlab_hash_table *) malloc(sizeof(starlab_hash_table));
     hashtable->table = (starlab_hash_node**) malloc(sizeof(starlab_hash_node *) * size);
     for (int i = 0; i < size; i++) {
@@ -299,7 +299,7 @@ void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(vo
 int compare_key_value_pairs(const void *a, const void *b) {
     KeyValuePair *pairA = (KeyValuePair *)a;
     KeyValuePair *pairB = (KeyValuePair *)b;
-    return (*(int*)pairB->value - *(int*)pairA->value);  // Adjust this comparison based on the actual type of the value
+    return (*(long*)pairB->value - *(long*)pairA->value);  // Adjust this comparison based on the actual type of the value
 }
 
 
@@ -314,7 +314,7 @@ void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, v
     KeyValuePair *pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
 
     int index = 0;
-    for (int i = 0; i < hashtable->size; i++) {
+    for (long i = 0; i < hashtable->size; i++) {
         starlab_hash_node *node = hashtable->table[i];
         while (node) {
             pairs[index].key = node->key;
@@ -328,7 +328,7 @@ void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, v
     qsort(pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
     // Fill the keys and values arrays
-    for (int i = 0; i < count; i++) {
+    for (long i = 0; i < count; i++) {
         (*keys)[i] = pairs[i].key;
         (*values)[i] = pairs[i].value;
     }
@@ -344,7 +344,7 @@ int get_count(starlab_hash_table* hashtable)
 }
 
 void starlab_free_table(starlab_hash_table *hashtable) {
-    for (int i = 0; i < hashtable->size; i++) {
+    for (long i = 0; i < hashtable->size; i++) {
         starlab_hash_node *node = hashtable->table[i];
         while (node) {
             starlab_hash_node *temp = node;
@@ -366,7 +366,7 @@ void starlab_free_table(starlab_hash_table *hashtable) {
 
 char* hexstr64(uns64 value) {
   static char hex64_buffer[MAX_SIMULTANEOUS_STRINGS][MAX_STR_LENGTH + 1];
-  static int  counter = 0;
+  static long  counter = 0;
 
   counter = CIRC_INC2(counter, MAX_SIMULTANEOUS_STRINGS);
   snprintf(hex64_buffer[counter], MAX_STR_LENGTH, "%08x%08x",

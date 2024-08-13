@@ -379,7 +379,7 @@ int   parse_double_array(double dest[], const void* str, int max_num);
 int   parse_string_array(char dest[][MAX_STR_LENGTH + 1], const void* str,
                          int max_num);
 
-#define INITIAL_TABLE_SIZE 100000
+#define INITIAL_TABLE_SIZE 10000000
 #define LOAD_FACTOR_THRESHOLD 0.75
 
 typedef struct starlab_hash_node {
@@ -390,15 +390,16 @@ typedef struct starlab_hash_node {
 
 typedef struct starlab_hash_table {
     starlab_hash_node **table;
-    int size;
-    int count;
+    long size;
+    long count;
     size_t value_size;
 } starlab_hash_table;
 
 typedef struct starlab_table_value {
-    unsigned long prev_fetch;
-    unsigned long this_fetch;
-} starlab_table_value;
+    unsigned long prev_fetch_cycle;
+    unsigned long fetch_cycle;
+    unsigned long exec_cycle;
+} inst_fetch_exec_truple;
 
 typedef struct {
     char *key;
@@ -408,7 +409,7 @@ typedef struct {
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);
-starlab_hash_table* starlab_create_table(int size, size_t value_size);
+starlab_hash_table* starlab_create_table(long size, size_t value_size);
 void starlab_resize_table(starlab_hash_table *hashtable);
 void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value);
 void* starlab_search(starlab_hash_table *hashtable, const char *key);
