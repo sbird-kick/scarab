@@ -243,7 +243,8 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             if(this_type == THIS_TYPE_NOP && prev_type == PREV_TYPE_NOP && !(this_type == 100 || prev_type == 100))
             {
               char yes_insert = 1; 
-              starlab_insert((starlab_hash_table*) is_candidate_ptr, address_as_string, &yes_insert);
+              if(DO_BOTH)
+                starlab_insert((starlab_hash_table*) is_candidate_ptr, address_as_string, &yes_insert);
               starlab_insert((starlab_hash_table*) is_candidate_ptr, previous_address_as_string, &yes_insert);
             }
             // converted = 1;
