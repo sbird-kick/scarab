@@ -154,101 +154,141 @@ void assert_ctype_pin_inst_same(uns proc_id, ctype_pin_inst inst_a, ctype_pin_in
 
 void ext_trace_fetch_op(uns proc_id, Op* op) {
 
-  starlab_hash_table* address_to_type_ptr = (starlab_hash_table*) voided_address_to_type_ptr;
-  if(address_to_type_ptr == NULL)
+  if(is_candidate_ptr == NULL)
   {
-    address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+    is_candidate_ptr = starlab_create_table(10000000, sizeof(unsigned char));
   }
 
-  static int prev_was_move = 0;
+  static unsigned long long prev_address = 0;
+
+  static unsigned char prev_type = 100; // invalid
+  static unsigned char this_type = 100;
+  // char converted = 0;
   if(uop_generator_get_bom(proc_id)) {
     if (!off_path_mode[proc_id]) {
       ctype_pin_inst* starlab_pi = &next_onpath_pi[proc_id];
-
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);
-
-      if(!starlab_search(address_to_type_ptr, address_as_string))
+      if(starlab_do_write)
       {
-        char insert_string[128] = {0};
-        sprintf(insert_string, "%s", "NOP");
-        if(starlab_pi->is_move)
-        {
-          sprintf(insert_string, "%s", "MOV");
-        }
-        else if(starlab_pi->is_call)
-        {
-          sprintf(insert_string, "%s", "CALL");
-        }
-        else if(starlab_pi->is_prefetch)
-        {
-          sprintf(insert_string, "%s", "PREFETCH");
-        }
-        else if(starlab_pi->has_push)
-        {
-          sprintf(insert_string, "%s", "PUSH");
-        }
-        else if(starlab_pi->has_pop)
-        {
-          sprintf(insert_string, "%s", "POP");
-        }
-        else if(starlab_pi->is_lock)
-        {
-          sprintf(insert_string, "%s", "LOCK");
-        }
-        else 
-        {
-          Flag has_load    = starlab_pi->num_ld > 0;
-          Flag has_push    = starlab_pi->has_push;
-          Flag has_pop     = starlab_pi->has_pop;
-          Flag has_store   = starlab_pi->num_st > 0;
-          Flag has_control = starlab_pi->cf_type != NOT_CF;  
-          Flag has_alu =
-            !(starlab_pi->is_move && (has_load || has_store)) &&  // not a simple LD/ST move
-            ((!has_control && !has_load &&
-              !has_store)             // not memory, not control, must be operate
-            || has_push || has_pop   // need ALU for stack address generation
-            || starlab_pi->num_dst_regs > 0  // if it writes to a registers, must be operate
-            || (has_load &&
-                has_store)  // must be read-modify-write operate (e.g. add $1, [%eax])
-            || (starlab_pi->op_type >= OP_PIPELINED_FAST &&  // special instructions always
-                starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));  // need an alu uop
-          if(has_alu)
+        char previous_address_as_string[128] = {0};
+        sprintf(previous_address_as_string, "%016llX", prev_address);
+          char insert_string[128] = {0};
+          sprintf(insert_string, "%s", "NOP");
+          this_type = 0;
+          if(starlab_pi->is_move)
           {
-            sprintf(insert_string, "%s", "ALU");
+            sprintf(insert_string, "%s", "MOV");
+            // STARLAB MOV HERE
+            this_type = 1;
+          }
+          else if(starlab_pi->is_call)
+          {
+            sprintf(insert_string, "%s", "CALL");
+            // STARLAB CALL HERE
+            this_type = 2;
+          }
+          else if(starlab_pi->is_prefetch)
+          {
+            sprintf(insert_string, "%s", "PREFETCH");
+            // STARLAB PREFETCH HERE
+            this_type = 3;
+          }
+          else if(starlab_pi->has_push)
+          {
+            sprintf(insert_string, "%s", "PUSH");
+            // STARLAB PUSH HERE
+            this_type = 4;
+          }
+          else if(starlab_pi->has_pop)
+          {
+            sprintf(insert_string, "%s", "POP");
+            // STARLAB POP HERE
+            this_type = 5;
+          }
+          else if(starlab_pi->is_lock)
+          {
+            sprintf(insert_string, "%s", "LOCK");
+            // STARLAB LOCK HERE
+            this_type = 6;
+          }
+          else 
+          {
+            Flag has_load    = starlab_pi->num_ld > 0;
+            Flag has_push    = starlab_pi->has_push;
+            Flag has_pop     = starlab_pi->has_pop;
+            Flag has_store   = starlab_pi->num_st > 0;
+            Flag has_control = starlab_pi->cf_type != NOT_CF;  
+            Flag has_alu =
+              !(starlab_pi->is_move && (has_load || has_store)) &&  // not a simple LD/ST move
+              ((!has_control && !has_load &&
+                !has_store)             // not memory, not control, must be operate
+              || has_push || has_pop   // need ALU for stack address generation
+              || starlab_pi->num_dst_regs > 0  // if it writes to a registers, must be operate
+              || (has_load &&
+                  has_store)  // must be read-modify-write operate (e.g. add $1, [%eax])
+              || (starlab_pi->op_type >= OP_PIPELINED_FAST &&  // special instructions always
+                  starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));  // need an alu uop
+            if(has_alu)
+            {
+              sprintf(insert_string, "%s", "ALU");
+              // STARLAB ALU HERE
+              this_type = 7;
+            }
+          }
+        
+        
+          if(starlab_do_write)
+          {
+            if(this_type == THIS_TYPE_NOP && prev_type == PREV_TYPE_NOP && !(this_type == 100 || prev_type == 100))
+            {
+              char yes_insert = 1; 
+              starlab_insert((starlab_hash_table*) is_candidate_ptr, address_as_string, &yes_insert);
+              starlab_insert((starlab_hash_table*) is_candidate_ptr, previous_address_as_string, &yes_insert);
+            }
+            // converted = 1;
+          }
+        
+      }
+      else // starlab_do_write == 0
+      {
+        if(starlab_search((starlab_hash_table*) is_candidate_ptr, address_as_string))
+        {
+          // convert to NOP
+          // printf("Converted to NOP %d and it was %s!\n", starlab_pi->size, (starlab_pi->cf_type == NOT_CF ? "NOT CF"  : "YES CF"));
+          if(starlab_pi->cf_type == NOT_CF)
+          {
+          starlab_pi->is_move = 0;
+          starlab_pi->num_ld = 0;
+          starlab_pi->has_push = 0;
+          starlab_pi->has_pop = 0;
+          starlab_pi->num_st = 0;
+          starlab_pi->cf_type = NOT_CF;
+          starlab_pi->op_type = OP_NOP;
+          // converted = 1;
           }
         }
-        starlab_insert(address_to_type_ptr, address_as_string, insert_string);
       }
 
-      if(starlab_pi->is_move && (prev_was_move == 0))
-      {
-        prev_was_move = 1;
-      }
-      else 
-      if (starlab_pi->is_move && prev_was_move == 1)
-      {
-        prev_was_move = 0;
-        // starlab_pi->is_move = 0;
-        // starlab_pi->num_ld = 0;
-        // starlab_pi->has_push = 0;
-        // starlab_pi->has_pop = 0;
-        // starlab_pi->num_st = 0;
-        // starlab_pi->cf_type = NOT_CF;
-        // starlab_pi->op_type = OP_NOP;
-      }
       uop_generator_get_uop(proc_id, op, &next_onpath_pi[proc_id]);
+      // if(converted)
+      //   printf("But instruction size was %d\n", op->inst_info->trace_info.inst_size);
     }
     else {
       uop_generator_get_uop(proc_id, op, &next_offpath_pi[proc_id]);
-      prev_was_move = 0;
+      prev_type = this_type = 100;
     }
   } else {
     uop_generator_get_uop(proc_id, op, NULL);
   }
 
-  voided_address_to_type_ptr = (void *) address_to_type_ptr;
+  if(prev_address != op->inst_info->addr) 
+  {
+    prev_address = op->inst_info->addr;
+    prev_type = this_type;
+  }
 
+  
   if(uop_generator_get_eom(proc_id)) {
     if (!off_path_mode[proc_id]) {
 

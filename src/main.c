@@ -224,14 +224,19 @@ void* voided_global_starlab_types_ht = NULL;
 void* voided_address_to_type_ptr = NULL;
 void* voided_address_to_prev_address = NULL;
 void* voided_inst_truple_ptr = NULL;
+void* is_candidate_ptr = NULL;
+
+// const char starlab_do_write = 1;
 
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
 char prev_address_as_string[128];
 unsigned long long starlab_prev_address = 0;
 
-
 int main(int argc, char* argv[], char* envp[]) {
+
+  
+
   char** simulated_argv;
   time_t cur_time;
 
@@ -258,6 +263,37 @@ int main(int argc, char* argv[], char* envp[]) {
 
   /* perform global initialization */
   init_global(simulated_argv, envp);
+
+  printf("starlab_do_write is: %llu\n", starlab_do_write);
+  if(!starlab_do_write)
+  {
+    FILE *file = fopen(NOP_FILE, "r");
+    if (file == NULL) {
+        perror("Error opening file for reading");
+        return 1;
+    }
+    
+    if(is_candidate_ptr == NULL)
+    {
+      is_candidate_ptr = starlab_create_table(10000, sizeof(unsigned char));
+    }
+
+    char line[128];
+    char address_as_string[128] = {0};
+    while (fgets(line, sizeof(line), file)) {
+        line[strcspn(line, "\n")] = '\0';
+        // Convert the line to an unsigned long long
+        unsigned long long value;
+        if (sscanf(line, "%016llX", &value) == 1) {
+            sprintf(address_as_string, "%016llX", value);  // Print the converted unsigned long long value
+            char yes_insert = 1;
+            starlab_insert((starlab_hash_table*) is_candidate_ptr, address_as_string, &yes_insert);
+        } else {
+            fprintf(stderr, "Failed to convert line to unsigned long long: %s\n", line);
+        }
+    }
+    fclose(file);
+  }
 
   /* print PID (sometimes useful for debugging) */
   if(PRINT_PID) {
@@ -302,38 +338,29 @@ int main(int argc, char* argv[], char* envp[]) {
 
   if(opt2_in_use())
     opt2_sim_complete();
-  
-  char **keys;
-  void **values_array;
 
-  KeyValuePair *key_value_pairs;
-  long count = get_count(voided_global_starlab_types_ht);
-  key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
-  
+  if(starlab_do_write)
+  {
+    char** keys;
+    void** values;
+    // Open the file specified by NOP_FILE for writing
+    FILE *file = fopen(NOP_FILE, "w");
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        return 1;
+    }
 
+    if (is_candidate_ptr) {
+        long count = get_count(is_candidate_ptr);  // Replace with the actual function to get count
+        starlab_return_key_value_arr(is_candidate_ptr, &keys, &values);  // Replace with the actual function to get keys and values
 
-  starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
+        for (long i = 0; i < count; i++) {
+            fprintf(file, "%s\n", keys[i]);
+        }
+    }
 
-  for (long i = 0; i < count; i++) {
-      key_value_pairs[i].key = keys[i];
-      key_value_pairs[i].value = values_array[i];
+    fclose(file);
   }
-
-    qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
-
-    unsigned long total_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        total_cc_count += *(unsigned long *)key_value_pairs[i].value;
-    }
-
-    unsigned long running_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
-        running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-        if (running_cc_count > ((total_cc_count * 99) / 100)) 
-            break;
-    }
-
 
   return 0;
 }

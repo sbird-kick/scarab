@@ -85,6 +85,10 @@ extern void* voided_inst_truple_ptr;
 extern void* voided_address_to_type_ptr;
 extern void* voided_address_to_prev_address;
 
+extern void* is_candidate_ptr;
+
+// extern const char starlab_do_write;
+
 extern unsigned long long prev_instruction_time;
 extern char prev_instruction_class[128];
 

@@ -112,3 +112,7 @@ DEF_PARAM( ignore_bar_fetch             , IGNORE_BAR_FETCH           , Flag   , 
 DEF_PARAM( trace_bbv_output             , TRACE_BBV_OUTPUT          , char*  , string    , NULL     ,       )
 DEF_PARAM( trace_footprint_output       , TRACE_FOOTPRINT_OUTPUT    , char*  , string    , ""       ,       )
 DEF_PARAM( segment_instr_count          , SEGMENT_INSTR_COUNT       , uns64  , uns64     , 0        ,       )
+DEF_PARAM( nop_file                , NOP_FILE             , char * , string    , "whatever.txt",      )
+DEF_PARAM( starlab_write                , starlab_do_write             , uns64 , uns64    , 1,      )
+DEF_PARAM( PREV_TYPE_NOP                , PREV_TYPE_NOP             , uns64 , uns64    , 100,      )
+DEF_PARAM( THIS_TYPE_NOP                , THIS_TYPE_NOP             , uns64 , uns64    , 100,      )

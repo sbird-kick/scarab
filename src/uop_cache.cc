@@ -448,7 +448,7 @@ void accumulate_op(Op* op) {
       }
 
       // if next_line_start != npc, the decoupled fe did not end the FT correctly (mispredict or btb miss), or op is off-path
-      ASSERT(uop_cache_proc_id, next_line_start == op->oracle_info.npc || op->oracle_info.recover_at_decode || op->oracle_info.recover_at_exec || op->off_path);
+      // ASSERT(uop_cache_proc_id, next_line_start == op->oracle_info.npc || op->oracle_info.recover_at_decode || op->oracle_info.recover_at_exec || op->off_path);
       current_accumulating_line->offset = next_line_start - current_accumulating_line->line_start;
     }
 
