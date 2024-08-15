@@ -163,6 +163,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
 
   static unsigned char prev_type = 100; // invalid
   static unsigned char this_type = 100;
+  static unsigned char prev_was_cand = 0;
   // char converted = 0;
   if(uop_generator_get_bom(proc_id)) {
     if (!off_path_mode[proc_id]) {
@@ -257,16 +258,22 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
         {
           // convert to NOP
           // printf("Converted to NOP %d and it was %s!\n", starlab_pi->size, (starlab_pi->cf_type == NOT_CF ? "NOT CF"  : "YES CF"));
-          if(starlab_pi->cf_type == NOT_CF)
+          if(prev_was_cand || DO_BOTH)
           {
-          starlab_pi->is_move = 0;
-          starlab_pi->num_ld = 0;
-          starlab_pi->has_push = 0;
-          starlab_pi->has_pop = 0;
-          starlab_pi->num_st = 0;
-          starlab_pi->cf_type = NOT_CF;
-          starlab_pi->op_type = OP_NOP;
-          // converted = 1;
+            if(starlab_pi->cf_type == NOT_CF)
+            {
+            starlab_pi->is_move = 0;
+            starlab_pi->num_ld = 0;
+            starlab_pi->has_push = 0;
+            starlab_pi->has_pop = 0;
+            starlab_pi->num_st = 0;
+            starlab_pi->cf_type = NOT_CF;
+            starlab_pi->op_type = OP_NOP;
+            // converted = 1;
+            prev_was_cand = 0;
+            }
+            else
+              prev_was_cand = 1;
           }
         }
       }
@@ -278,6 +285,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
     else {
       uop_generator_get_uop(proc_id, op, &next_offpath_pi[proc_id]);
       prev_type = this_type = 100;
+      prev_was_cand = 0;
     }
   } else {
     uop_generator_get_uop(proc_id, op, NULL);
