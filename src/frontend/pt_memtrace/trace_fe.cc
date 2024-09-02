@@ -237,7 +237,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
               this_type = 7;
             }
           }
-        
+          
         
           if(starlab_do_write)
           {
@@ -258,7 +258,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
         {
           // convert to NOP
           // printf("Converted to NOP %d and it was %s!\n", starlab_pi->size, (starlab_pi->cf_type == NOT_CF ? "NOT CF"  : "YES CF"));
-          if(prev_was_cand || DO_BOTH)
+          if(prev_was_cand || !DO_BOTH)
           {
             if(starlab_pi->cf_type == NOT_CF)
             {

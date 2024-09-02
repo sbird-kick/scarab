@@ -292,6 +292,7 @@ int main(int argc, char* argv[], char* envp[]) {
             fprintf(stderr, "Failed to convert line to unsigned long long: %s\n", line);
         }
     }
+    printf("There are %d candidates for fusion\n", get_count((starlab_hash_table*)is_candidate_ptr));
     fclose(file);
   }
 
