@@ -159,59 +159,44 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
     is_candidate_ptr = starlab_create_table(10000000, sizeof(unsigned char));
   }
 
-  static unsigned long long prev_address = 0;
-
-  static unsigned char prev_type = 100; // invalid
-  static unsigned char this_type = 100;
-  static unsigned char prev_was_cand = 0;
-  // char converted = 0;
+   // char converted = 0;
   if(uop_generator_get_bom(proc_id)) {
     if (!off_path_mode[proc_id]) {
       ctype_pin_inst* starlab_pi = &next_onpath_pi[proc_id];
-      char address_as_string[128] = {0};
-      sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);
-      if(starlab_do_write)
-      {
-        char previous_address_as_string[128] = {0};
-        sprintf(previous_address_as_string, "%016llX", prev_address);
-          char insert_string[128] = {0};
-          sprintf(insert_string, "%s", "NOP");
-          this_type = 0;
-          if(starlab_pi->is_move)
+      bool is_relevant_address = (starlab_pi->instruction_addr == iclass_address);
+          if(is_relevant_address)
+            printf("scarab inst address! %016lx\n", starlab_pi->instruction_addr);
+          if(is_relevant_address)
+             printf("SCARAB TYPE: ");
+          if(starlab_pi->is_move && is_relevant_address)
           {
-            sprintf(insert_string, "%s", "MOV");
-            // STARLAB MOV HERE
-            this_type = 1;
+            printf("%s\n\n", "MOV");
+            exit(1);
           }
-          else if(starlab_pi->is_call)
+          else if(starlab_pi->is_call && is_relevant_address)
           {
-            sprintf(insert_string, "%s", "CALL");
-            // STARLAB CALL HERE
-            this_type = 2;
+            printf("%s\n\n", "CALL");
+            exit(1);
           }
-          else if(starlab_pi->is_prefetch)
+          else if(starlab_pi->is_prefetch && is_relevant_address)
           {
-            sprintf(insert_string, "%s", "PREFETCH");
-            // STARLAB PREFETCH HERE
-            this_type = 3;
+            printf("%s\n\n", "PREFETCH");
+            exit(1);
           }
-          else if(starlab_pi->has_push)
+          else if(starlab_pi->has_push && is_relevant_address)
           {
-            sprintf(insert_string, "%s", "PUSH");
-            // STARLAB PUSH HERE
-            this_type = 4;
+            printf("%s\n\n", "PUSH");
+            exit(1);
           }
-          else if(starlab_pi->has_pop)
+          else if(starlab_pi->has_pop && is_relevant_address)
           {
-            sprintf(insert_string, "%s", "POP");
-            // STARLAB POP HERE
-            this_type = 5;
+            printf("%s\n\n", "POP");
+            exit(1);
           }
-          else if(starlab_pi->is_lock)
+          else if(starlab_pi->is_lock && is_relevant_address)
           {
-            sprintf(insert_string, "%s", "LOCK");
-            // STARLAB LOCK HERE
-            this_type = 6;
+            printf("%s\n\n", "LOCK");
+            exit(1);
           }
           else 
           {
@@ -230,53 +215,30 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
                   has_store)  // must be read-modify-write operate (e.g. add $1, [%eax])
               || (starlab_pi->op_type >= OP_PIPELINED_FAST &&  // special instructions always
                   starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));  // need an alu uop
-            if(has_alu)
+
+            // if(has_load || has_store)
+            // {
+            //   printf("%s\n\n", "LDST");
+            //   exit(1);
+            // }
+            if(has_control && is_relevant_address)
             {
-              sprintf(insert_string, "%s", "ALU");
-              // STARLAB ALU HERE
-              this_type = 7;
+              printf("%s\n\n", "CONTROL");
+              exit(1);
+            }
+            if(has_alu && is_relevant_address)
+            {
+              printf("%s\n\n", "ALU");
+              exit(1);
+            }
+            else if(is_relevant_address)
+            {
+              printf("%s\n\n", "NOP");
+              exit(1);
             }
           }
         
-        
-          if(starlab_do_write)
-          {
-            if(this_type == THIS_TYPE_NOP && prev_type == PREV_TYPE_NOP && !(this_type == 100 || prev_type == 100))
-            {
-              char yes_insert = 1; 
-              if(DO_BOTH)
-                starlab_insert((starlab_hash_table*) is_candidate_ptr, address_as_string, &yes_insert);
-              starlab_insert((starlab_hash_table*) is_candidate_ptr, previous_address_as_string, &yes_insert);
-            }
-            // converted = 1;
-          }
-        
-      }
-      else // starlab_do_write == 0
-      {
-        if(starlab_search((starlab_hash_table*) is_candidate_ptr, address_as_string))
-        {
-          // convert to NOP
-          // printf("Converted to NOP %d and it was %s!\n", starlab_pi->size, (starlab_pi->cf_type == NOT_CF ? "NOT CF"  : "YES CF"));
-          if(prev_was_cand || DO_BOTH)
-          {
-            if(starlab_pi->cf_type == NOT_CF)
-            {
-            starlab_pi->is_move = 0;
-            starlab_pi->num_ld = 0;
-            starlab_pi->has_push = 0;
-            starlab_pi->has_pop = 0;
-            starlab_pi->num_st = 0;
-            starlab_pi->cf_type = NOT_CF;
-            starlab_pi->op_type = OP_NOP;
-            // converted = 1;
-            prev_was_cand = 0;
-            }
-            else
-              prev_was_cand = 1;
-          }
-        }
-      }
+      
 
       uop_generator_get_uop(proc_id, op, &next_onpath_pi[proc_id]);
       // if(converted)
@@ -284,18 +246,12 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
     }
     else {
       uop_generator_get_uop(proc_id, op, &next_offpath_pi[proc_id]);
-      prev_type = this_type = 100;
-      prev_was_cand = 0;
     }
   } else {
     uop_generator_get_uop(proc_id, op, NULL);
   }
 
-  if(prev_address != op->inst_info->addr) 
-  {
-    prev_address = op->inst_info->addr;
-    prev_type = this_type;
-  }
+  // exit(1);
 
   
   if(uop_generator_get_eom(proc_id)) {
