@@ -213,7 +213,9 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
                 has_store)  // must be read-modify-write operate (e.g. add $1, [%eax])
             || (starlab_pi->op_type >= OP_PIPELINED_FAST &&  // special instructions always
                 starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));  // need an alu uop
-          if(has_alu)
+          if(has_control)
+            sprintf(insert_string, "%s", "JUMP");
+          else if(has_alu)
           {
             sprintf(insert_string, "%s", "ALU");
           }
