@@ -324,6 +324,16 @@ void* starlab_search(starlab_hash_table *hashtable, const char *key) {
     return NULL; // Indicates that the key is not found
 }
 
+void print_mov_alu_hashtable(mov_alu_hash_table *hashtable){
+  for(unsigned i = 0; i<hashtable->size; i++){
+    mov_alu_entry *node = hashtable->table[i];
+    while(node){
+      printf("MOV Addr: %lx ALU Addr: %lx\n", node->mov_addr, node->alu_addr);
+      node = node->next;
+    }
+  }
+}
+
 unsigned long mov_alu_search_addr(mov_alu_hash_table *hashtable, unsigned long mov_addr){
   unsigned int idx = mov_alu_hash_function(mov_addr, hashtable->size);
 
@@ -375,6 +385,7 @@ void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(vo
         }
     }
 }
+
 
 int compare_key_value_pairs(const void *a, const void *b) {
     KeyValuePair *pairA = (KeyValuePair *)a;

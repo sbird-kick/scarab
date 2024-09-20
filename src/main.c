@@ -332,39 +332,39 @@ int main(int argc, char* argv[], char* envp[]) {
 
     qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
-    unsigned long total_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        total_cc_count += *(unsigned long *)key_value_pairs[i].value;
-    }
+    // unsigned long total_cc_count = 0;
+    // for (long i = 0; i < count; i++) {
+    //     total_cc_count += *(unsigned long *)key_value_pairs[i].value;
+    // }
 
-    unsigned long running_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
-        running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-        if (running_cc_count > ((total_cc_count * 99) / 100)) 
-            break;
-    }
+    // unsigned long running_cc_count = 0;
+    // for (long i = 0; i < count; i++) {
+    //     printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
+    //     running_cc_count += *(unsigned long *)key_value_pairs[i].value;
+    //     if (running_cc_count > ((total_cc_count * 99) / 100)) 
+    //         break;
+    // }
 
 
 
-  if (voided_mov_alu_ht == NULL) {
-    printf("mov_alu_table_ptr is NULL.\n");
-} else {
-    mov_alu_hash_table* mov_alu_table_ptr = (mov_alu_hash_table*)voided_mov_alu_ht; // Cast here
+//   if (voided_mov_alu_ht == NULL) {
+//     printf("mov_alu_table_ptr is NULL.\n");
+// } else {
+//     mov_alu_hash_table* mov_alu_table_ptr = (mov_alu_hash_table*)voided_mov_alu_ht; // Cast here
 
-    for (long i = 0; i < mov_alu_table_ptr->size; i++) {
-        mov_alu_entry* entry = mov_alu_table_ptr->table[i]; // Get the head of the linked list
-        if (entry != NULL) {
-            printf("Bucket %ld:\n", i);
-            while (entry != NULL) {
-                printf("  MOV Address: 0x%lx, ALU Address: 0x%lx\n", entry->mov_addr, entry->alu_addr);
-                entry = entry->next; // Move to the next entry
-            }
-        } else {
-            printf("Bucket %ld is empty.\n", i);
-        }
-    }
-}
+//     for (long i = 0; i < mov_alu_table_ptr->size; i++) {
+//         mov_alu_entry* entry = mov_alu_table_ptr->table[i]; // Get the head of the linked list
+//         if (entry != NULL) {
+//             printf("Bucket %ld:\n", i);
+//             while (entry != NULL) {
+//                 printf("  MOV Address: 0x%lx, ALU Address: 0x%lx\n", entry->mov_addr, entry->alu_addr);
+//                 entry = entry->next; // Move to the next entry
+//             }
+//         } else {
+//             printf("Bucket %ld is empty.\n", i);
+//         }
+//     }
+// }
 
 
   return 0;

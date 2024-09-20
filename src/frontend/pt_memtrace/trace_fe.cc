@@ -156,9 +156,10 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
 
   // DEEPANJALI
      mov_alu_hash_table* voided_mov_alu_table_ptr= (mov_alu_hash_table*) voided_mov_alu_ht;
+
     if (voided_mov_alu_table_ptr == NULL) 
     {
-        voided_mov_alu_table_ptr = create_mov_alu_hash_table(INITIAL_TABLE_SIZE);
+      voided_mov_alu_table_ptr = create_mov_alu_hash_table(INITIAL_TABLE_SIZE);
     }
 
 
@@ -168,19 +169,23 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
     address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
   }
 
-
   static int prev_was_move = 0;
   if(uop_generator_get_bom(proc_id)) {
     if (!off_path_mode[proc_id]) {
       ctype_pin_inst* starlab_pi = &next_onpath_pi[proc_id];
 
+      consec_curr_instr = starlab_pi->instruction_addr;
 
       // FOR <MOV, ALU> STATS
     if (consec_prev_instr == 0) {  // First instruction?
         // Set the current instruction as previous for next round
         consec_prev_instr = consec_curr_instr;
+        consec_prev_instr = 1;
         if (starlab_pi->is_move) {
             consec_prev_mov = 1;  // Mark that the first instruction is a MOV
+        }
+        else{
+          consec_prev_mov = 0;
         }
     } else {
         // Determine conditions for ALU: copy Humza's logic
@@ -201,11 +206,11 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));    // Special instructions need ALU
 
         if (starlab_pi->is_move) {  // Current instruction is a move?
-            // Save current as previous instruction (as an unsigned long)
             consec_prev_instr = consec_curr_instr;  
-            consec_is_alu = 0;  // Reset ALU flag
-            consec_prev_mov = 1;  // Mark that the previous instruction is a MOV
+            consec_is_alu = 0;  
+            consec_prev_mov = 1;
         } 
+
         else if (codverch_has_alu) {  // Check if current instruction is ALU
             if (consec_prev_mov) {  // If previous instruction was MOV
                 printf("Consecutive <MOV, ALU> pair detected!\n");
@@ -214,6 +219,9 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
                 insert_mov_alu_hashtable(voided_mov_alu_table_ptr, 
                                         consec_prev_instr,  // MOV instruction address
                                         consec_curr_instr);  // ALU instruction address
+
+
+                print_mov_alu_hashtable(voided_mov_alu_table_ptr);
 
                 consec_prev_mov = 0;  // Reset MOV flag after detection
             }
