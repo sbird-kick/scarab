@@ -225,6 +225,7 @@ void* voided_address_to_type_ptr = NULL;
 void* voided_address_to_prev_address = NULL;
 void* voided_inst_truple_ptr = NULL;
 void* voided_mov_alu_hash_table_ptr = NULL; //DEEPANJALI
+void* voided_mov_alu_ht = NULL;
 
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
@@ -343,6 +344,27 @@ int main(int argc, char* argv[], char* envp[]) {
         if (running_cc_count > ((total_cc_count * 99) / 100)) 
             break;
     }
+
+
+
+  if (voided_mov_alu_ht == NULL) {
+    printf("mov_alu_table_ptr is NULL.\n");
+} else {
+    mov_alu_hash_table* mov_alu_table_ptr = (mov_alu_hash_table*)voided_mov_alu_ht; // Cast here
+
+    for (long i = 0; i < mov_alu_table_ptr->size; i++) {
+        mov_alu_entry* entry = mov_alu_table_ptr->table[i]; // Get the head of the linked list
+        if (entry != NULL) {
+            printf("Bucket %ld:\n", i);
+            while (entry != NULL) {
+                printf("  MOV Address: 0x%lx, ALU Address: 0x%lx\n", entry->mov_addr, entry->alu_addr);
+                entry = entry->next; // Move to the next entry
+            }
+        } else {
+            printf("Bucket %ld is empty.\n", i);
+        }
+    }
+}
 
 
   return 0;

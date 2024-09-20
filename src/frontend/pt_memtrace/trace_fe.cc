@@ -155,10 +155,12 @@ void assert_ctype_pin_inst_same(uns proc_id, ctype_pin_inst inst_a, ctype_pin_in
 void ext_trace_fetch_op(uns proc_id, Op* op) {
 
   // DEEPANJALI
-  mov_alu_hash_table* mov_alu_table_ptr = (mov_alu_hash_table*) voided_mov_alu_hash_table_ptr;
-  if(mov_alu_table_ptr == NULL){
-    mov_alu_table_ptr = create_mov_alu_hash_table(INITIAL_TABLE_SIZE);
-  }
+     mov_alu_hash_table* voided_mov_alu_table_ptr= (mov_alu_hash_table*) voided_mov_alu_ht;
+    if (voided_mov_alu_table_ptr == NULL) 
+    {
+        voided_mov_alu_table_ptr = create_mov_alu_hash_table(INITIAL_TABLE_SIZE);
+    }
+
 
   starlab_hash_table* address_to_type_ptr = (starlab_hash_table*) voided_address_to_type_ptr;
   if(address_to_type_ptr == NULL)
@@ -209,7 +211,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
                 printf("Consecutive <MOV, ALU> pair detected!\n");
 
                 // Insert the pair into the hash table
-                insert_mov_alu_hashtable(mov_alu_table_ptr, 
+                insert_mov_alu_hashtable(voided_mov_alu_table_ptr, 
                                         consec_prev_instr,  // MOV instruction address
                                         consec_curr_instr);  // ALU instruction address
 
@@ -221,6 +223,9 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             consec_prev_mov = 0; 
         }
     }
+
+      // Update global pointers
+    voided_mov_alu_ht = (void*)voided_mov_alu_table_ptr;
 
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);

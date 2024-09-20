@@ -99,6 +99,7 @@ extern unsigned long consec_curr_instr; // What is the current instruction? (con
 extern unsigned consec_mov_alu_idx;
 extern char* temp; // For storing temp address in ICACHE stage 
 extern void* voided_mov_alu_hash_table_ptr;
+extern void* voided_mov_alu_ht;
 
 /**************************************************************************************/
 
