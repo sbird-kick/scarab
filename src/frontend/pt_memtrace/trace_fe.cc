@@ -154,16 +154,73 @@ void assert_ctype_pin_inst_same(uns proc_id, ctype_pin_inst inst_a, ctype_pin_in
 
 void ext_trace_fetch_op(uns proc_id, Op* op) {
 
+  // DEEPANJALI
+  mov_alu_hash_table* mov_alu_table_ptr = (mov_alu_hash_table*) voided_mov_alu_hash_table_ptr;
+  if(mov_alu_table_ptr == NULL){
+    mov_alu_table_ptr = create_mov_alu_hash_table(INITIAL_TABLE_SIZE);
+  }
+
   starlab_hash_table* address_to_type_ptr = (starlab_hash_table*) voided_address_to_type_ptr;
   if(address_to_type_ptr == NULL)
   {
     address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
   }
 
+
   static int prev_was_move = 0;
   if(uop_generator_get_bom(proc_id)) {
     if (!off_path_mode[proc_id]) {
       ctype_pin_inst* starlab_pi = &next_onpath_pi[proc_id];
+
+
+      // FOR <MOV, ALU> STATS
+    if (consec_prev_instr == 0) {  // First instruction?
+        // Set the current instruction as previous for next round
+        consec_prev_instr = consec_curr_instr;
+        if (starlab_pi->is_move) {
+            consec_prev_mov = 1;  // Mark that the first instruction is a MOV
+        }
+    } else {
+        // Determine conditions for ALU: copy Humza's logic
+
+        Flag has_load    = starlab_pi->num_ld > 0;
+        Flag has_push    = starlab_pi->has_push;
+        Flag has_pop     = starlab_pi->has_pop;
+        Flag has_store   = starlab_pi->num_st > 0;
+        Flag has_control = starlab_pi->cf_type != NOT_CF;  
+
+        bool codverch_has_alu = 
+            !(starlab_pi->is_move && (has_load || has_store)) &&  // Not a simple LD/ST move
+            ((!has_control && !has_load && !has_store) ||          // Not memory, not control, must be operate
+            has_push || has_pop ||                                 // Need ALU for stack address generation
+            starlab_pi->num_dst_regs > 0 ||                        // If it writes to registers, must be operate
+            (has_load && has_store) ||                             // Read-modify-write operate
+            (starlab_pi->op_type >= OP_PIPELINED_FAST && 
+            starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));    // Special instructions need ALU
+
+        if (starlab_pi->is_move) {  // Current instruction is a move?
+            // Save current as previous instruction (as an unsigned long)
+            consec_prev_instr = consec_curr_instr;  
+            consec_is_alu = 0;  // Reset ALU flag
+            consec_prev_mov = 1;  // Mark that the previous instruction is a MOV
+        } 
+        else if (codverch_has_alu) {  // Check if current instruction is ALU
+            if (consec_prev_mov) {  // If previous instruction was MOV
+                printf("Consecutive <MOV, ALU> pair detected!\n");
+
+                // Insert the pair into the hash table
+                insert_mov_alu_hashtable(mov_alu_table_ptr, 
+                                        consec_prev_instr,  // MOV instruction address
+                                        consec_curr_instr);  // ALU instruction address
+
+                consec_prev_mov = 0;  // Reset MOV flag after detection
+            }
+            // Update the previous instruction (as an unsigned long)
+            consec_prev_instr = consec_curr_instr;
+            consec_is_alu = 0; 
+            consec_prev_mov = 0; 
+        }
+    }
 
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);

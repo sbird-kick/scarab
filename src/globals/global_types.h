@@ -82,7 +82,6 @@ typedef uns32 ULong;
 typedef uns16 UWord;
 typedef uns8  UByte;
 
-
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_TYPES_H__ */

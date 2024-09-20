@@ -331,16 +331,30 @@ void prefetcher_update_on_icache_access(Flag icache_hit) {
 }
 
 void icache_hit_events(Flag uop_cache_hit) {
-  DEBUG(ic->proc_id, "Cache hit on op_num:%s @ 0x%s line_addr 0x%s\n",
-        unsstr64(op_count[ic->proc_id]), hexstr64s(ic->fetch_addr), hexstr64s(ic->fetch_addr & ~0x3F));
+    DEBUG(ic->proc_id, "Cache hit on op_num:%s @ 0x%s line_addr 0x%s\n",
+          unsstr64(op_count[ic->proc_id]), hexstr64s(ic->fetch_addr), hexstr64s(ic->fetch_addr & ~0x3F));
 
-  if (ALWAYS_LOOKUP_ICACHE) {
-    if (!ic->off_path) {
-      STAT_EVENT(ic->proc_id, ICACHE_HIT_UOP_CACHE_MISS_ON_PATH + uop_cache_hit);
-    } else {
-      STAT_EVENT(ic->proc_id, ICACHE_HIT_UOP_CACHE_MISS_OFF_PATH + uop_cache_hit);
+    if (ALWAYS_LOOKUP_ICACHE) {
+        if (!ic->off_path) {
+            STAT_EVENT(ic->proc_id, ICACHE_HIT_UOP_CACHE_MISS_ON_PATH + uop_cache_hit);
+        } else {
+            STAT_EVENT(ic->proc_id, ICACHE_HIT_UOP_CACHE_MISS_OFF_PATH + uop_cache_hit);
+        }
     }
-  }
+
+    unsigned long addr = (unsigned long)(ic->fetch_addr);
+    mov_alu_hash_table* mov_alu_table_ptr = (mov_alu_hash_table*) voided_mov_alu_hash_table_ptr;
+    if (mov_alu_table_ptr != NULL) {
+        unsigned long alu_addr = mov_alu_search_addr(mov_alu_table_ptr, addr);
+        if (alu_addr != 0) {
+            DEBUG(ic->proc_id, "Found corresponding ALU address 0x%lx for MOV address 0x%lx\n", alu_addr, addr);
+            printf("Found.\n");
+            // Handle the found ALU address (e.g., updating stats or triggering actions)
+        } else {
+            DEBUG(ic->proc_id, "No corresponding ALU address found for MOV address 0x%lx\n", addr);
+            printf("Not Found.\n");
+        }
+    }
 
   prefetcher_update_on_icache_access(/*icache_hit*/ TRUE);
   log_stats_ic_hit();

@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include "globals/global_types.h"
 #include "statistics.h"
+#include "stdbool.h"
 
 #include "libs/hash_lib.h"
 
@@ -90,6 +91,15 @@ extern char prev_instruction_class[128];
 
 extern char prev_address_as_string[128];
 extern unsigned long long starlab_prev_address;
+
+extern bool consec_prev_mov; // Was the previous instruction in the consecutive instruction sequences MOV?
+extern bool consec_is_alu; // Is the current instruction performing an ALU operation? 
+extern unsigned long consec_prev_instr; // What was the previous instruction? (convert addr to string)
+extern unsigned long consec_curr_instr; // What is the current instruction? (convert addr to string)
+extern unsigned consec_mov_alu_idx;
+extern char* temp; // For storing temp address in ICACHE stage 
+extern void* voided_mov_alu_hash_table_ptr;
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */

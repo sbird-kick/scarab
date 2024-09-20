@@ -382,6 +382,28 @@ int   parse_string_array(char dest[][MAX_STR_LENGTH + 1], const void* str,
 #define INITIAL_TABLE_SIZE 10000000
 #define LOAD_FACTOR_THRESHOLD 0.75
 
+// DEEPANJALI
+typedef struct mov_alu_entry{
+  unsigned long mov_addr;
+  unsigned long alu_addr;
+  struct mov_alu_entry *next; // For handling collisions
+} mov_alu_entry;
+
+typedef struct mov_alu_hash_table{
+  mov_alu_entry **table;
+  long size;
+  long count;
+
+} mov_alu_hash_table;
+
+unsigned mov_alu_hash_function(unsigned long address, long table_size);
+mov_alu_hash_table* create_mov_alu_hash_table(long size);
+void insert_mov_alu_hashtable(mov_alu_hash_table *hashtable, unsigned long mov_addr, unsigned long alu_addr);
+unsigned long mov_alu_search_addr(mov_alu_hash_table *hashtable, unsigned long mov_addr);
+void mov_alu_free_table(mov_alu_hash_table* hashtable);
+int get_count_mov_alu_hashtable(mov_alu_hash_table* hashtable);
+void resize_table(mov_alu_hash_table *hashtable);
+
 typedef struct starlab_hash_node {
     char *key;
     void *value;
@@ -406,7 +428,6 @@ typedef struct {
     void *value;
 } KeyValuePair;
 
-// starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);
 starlab_hash_table* starlab_create_table(long size, size_t value_size);

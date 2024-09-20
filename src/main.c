@@ -224,14 +224,24 @@ void* voided_global_starlab_types_ht = NULL;
 void* voided_address_to_type_ptr = NULL;
 void* voided_address_to_prev_address = NULL;
 void* voided_inst_truple_ptr = NULL;
+void* voided_mov_alu_hash_table_ptr = NULL; //DEEPANJALI
 
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
 char prev_address_as_string[128];
 unsigned long long starlab_prev_address = 0;
+unsigned consec_mov_alu_idx = 0;
+
+// DEEPANJALI
+bool consec_prev_mov = 0; // Flag indicating if the previous instruction was MOV in the sequence
+bool consec_is_alu = 0; // Flag indicating if the current instruction is performing an ALU operation
+unsigned long consec_prev_instr; 
+unsigned long consec_curr_instr; 
+char* temp = NULL;
 
 
 int main(int argc, char* argv[], char* envp[]) {
+
   char** simulated_argv;
   time_t cur_time;
 
