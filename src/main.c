@@ -239,6 +239,12 @@ bool consec_is_alu = 0; // Flag indicating if the current instruction is perform
 unsigned long consec_prev_instr; 
 unsigned long consec_curr_instr; 
 char* temp = NULL;
+unsigned codverch_icache_hit = 0;
+
+unsigned long mov_addr_updateicache;
+unsigned long alu_addr_updateicache; 
+bool is_mov_updateicache = 0;
+bool is_alu_updateicache = 0;
 
 
 int main(int argc, char* argv[], char* envp[]) {

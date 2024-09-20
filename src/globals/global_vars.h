@@ -100,6 +100,12 @@ extern unsigned consec_mov_alu_idx;
 extern char* temp; // For storing temp address in ICACHE stage 
 extern void* voided_mov_alu_hash_table_ptr;
 extern void* voided_mov_alu_ht;
+extern unsigned codverch_icache_hit;
+
+extern unsigned long mov_addr_updateicache;
+extern unsigned long alu_addr_updateicache; 
+extern bool is_mov_updateicache;
+extern bool is_alu_updateicache;
 
 /**************************************************************************************/
 

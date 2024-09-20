@@ -342,20 +342,42 @@ void icache_hit_events(Flag uop_cache_hit) {
         }
     }
 
-    // unsigned long addr = (unsigned long)(ic->fetch_addr);
+    // DEEPANJALI
+    mov_alu_hash_table* voided_mov_alu_table_ptr = (mov_alu_hash_table*) voided_mov_alu_ht;
 
-    // mov_alu_hash_table* mov_alu_table_ptr = (mov_alu_hash_table*) voided_mov_alu_hash_table_ptr;
-    // if (mov_alu_table_ptr != NULL) {
-    //     unsigned long alu_addr = mov_alu_search_addr(mov_alu_table_ptr, addr);
-    //     if (alu_addr != 0) {
-    //         DEBUG(ic->proc_id, "Found corresponding ALU address 0x%lx for MOV address 0x%lx\n", alu_addr, addr);
-    //         printf("Found.\n");
-    //         // Handle the found ALU address (e.g., updating stats or triggering actions)
-    //     } else {
-    //         DEBUG(ic->proc_id, "No corresponding ALU address found for MOV address 0x%lx\n", addr);
-    //         printf("Not Found.\n");
-    //     }
-    // }
+    if (ic->fetch_addr == mov_alu_search_addr(voided_mov_alu_table_ptr, ic->fetch_addr)) {
+        printf("This is a MOV instruction, and it is present in the hashtable\n");
+        is_mov_updateicache = 1;
+        mov_addr_updateicache = ic->fetch_addr;
+
+        // Fetch the corresponding ALU instruction
+        unsigned long hash_index = ic->fetch_addr % voided_mov_alu_table_ptr->size;  // Use hash function to get index
+        mov_alu_entry* node = voided_mov_alu_table_ptr->table[hash_index];  // Access the hash table
+
+        while (node != NULL) {
+            if (node->mov_addr == ic->fetch_addr) {
+                // Found the corresponding MOV address, now we can fetch ALU address
+                alu_addr_updateicache = node->alu_addr;
+                break;  // Exit after finding the entry
+            }
+            node = node->next;  // Move to the next entry in case of collisions
+        }
+    }
+
+    else if(is_mov_updateicache) // prev instruction was mov, check whether curr inst is ALU
+    {
+      if(ic->fetch_addr == alu_addr_updateicache){
+        // Consecutive <MOV, ALU> ICACHE hits found
+        printf("Consecutive MOV ALU hits");
+      }
+      is_mov_updateicache = 0;
+    }
+
+    else {
+      // not a consecutive MOV ALU, do nothing.
+        printf("Not a consecutive MOV or ALU.\n");
+    }
+
 
   prefetcher_update_on_icache_access(/*icache_hit*/ TRUE);
   log_stats_ic_hit();
@@ -476,6 +498,23 @@ void update_icache_stage() {
 
   STAT_EVENT(ic->proc_id, FETCH_ON_PATH + ic->off_path);
 
+  // DEEPANJALI
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   ASSERT(ic->proc_id, ic->next_state != ICACHE_FINISHED_FT_EXPECTING_NEXT);
   ASSERT(ic->proc_id, ic->next_state != ICACHE_LOOKUP_SERVING);
   while(!break_fetch) {
@@ -553,6 +592,15 @@ void update_icache_stage() {
           if (ALWAYS_LOOKUP_ICACHE) {
             if (ic->line) {
               icache_hit_events(/*uop_cache_hit*/ TRUE);
+
+
+
+
+
+
+
+
+
             } else {
               icache_miss_events(/*uop_cache_hit*/ TRUE);
               if (IPRF_ON_UOP_CACHE_HIT) {
@@ -876,7 +924,6 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
     thread_map_mem_dep(op);
     op->fetch_cycle = cycle_count;
-
     
     starlab_hash_table* address_to_prev_address = (starlab_hash_table*) voided_address_to_prev_address;
     if(address_to_prev_address == NULL)
