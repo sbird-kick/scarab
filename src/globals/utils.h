@@ -403,7 +403,7 @@ unsigned long mov_alu_search_addr(mov_alu_hash_table *hashtable, unsigned long m
 void mov_alu_free_table(mov_alu_hash_table* hashtable);
 int get_count_mov_alu_hashtable(mov_alu_hash_table* hashtable);
 void resize_table(mov_alu_hash_table *hashtable);
-void print_mov_alu_hashtable(mov_alu_hash_table *hashtable);
+void print_mov_alu_hashtable(mov_alu_hash_table *hashtable); // Prints in hexadecimal
 
 typedef struct starlab_hash_node {
     char *key;

@@ -211,21 +211,20 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             consec_prev_mov = 1;
         } 
 
-        else if (codverch_has_alu) {  // Check if current instruction is ALU
-            if (consec_prev_mov) {  // If previous instruction was MOV
+        else if (codverch_has_alu) {  
+            if (consec_prev_mov) { 
                 printf("Consecutive <MOV, ALU> pair detected!\n");
 
-                // Insert the pair into the hash table
                 insert_mov_alu_hashtable(voided_mov_alu_table_ptr, 
-                                        consec_prev_instr,  // MOV instruction address
-                                        consec_curr_instr);  // ALU instruction address
+                                        consec_prev_instr,  
+                                        consec_curr_instr);  
 
 
-                print_mov_alu_hashtable(voided_mov_alu_table_ptr);
+                // print_mov_alu_hashtable(voided_mov_alu_table_ptr);
 
-                consec_prev_mov = 0;  // Reset MOV flag after detection
+                consec_prev_mov = 0;  
             }
-            // Update the previous instruction (as an unsigned long)
+  
             consec_prev_instr = consec_curr_instr;
             consec_is_alu = 0; 
             consec_prev_mov = 0; 
