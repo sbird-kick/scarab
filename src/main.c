@@ -224,7 +224,7 @@ void* voided_global_starlab_types_ht = NULL;
 void* voided_address_to_type_ptr = NULL;
 void* voided_address_to_prev_address = NULL;
 void* voided_inst_truple_ptr = NULL;
-void* voided_mov_alu_hash_table_ptr = NULL; //DEEPANJALI
+void* voided_mov_alu_table_ptr = NULL; //DEEPANJALI
 void* voided_mov_alu_ht = NULL;
 
 unsigned long long prev_instruction_time = 0;
@@ -236,9 +236,16 @@ unsigned consec_mov_alu_idx = 0;
 // DEEPANJALI
 bool consec_prev_mov = 0; // Flag indicating if the previous instruction was MOV in the sequence
 bool consec_is_alu = 0; // Flag indicating if the current instruction is performing an ALU operation
-unsigned long consec_prev_instr; 
-unsigned long consec_curr_instr; 
+unsigned long long consec_prev_instr; 
+unsigned long long consec_curr_instr; 
 char* temp = NULL;
+
+unsigned long mov_addr_updateicache;
+unsigned long alu_addr_updateicache; 
+bool is_mov_updateicache = 0;
+bool is_alu_updateicache = 0;
+unsigned long long prev_addr_storage = 0; 
+unsigned long long codverch_icache_hit = 0;
 
 
 int main(int argc, char* argv[], char* envp[]) {
@@ -332,6 +339,8 @@ int main(int argc, char* argv[], char* envp[]) {
 
     qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
+    // PREVIOUS EXPERIMENT
+
     // unsigned long total_cc_count = 0;
     // for (long i = 0; i < count; i++) {
     //     total_cc_count += *(unsigned long *)key_value_pairs[i].value;
@@ -346,25 +355,15 @@ int main(int argc, char* argv[], char* envp[]) {
     // }
 
 
-
-//   if (voided_mov_alu_ht == NULL) {
-//     printf("mov_alu_table_ptr is NULL.\n");
-// } else {
-//     mov_alu_hash_table* mov_alu_table_ptr = (mov_alu_hash_table*)voided_mov_alu_ht; // Cast here
-
-//     for (long i = 0; i < mov_alu_table_ptr->size; i++) {
-//         mov_alu_entry* entry = mov_alu_table_ptr->table[i]; // Get the head of the linked list
-//         if (entry != NULL) {
-//             printf("Bucket %ld:\n", i);
-//             while (entry != NULL) {
-//                 printf("  MOV Address: 0x%lx, ALU Address: 0x%lx\n", entry->mov_addr, entry->alu_addr);
-//                 entry = entry->next; // Move to the next entry
-//             }
-//         } else {
-//             printf("Bucket %ld is empty.\n", i);
-//         }
-//     }
-// }
+    // DEEPANJALI
+    mov_alu_hash_table* voided_mov_alu_table_ptr = (mov_alu_hash_table*) voided_mov_alu_ht;
+    if (voided_mov_alu_table_ptr == NULL) {
+      printf("mov_alu_table_ptr is NULL.\n");
+    } 
+    else {
+        
+        print_mov_alu_hashtable(voided_mov_alu_table_ptr);
+    }
 
 
   return 0;
