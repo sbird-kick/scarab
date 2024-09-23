@@ -53,6 +53,9 @@ void off_path_generate_inst(uns proc_id, uint64_t *off_path_addr, ctype_pin_inst
     *inst = create_dummy_nop(*off_path_addr, WPNM_REASON_REDIRECT_TO_NOT_INSTRUMENTED);
     (*off_path_addr) += DUMMY_NOP_SIZE;
   }
+
+
+
 }
 
 Flag ctype_pin_inst_same_mem_vaddr(ctype_pin_inst inst_a, ctype_pin_inst inst_b) {
@@ -155,13 +158,13 @@ void assert_ctype_pin_inst_same(uns proc_id, ctype_pin_inst inst_a, ctype_pin_in
 void ext_trace_fetch_op(uns proc_id, Op* op) {
 
   // DEEPANJALI
-     mov_alu_hash_table* voided_mov_alu_table_ptr= (mov_alu_hash_table*) voided_mov_alu_ht;
+    mov_alu_hash_table* voided_mov_alu_table_ptr= (mov_alu_hash_table*) voided_mov_alu_ht;
 
     if (voided_mov_alu_table_ptr == NULL) 
     {
       voided_mov_alu_table_ptr = create_mov_alu_hash_table(INITIAL_TABLE_SIZE);
     }
-
+    const char *output_file_name = "mov_alu_addresses.txt";
 
   starlab_hash_table* address_to_type_ptr = (starlab_hash_table*) voided_address_to_type_ptr;
   if(address_to_type_ptr == NULL)
@@ -176,7 +179,10 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
 
       consec_curr_instr = starlab_pi->instruction_addr;
 
-      // FOR <MOV, ALU> STATS
+      // sprintf(prev_address_as_string, "%lx", starlab_pi->instruction_addr);
+      //  printf("Instruction Address: %s\n", prev_address_as_string);
+
+    //  FOR <MOV, ALU> STATS
     if (consec_prev_instr == 0) {  // First instruction?
         // Set the current instruction as previous for next round
         consec_prev_instr = consec_curr_instr;
@@ -205,10 +211,12 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             (starlab_pi->op_type >= OP_PIPELINED_FAST && 
             starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));    // Special instructions need ALU
 
+
         if (starlab_pi->is_move) {  // Current instruction is a move?
             consec_prev_instr = consec_curr_instr;  
             consec_is_alu = 0;  
             consec_prev_mov = 1;
+
         } 
 
         else if (codverch_has_alu) {  
@@ -219,9 +227,17 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
                                         consec_prev_instr,  
                                         consec_curr_instr);  
 
+                // Write the MOV and ALU instruction to a file 
+               FILE* mov_alu_addr_file_ptr = fopen(output_file_name, "a");
+              if (mov_alu_addr_file_ptr == NULL) {
+                printf("Error opening file.\n");
+              } 
+              else {
+                fprintf(mov_alu_addr_file_ptr, "%lld %lld\n", consec_prev_instr, consec_curr_instr);
+                  fclose(mov_alu_addr_file_ptr);  
+              }
 
-                // print_mov_alu_hashtable(voided_mov_alu_table_ptr);
-
+                print_mov_alu_hashtable(voided_mov_alu_table_ptr);
                 consec_prev_mov = 0;  
             }
   
@@ -231,6 +247,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
         }
     }
 
+       
       // Update global pointers
     voided_mov_alu_ht = (void*)voided_mov_alu_table_ptr;
 

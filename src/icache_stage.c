@@ -330,7 +330,17 @@ void prefetcher_update_on_icache_access(Flag icache_hit) {
     fnlmma_prefetch(ic->proc_id, ic->fetch_addr, icache_hit, 0);
 }
 
+
+
+
+
+
 void icache_hit_events(Flag uop_cache_hit) {
+    static unsigned long long prev_inst_addr = 0;  
+    static int prev_inst_type = -1;  // -1 indicates no previous instruction type
+    char mov_alu_line[256];
+    unsigned long long mov_addr, alu_addr;
+
     DEBUG(ic->proc_id, "Cache hit on op_num:%s @ 0x%s line_addr 0x%s\n",
           unsstr64(op_count[ic->proc_id]), hexstr64s(ic->fetch_addr), hexstr64s(ic->fetch_addr & ~0x3F));
 
@@ -342,46 +352,77 @@ void icache_hit_events(Flag uop_cache_hit) {
         }
     }
 
-    // DEEPANJALI
-    mov_alu_hash_table* voided_mov_alu_table_ptr = (mov_alu_hash_table*) voided_mov_alu_ht;
+    // Open the MOV/ALU addresses file for reading
+    FILE *file = fopen("mov_alu_addresses.txt", "r");
+    if (!file) {
+        printf("Error: Unable to open mov_alu_addresses.txt\n");
+        return;
+    }
 
-    if (ic->fetch_addr == mov_alu_search_addr(voided_mov_alu_table_ptr, ic->fetch_addr)) {
-        printf("This is a MOV instruction, and it is present in the hashtable\n");
-        is_mov_updateicache = 1;
-        mov_addr_updateicache = ic->fetch_addr;
+    int found = 0;  // Flag to indicate if we found the current address
+    while (fgets(mov_alu_line, sizeof(mov_alu_line), file)) {
+        // Log the line being read
+        // printf("Reading line: '%s'\n", mov_alu_line); 
+        
+        // Strip the newline character
+        mov_alu_line[strcspn(mov_alu_line, "\n")] = '\0';
 
-        // Fetch the corresponding ALU instruction
-        unsigned long hash_index = ic->fetch_addr % voided_mov_alu_table_ptr->size;  // Use hash function to get index
-        mov_alu_entry* node = voided_mov_alu_table_ptr->table[hash_index];  // Access the hash table
+        // Parse the MOV and ALU addresses from the line
+        if (sscanf(mov_alu_line, "%llu %llu", &mov_addr, &alu_addr) == 2) {
+            // printf("Parsed MOV addr: 0x%llu, ALU addr: 0x%llu\n", mov_addr, alu_addr); // Log parsed addresses
 
-        while (node != NULL) {
-            if (node->mov_addr == ic->fetch_addr) {
-                // Found the corresponding MOV address, now we can fetch ALU address
-                alu_addr_updateicache = node->alu_addr;
-                break;  // Exit after finding the entry
+            // Check if the fetch address matches MOV or ALU addresses
+            if ((unsigned long long)ic->fetch_addr == mov_addr) {
+                // Current address is a MOV address; update instruction type
+                prev_inst_type = 0;  // 0 indicates MOV
+                printf("Current address is a MOV instruction at 0x%llu\n", (unsigned long long)ic->fetch_addr);
+                found = 1;
+                break;
+            } else if ((unsigned long long)ic->fetch_addr == alu_addr) {
+                // Current address is an ALU address; check previous instruction type
+                if (prev_inst_type == 0) {  // Check if the previous instruction was MOV
+                    printf("Previous instruction was MOV followed by ALU instruction at 0x%llu\n", (unsigned long long)ic->fetch_addr);
+                } else {
+                    printf("ALU instruction at 0x%llu does not follow a MOV instruction\n", (unsigned long long)ic->fetch_addr);
+                }
+                prev_inst_type = 1;  // 1 indicates ALU
+                found = 1;
+                break;
             }
-            node = node->next;  // Move to the next entry in case of collisions
+        } else {
+            printf("Failed to parse line: '%s'\n", mov_alu_line); // Log parsing failures
         }
     }
 
-    else if(is_mov_updateicache) // prev instruction was mov, check whether curr inst is ALU
-    {
-      if(ic->fetch_addr == alu_addr_updateicache){
-        // Consecutive <MOV, ALU> ICACHE hits found
-        printf("Consecutive MOV ALU hits");
-      }
-      is_mov_updateicache = 0;
+    fclose(file);
+
+    if (!found) {
+        printf("Address 0x%llx not found in mov_alu_addresses.txt\n", (unsigned long long)ic->fetch_addr);
+    } else {
+        printf("Address 0x%llx was found in mov_alu_addresses.txt\n", (unsigned long long)ic->fetch_addr);
     }
 
-    else {
-      // not a consecutive MOV ALU, do nothing.
-        printf("Not a consecutive MOV or ALU.\n");
-    }
+    // Update the previous instruction address
+    prev_inst_addr = (unsigned long long)ic->fetch_addr;
 
-
-  prefetcher_update_on_icache_access(/*icache_hit*/ TRUE);
-  log_stats_ic_hit();
+    prefetcher_update_on_icache_access(/*icache_hit*/ TRUE);
+    log_stats_ic_hit();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void icache_miss_events(Flag uop_cache_hit) {
     DEBUG(ic->proc_id, "Cache miss on op_num:%s @ 0x%s\n",
@@ -497,22 +538,6 @@ void update_icache_stage() {
   ic->back_on_path = FALSE;
 
   STAT_EVENT(ic->proc_id, FETCH_ON_PATH + ic->off_path);
-
-  // DEEPANJALI
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   ASSERT(ic->proc_id, ic->next_state != ICACHE_FINISHED_FT_EXPECTING_NEXT);
