@@ -187,7 +187,7 @@ unsigned int starlab_hash(const char *key, int table_size) {
     return hash % table_size;
 }
 
-unsigned mov_alu_hash_function(unsigned long address, long table_size){
+unsigned mov_alu_hash_function(unsigned long long address, long table_size){
   return address % table_size;
 }
 
@@ -288,7 +288,7 @@ void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value)
     hashtable->count++;
 }
 
-void insert_mov_alu_hashtable(mov_alu_hash_table *hashtable, unsigned long mov_addr, unsigned long alu_addr){
+void insert_mov_alu_hashtable(mov_alu_hash_table *hashtable, unsigned long long mov_addr, unsigned long long alu_addr){
   unsigned int idx = mov_alu_hash_function(mov_addr, hashtable->size);
 
   mov_alu_entry *node = hashtable->table[idx];
@@ -328,13 +328,13 @@ void print_mov_alu_hashtable(mov_alu_hash_table *hashtable){
   for(unsigned i = 0; i<hashtable->size; i++){
     mov_alu_entry *node = hashtable->table[i];
     while(node){
-      printf("MOV Addr: %lx ALU Addr: %lx\n", node->mov_addr, node->alu_addr);
+      printf("MOV Addr: %lld ALU Addr: %lld\n", node->mov_addr, node->alu_addr);
       node = node->next;
     }
   }
 }
 
-unsigned long mov_alu_search_addr(mov_alu_hash_table *hashtable, unsigned long mov_addr){
+unsigned long long mov_alu_search_addr(mov_alu_hash_table *hashtable, unsigned long long mov_addr){
   unsigned int idx = mov_alu_hash_function(mov_addr, hashtable->size);
 
   mov_alu_entry *node = hashtable->table[idx];
