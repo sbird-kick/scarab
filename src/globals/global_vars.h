@@ -94,12 +94,19 @@ extern unsigned long long starlab_prev_address;
 
 extern bool consec_prev_mov; // Was the previous instruction in the consecutive instruction sequences MOV?
 extern bool consec_is_alu; // Is the current instruction performing an ALU operation? 
-extern unsigned long consec_prev_instr; // What was the previous instruction? (convert addr to string)
-extern unsigned long consec_curr_instr; // What is the current instruction? (convert addr to string)
+extern unsigned long long consec_prev_instr; // What was the previous instruction? (convert addr to string)
+extern unsigned long long consec_curr_instr; // What is the current instruction? (convert addr to string)
 extern unsigned consec_mov_alu_idx;
 extern char* temp; // For storing temp address in ICACHE stage 
-extern void* voided_mov_alu_hash_table_ptr;
+extern void* voided_mov_alu_table_ptr;
 extern void* voided_mov_alu_ht;
+extern unsigned codverch_icache_hit;
+
+extern unsigned long mov_addr_updateicache;
+extern unsigned long alu_addr_updateicache; 
+extern bool is_mov_updateicache;
+extern bool is_alu_updateicache;
+extern unsigned long long prev_addr_storage;
 
 /**************************************************************************************/
 
