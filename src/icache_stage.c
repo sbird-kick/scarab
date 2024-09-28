@@ -395,7 +395,7 @@ void icache_hit_events(Flag uop_cache_hit) {
         // printf("ALU instruction from previous MOV: %lld\n", alu_inst_from_prev_mov);
 
     if (ic->fetch_addr == alu_inst_from_prev_mov) {
-        printf("icache fetch address: %lld\n", ic->fetch_addr);
+        // printf("icache fetch address: %lld\n", ic->fetch_addr);
         // printf("ALU instruction from previous MOV: %lld\n", alu_inst_from_prev_mov);
         consec_icache_hit_curr_alu = true;
     } else {
