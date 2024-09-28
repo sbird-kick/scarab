@@ -187,6 +187,19 @@ unsigned int starlab_hash(const char *key, int table_size) {
     return hash % table_size;
 }
 
+unsigned int mov_alu_hash(unsigned long long mov_address, int table_size){
+  unsigned int hash = 0; 
+
+   // Hashing the address by processing each byte
+    for (int i = 0; i < sizeof(mov_address); i++) {
+        hash = (hash << 5) + (mov_address & 0xFF);  // Add the lowest byte of the address to the hash
+        mov_address >>= 8;  // Shift the address right by 8 bits (1 byte)
+    }
+    
+    return hash % table_size;
+
+}
+
 starlab_hash_table* starlab_create_table(long size, size_t value_size) {
     starlab_hash_table *hashtable = (starlab_hash_table *) malloc(sizeof(starlab_hash_table));
     hashtable->table = (starlab_hash_node**) malloc(sizeof(starlab_hash_node *) * size);
@@ -198,6 +211,27 @@ starlab_hash_table* starlab_create_table(long size, size_t value_size) {
     hashtable->value_size = value_size;
     return hashtable;
 }
+
+mov_alu_hash_table* mov_alu_create_table(long size, size_t value_size) {
+    // Allocate memory for the hash table structure
+    mov_alu_hash_table *hashtable = (mov_alu_hash_table*) malloc(sizeof(mov_alu_hash_table));
+    
+    // Allocate memory for the table array of hash nodes
+    hashtable->table = (mov_alu_entry**) malloc(sizeof(mov_alu_entry*) * size);
+
+    // Initialize the hash table elements to NULL
+    for(int i = 0; i < size; i++) {
+        hashtable->table[i] = NULL; 
+    }
+
+    // Set the size, count, and value_size for the hash table
+    hashtable->size = size;
+    hashtable->count = 0;
+    hashtable->value_size = value_size; // Add this line if value_size is needed
+
+    return hashtable;
+}
+
 
 void starlab_resize_table(starlab_hash_table *hashtable) {
     printf("resizing hash table\n");
@@ -223,6 +257,31 @@ void starlab_resize_table(starlab_hash_table *hashtable) {
     hashtable->size = new_size;
 }
 
+void mov_alu_resize_table(mov_alu_hash_table *hashtable) {
+    printf("resizing hash table\n");
+    int new_size = hashtable->size * 2;
+    mov_alu_entry **new_table = (mov_alu_entry**) malloc(sizeof(mov_alu_entry *) * new_size);
+    for (int i = 0; i < new_size; i++) {
+        new_table[i] = NULL;
+    }
+
+    for (int i = 0; i < hashtable->size; i++) {
+        mov_alu_entry *node = hashtable->table[i];
+        while (node) {
+            unsigned int new_index = mov_alu_hash(node->mov_addr, new_size);
+            mov_alu_entry *next_node = node->next;
+            node->next = new_table[new_index];
+            new_table[new_index] = node;
+            node = next_node;
+        }
+    }
+
+    free(hashtable->table);
+    hashtable->table = new_table;
+    hashtable->size = new_size;
+}
+
+
 void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value) {
     if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
         starlab_resize_table(hashtable);
@@ -247,6 +306,32 @@ void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value)
     hashtable->count++;
 }
 
+void mov_alu_insert(mov_alu_hash_table *hashtable, unsigned long long mov_addr, unsigned long long alu_addr) {
+    if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
+        mov_alu_resize_table(hashtable);
+    }
+
+    unsigned int idx = mov_alu_hash(mov_addr, hashtable->size);
+    mov_alu_entry *node = hashtable->table[idx];
+
+    // Check whether the address already exists, if so just update it
+    while (node) {
+        if (node->mov_addr == mov_addr) {
+            node->alu_addr = alu_addr;
+            return;
+        }
+        node = node->next;
+    }
+
+    mov_alu_entry *new_node = (mov_alu_entry*) malloc(sizeof(mov_alu_entry));
+    new_node->mov_addr = mov_addr;
+    new_node->alu_addr = alu_addr; // Directly assign the value
+    new_node->next = hashtable->table[idx];
+    hashtable->table[idx] = new_node;
+    hashtable->count++;
+}
+
+
 void* starlab_search(starlab_hash_table *hashtable, const char *key) {
     unsigned int index = starlab_hash(key, hashtable->size);
     starlab_hash_node *node = hashtable->table[index];
@@ -257,6 +342,18 @@ void* starlab_search(starlab_hash_table *hashtable, const char *key) {
         node = node->next;
     }
     return NULL; // Indicates that the key is not found
+}
+
+unsigned long long  mov_alu_search(mov_alu_hash_table *hashtable, unsigned long long mov_addr) {
+    unsigned int index = mov_alu_hash(mov_addr, hashtable->size);
+    mov_alu_entry *node = hashtable->table[index];
+    while (node) {
+        if (node->mov_addr == mov_addr)  {
+            return node->alu_addr;
+        }
+        node = node->next;
+    }
+    return 0; // Indicates that the key is not found
 }
 
 void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
@@ -285,6 +382,30 @@ void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
     hashtable->count--;
 }
 
+void mov_alu_delete_key(mov_alu_hash_table *hashtable, unsigned long long mov_addr) {
+    unsigned int index = mov_alu_hash(mov_addr, hashtable->size);
+    mov_alu_entry *node = hashtable->table[index];
+    mov_alu_entry *prev = NULL;
+
+    while (node && (node->mov_addr != mov_addr)) {
+        prev = node;
+        node = node->next;
+    }
+
+    if (node == NULL) {
+        return; // Key not found
+    }
+
+    if (prev == NULL) {
+        hashtable->table[index] = node->next;
+    } else {
+        prev->next = node->next;
+    }
+
+    free(node);
+    hashtable->count--;
+}
+
 void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *)) {
     for (int i = 0; i < hashtable->size; i++) {
         starlab_hash_node *node = hashtable->table[i];
@@ -296,12 +417,21 @@ void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(vo
     }
 }
 
+void mov_alu_iterate_table(mov_alu_hash_table *hashtable, void (*print_value)(unsigned long long, unsigned long long)) {
+    for (int i = 0; i < hashtable->size; i++) {
+        mov_alu_entry *node = hashtable->table[i];
+        while (node) {
+            print_value(node->mov_addr, node->alu_addr);
+            node = node->next;
+        }
+    }
+}
+
 int compare_key_value_pairs(const void *a, const void *b) {
     KeyValuePair *pairA = (KeyValuePair *)a;
     KeyValuePair *pairB = (KeyValuePair *)b;
     return (*(long*)pairB->value - *(long*)pairA->value);  // Adjust this comparison based on the actual type of the value
 }
-
 
 
 void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, void ***values) {
@@ -336,7 +466,33 @@ void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, v
     free(pairs);
 }
 
+mov_alu_entry* mov_alu_return_entry(mov_alu_hash_table *hashtable, unsigned long long mov_addr) {
+    // Compute the index for the key using the hash function
+    unsigned int index = mov_alu_hash(mov_addr, hashtable->size);
+
+    // Traverse the linked list at the hashed index to find the correct entry
+    mov_alu_entry *node = hashtable->table[index];
+    while (node) {
+        if (node->mov_addr == mov_addr) {
+            // If the entry with the given key is found, return the mov_alu_entry
+            return node;
+        }
+        node = node->next;
+    }
+
+    // If the entry is not found, return NULL
+    return NULL;
+}
+
+
 int get_count(starlab_hash_table* hashtable)
+{
+  if(hashtable == NULL)
+    return 0;
+  return hashtable->count;
+}
+
+int get_count_mov_alu(mov_alu_hash_table* hashtable)
 {
   if(hashtable == NULL)
     return 0;
@@ -358,6 +514,18 @@ void starlab_free_table(starlab_hash_table *hashtable) {
     free(hashtable);
 }
 
+void mov_alu_free_table(mov_alu_hash_table *hashtable) {
+    for (long i = 0; i < hashtable->size; i++) {
+        mov_alu_entry *node = hashtable->table[i];
+        while (node) {
+            mov_alu_entry *temp = node;
+            node = node->next;
+            free(temp);
+        }
+    }
+    free(hashtable->table);
+    free(hashtable);
+}
 
 /**************************************************************************************/
 /* hexstr64: This little function exists to convert a 64-bit integer into a

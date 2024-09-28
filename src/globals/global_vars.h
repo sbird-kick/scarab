@@ -32,6 +32,7 @@
 /**************************************************************************************/
 
 #include <stdio.h>
+#include <stdbool.h>
 #include "globals/global_types.h"
 #include "statistics.h"
 
@@ -85,11 +86,30 @@ extern void* voided_inst_truple_ptr;
 extern void* voided_address_to_type_ptr;
 extern void* voided_address_to_prev_address;
 
+extern void* is_candidate_ptr;
+
+// extern const char starlab_do_write;
+
 extern unsigned long long prev_instruction_time;
 extern char prev_instruction_class[128];
 
 extern char prev_address_as_string[128];
 extern unsigned long long starlab_prev_address;
+
+extern void* voided_mov_alu_table_ptr;
+extern void* voided_mov_alu_ht;
+extern unsigned long long consec_prev_instr; // What was the previous instruction? 
+extern unsigned long long consec_curr_instr; // What is the current instruction? 
+extern bool consec_prev_mov; // Was the previous instruction in the consecutive instruction sequences MOV?
+extern bool consec_is_alu; // Is the current instruction performing an ALU operation? 
+
+extern bool consec_icache_hit_prev_mov; // Was the previous instruction in the icache hit logic a MOV?
+extern bool consec_icache_hit_curr_alu; // Is the current instruction in the icache hit logic an ALU operation?
+extern unsigned long long alu_inst_from_prev_mov; // The ALU instruction corresponding to the previous MOV instruction from the hashtable
+extern unsigned long long mov_inst_icache_hit_prev_mov; // The MOV instruction corresponding to the previous MOV instruction from the hashtable
+extern char deep_curr_address_as_string[128]; // The current instruction address in hex
+extern char alu_address_as_string[128]; // The ALU instruction address in hex
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */

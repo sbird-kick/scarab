@@ -382,11 +382,26 @@ int   parse_string_array(char dest[][MAX_STR_LENGTH + 1], const void* str,
 #define INITIAL_TABLE_SIZE 10000000
 #define LOAD_FACTOR_THRESHOLD 0.75
 
+// DEEPANJALI 
+
+typedef struct mov_alu_entry {
+  unsigned long long mov_addr;
+  unsigned long long alu_addr;
+  struct mov_alu_entry *next; 
+} mov_alu_entry;
+
 typedef struct starlab_hash_node {
     char *key;
     void *value;
     struct starlab_hash_node *next;
 } starlab_hash_node;
+
+typedef struct mov_alu_hash_table{
+  mov_alu_entry **table;
+  long size;
+  long count;
+  size_t value_size;
+} mov_alu_hash_table;
 
 typedef struct starlab_hash_table {
     starlab_hash_node **table;
@@ -419,6 +434,17 @@ void starlab_free_table(starlab_hash_table *hashtable);
 void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, void ***values);
 int compare_key_value_pairs(const void *a, const void *b);
 int get_count(starlab_hash_table* hashtable);
+
+unsigned int mov_alu_hash(unsigned long long mov_address, int table_size);
+mov_alu_hash_table* mov_alu_create_table(long size, size_t value_size);
+void mov_alu_resize_table(mov_alu_hash_table *hashtable);
+void mov_alu_insert(mov_alu_hash_table *hashtable, unsigned long long mov_addr, unsigned long long alu_addr);
+void mov_alu_delete_key(mov_alu_hash_table *hashtable, unsigned long long mov_addr);
+unsigned long long  mov_alu_search(mov_alu_hash_table *hashtable, unsigned long long mov_addr);
+void mov_alu_iterate_table(mov_alu_hash_table *hashtable, void (*print_value)(unsigned long long, unsigned long long));
+int get_count_mov_alu(mov_alu_hash_table* hashtable);
+void mov_alu_free_table(mov_alu_hash_table *hashtable);
+mov_alu_entry* mov_alu_return_entry(mov_alu_hash_table *hashtable, unsigned long long mov_addr);
 
 /* for use in qsort */
 int compare_uns64(const void*, const void*);

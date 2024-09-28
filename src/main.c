@@ -228,7 +228,22 @@ void* voided_inst_truple_ptr = NULL;
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
 char prev_address_as_string[128];
+char deep_curr_address_as_string[128];
 unsigned long long starlab_prev_address = 0;
+
+void* voided_mov_alu_table_ptr = NULL;
+void* voided_mov_alu_ht = NULL;
+unsigned long long consec_curr_instr = 0;
+unsigned long long consec_prev_instr = 0;
+bool consec_prev_mov = false;
+bool consec_is_alu = false;
+unsigned long long mov_inst_icache_hit_prev_mov = 0;
+unsigned long long alu_inst_from_prev_mov = 0;
+bool consec_icache_hit_prev_mov = false;
+bool consec_icache_hit_curr_alu = false;
+
+char deep_curr_address_as_string[128]; // The current instruction address in hex
+char alu_address_as_string[128]; // The ALU instruction address in hex
 
 
 int main(int argc, char* argv[], char* envp[]) {
@@ -321,18 +336,18 @@ int main(int argc, char* argv[], char* envp[]) {
 
     qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
-    unsigned long total_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        total_cc_count += *(unsigned long *)key_value_pairs[i].value;
-    }
+    // unsigned long total_cc_count = 0;
+    // for (long i = 0; i < count; i++) {
+    //     total_cc_count += *(unsigned long *)key_value_pairs[i].value;
+    // }
 
-    unsigned long running_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
-        running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-        if (running_cc_count > ((total_cc_count * 99) / 100)) 
-            break;
-    }
+    // unsigned long running_cc_count = 0;
+    // for (long i = 0; i < count; i++) {
+    //     printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
+    //     running_cc_count += *(unsigned long *)key_value_pairs[i].value;
+    //     if (running_cc_count > ((total_cc_count * 99) / 100)) 
+    //         break;
+    // }
 
 
   return 0;

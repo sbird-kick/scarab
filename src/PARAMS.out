@@ -1,9 +1,7 @@
 --mode full
 --model cmp
---frontend memtrace
---inst_limit 100000000
+--frontend pt
 --sim_limit none
---full_warmup 15000000
 --dump_params 1
 --dump_stats 1
 --dump_trace 0
@@ -21,7 +19,6 @@
 --icache_size 32768
 --icache_assoc 8
 --icache_line_size 64
---uop_cache_enable 0
 --uop_cache_lines 384    # 6 x 384 = 2304 uops in total
 --uop_cache_assoc 8
 --iprf_on_uop_cache_hit 1
@@ -34,7 +31,7 @@
 --dcache_banks 1
 --mem_ooo_stores 1
 --mem_obey_store_dep 1
---mem_req_buffer_entries 64
+--mem_req_buffer_entries 32
 --mem_priority_ifetch 0
 --mem_priority_dfetch 1
 --mem_priority_dstore 2
@@ -58,7 +55,7 @@
 --ramulator_rows 65536
 --ramulator_cols 1024
 --ramulator_scheduling_policy FRFCFS_Cap
---ramulator_readq_entries 64
+--ramulator_readq_entries 32
 --ramulator_writeq_entries 32
 --ramulator_record_cmd_trace FALSE
 --ramulator_print_cmd_trace FALSE
@@ -91,18 +88,14 @@
 --fu_types b00100100111111100111001001111110010010011111110011100100111111 b10010000110111100011111001110111001000011011110001111100111011 b00000001000000001000000010000010000000100000000100000001000001 b00000001000000001000000010000010000000100000000100000001000001 b00000000110111100011011001110110000000011011110001101100111011 b01001000000000000111001001111110100100000000000011100100111111 b00000010000000010000000100000010000001000000001000000010000001 b00000010000000010000000100000010000001000000001000000010000001
 --decode_cycles 5
 --map_cycles 5
---fetch_off_path_ops 0
---wp_collect_stats 1
+--fetch_off_path_ops 1
 --stores_do_not_block_window 1
 --prefs_do_not_block_window 1
---cbp_trace_r0 /simpoint_traces//xgboost/traces_simp/trace/463.zip
---memtrace_modules_log /simpoint_traces//xgboost/traces_simp/bin
---fe_ftq_block_num 16
+--cbp_trace_r0 /users/deepmish/datacenterGz/cassandra/pt_trace
 --debug_cycle_start 0
 --debug_cycle_stop -1
 --debug_inst_start 0
 --debug_inst_stop -1
---perfect_crs 1
 --perfect_nt_btb 0  # deprecated, effectively always true.
 --cfs_per_cycle 6                         # Number of branches that can be predicted in a single cycle
 --update_bp_off_path 1                         # Allow off path ops to update branch predictor state (e.g., ops when they complete exec stage).
@@ -138,7 +131,6 @@
 --pref_update_interval 8192
 --pref_timely_thresh 0.01
 --pref_polpf_thresh 0.005
---fdip_enable 1
 1 1 1 1 1 1 1 
 
 --- Cut out everything below to use this file as PARAMS.in ---
@@ -147,8 +139,8 @@ Parameter status at compile time and values supplied on the command line:
 
 SIM_MODE                                 0                               full
 SIM_MODEL                                0                               cmp
-FRONTEND                                 FE_PIN_EXEC_DRIVEN              memtrace
-INST_LIMIT                               NULL                            100000000
+FRONTEND                                 FE_PIN_EXEC_DRIVEN              pt
+INST_LIMIT                               NULL                            
 SIM_LIMIT                                "none"                          none
 FORWARD_PROGRESS_LIMIT                   100000000                       
 FORWARD_PROGRESS_INTERVAL                10000                           
@@ -157,7 +149,7 @@ FAST_FORWARD_TRACE_INS                   0
 FAST_FORWARD_UNTIL_ADDR                  0                               
 MEMTRACE_ROI_BEGIN                       0                               
 MEMTRACE_ROI_END                         0                               
-FULL_WARMUP                              0                               15000000
+FULL_WARMUP                              0                               
 WARMUP                                   0                               
 HEARTBEAT_INTERVAL                       1000000                         
 NUM_HEARTBEATS                           0                               
@@ -240,7 +232,7 @@ ICACHE_READ_PORTS                        2
 ICACHE_WRITE_PORTS                       1                               
 ICACHE_BANKS                             8                               
 ICACHE_REPL                              0                               
-UOP_CACHE_ENABLE                         1                               0
+UOP_CACHE_ENABLE                         1                               
 ALWAYS_LOOKUP_ICACHE                     0                               
 UOP_CACHE_INSERT_ONLY_ONPATH             FALSE                           
 UOP_CACHE_LINES                          384                             384    # 6 x 384 = 2304 uops in total
@@ -275,7 +267,7 @@ PREF_INSERT_LRU                          FALSE
 PREF_INSERT_MIDDLE                       FALSE                           
 PREF_INSERT_LOWQTR                       FALSE                           
 PREF_INSERT_DYNACC                       FALSE                           
-MEM_REQ_BUFFER_ENTRIES                   32                              64
+MEM_REQ_BUFFER_ENTRIES                   32                              32
 PRIVATE_MSHR_ON                          TRUE                            
 MEM_PRIORITY_IFETCH                      0                               0
 MEM_PRIORITY_DFETCH                      0                               1
@@ -387,7 +379,7 @@ BUS_WIDTH_IN_BYTES                       8                               8
 RAMULATOR_ROWS                           65536                           65536
 RAMULATOR_COLS                           1024                            1024
 RAMULATOR_SCHEDULING_POLICY              "FRFCFS_Cap"                    FRFCFS_Cap
-RAMULATOR_READQ_ENTRIES                  32                              64
+RAMULATOR_READQ_ENTRIES                  32                              32
 RAMULATOR_WRITEQ_ENTRIES                 32                              32
 RAMULATOR_REC_CMD_TRACE                  "off"                           FALSE
 RAMULATOR_PRINT_CMD_TRACE                "off"                           FALSE
@@ -521,8 +513,8 @@ DIE_ON_RET_STALL_CORE                    0
 DIE_ON_MEM_BLOCK_THRESH                  0                               
 DIE_ON_MEM_BLOCK_CORE                    0                               
 FETCH_ACROSS_FETCH_TARGET                TRUE                            
-FETCH_OFF_PATH_OPS                       TRUE                            0
-WP_COLLECT_STATS                         FALSE                           1
+FETCH_OFF_PATH_OPS                       TRUE                            1
+WP_COLLECT_STATS                         FALSE                           
 SWITCH_IC_FETCH_ON_RECOVERY              TRUE                            
 OP_INV_DELAY                             1                               
 OP_NOP_DELAY                             1                               
@@ -563,7 +555,7 @@ OBEY_REG_DEP                             TRUE
 OLDEST_FIRST_SCHED                       FALSE                           
 FIND_EMPTIEST_RS                         FALSE                           
 TRACK_L1_MISS_DEPS                       FALSE                           
-CBP_TRACE_R0                             NULL                            /simpoint_traces//xgboost/traces_simp/trace/463.zip
+CBP_TRACE_R0                             NULL                            /users/deepmish/datacenterGz/cassandra/pt_trace
 CBP_TRACE_R1                             NULL                            
 CBP_TRACE_R2                             NULL                            
 CBP_TRACE_R3                             NULL                            
@@ -627,8 +619,8 @@ CBP_TRACE_R60                            NULL
 CBP_TRACE_R61                            NULL                            
 CBP_TRACE_R62                            NULL                            
 CBP_TRACE_R63                            NULL                            
-MEMTRACE_MODULES_LOG                     NULL                            /simpoint_traces//xgboost/traces_simp/bin
-FE_FTQ_BLOCK_NUM                         32                              16
+MEMTRACE_MODULES_LOG                     NULL                            
+FE_FTQ_BLOCK_NUM                         32                              
 FE_FTQ_TAKEN_CFS_PER_CYCLE               2                               
 FE_FTQ_BYTES_PER_CYCLE                   128                             
 DUMB_CORE_ON                             FALSE                           
@@ -699,7 +691,7 @@ DEBUG_FNLMMA                             FALSE
 PERFECT_BP                               FALSE                           
 PERFECT_BTB                              FALSE                           
 PERFECT_IBP                              FALSE                           
-PERFECT_CRS                              FALSE                           1
+PERFECT_CRS                              FALSE                           
 PERFECT_CBR_BTB                          FALSE                           
 PERFECT_NT_BTB                           FALSE                           0  # deprecated, effectively always true.
 CFS_PER_CYCLE                            3                               6                         # Number of branches that can be predicted in a single cycle
@@ -878,7 +870,7 @@ L1I_ENTANGLED_TABLE_INDEX_BITS           9
 L1I_ENTANGLED_TABLE_WAYS                 16                              
 DJOLT_ENABLE                             0                               
 FNLMMA_ENABLE                            0                               
-FDIP_ENABLE                              1                               1
+FDIP_ENABLE                              1                               
 FDIP_ALWAYS_PREFETCH                     FALSE                           
 PERFECT_FDIP                             FALSE                           
 FDIP_BLOOM_FILTER                        FALSE                           
