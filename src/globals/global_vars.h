@@ -110,6 +110,17 @@ extern unsigned long long mov_inst_icache_hit_prev_mov; // The MOV instruction c
 extern char deep_curr_address_as_string[128]; // The current instruction address in hex
 extern char alu_address_as_string[128]; // The ALU instruction address in hex
 
+extern bool consec_icache_hit_prev_alu;
+extern bool consec_icache_hit_curr_jump;
+extern unsigned long long jump_inst_from_prev_alu;
+extern unsigned long long alu_inst_icache_hit_prev_alu; // The ALU instruction corresponding to the previous ALU instruction from the hashtable
+extern char jump_address_as_string[128]; // The jump instruction address in hex
+extern void* voided_alu_jump_table_ptr;
+extern void* voided_alu_jump_ht;
+extern bool consec_prev_alu;
+extern bool consec_is_jump;
+
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */

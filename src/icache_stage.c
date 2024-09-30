@@ -351,65 +351,103 @@ void icache_hit_events(Flag uop_cache_hit) {
     // Check whether the current instruction is an ALU by comparing it against the MOV entry.
     // If it is an ALU and the previous instruction was a MOV, then increment the STATS.
 
-    int mov_alu_stats_counter = 1;
+    // int mov_alu_stats_counter = 1;
 
-        // Print the current instruction address in hex
-    sprintf(deep_curr_address_as_string, "%016llX", ic->fetch_addr);
-    // printf("Current instruction: %s\n", deep_curr_address_as_string);
+    //     // Print the current instruction address in hex
+    // sprintf(deep_curr_address_as_string, "%016llX", ic->fetch_addr);
+    // // printf("Current instruction: %s\n", deep_curr_address_as_string);
 
-    mov_alu_hash_table *voided_mov_alu_table_ptr = (mov_alu_hash_table *)voided_mov_alu_ht;
+    // mov_alu_hash_table *voided_mov_alu_table_ptr = (mov_alu_hash_table *)voided_mov_alu_ht;
 
-    if (voided_mov_alu_table_ptr == NULL) {
-    // If the table is not initialized, create it.
-    voided_mov_alu_table_ptr = mov_alu_create_table(INITIAL_TABLE_SIZE, sizeof(mov_alu_entry));
-    if (voided_mov_alu_table_ptr == NULL) {
-        // Handle memory allocation failure here.
-        fprintf(stderr, "Error: Failed to create MOV/ALU hash table\n");
+    // if (voided_mov_alu_table_ptr == NULL) {
+    // // If the table is not initialized, create it.
+    // voided_mov_alu_table_ptr = mov_alu_create_table(INITIAL_TABLE_SIZE, sizeof(mov_alu_entry));
+    // if (voided_mov_alu_table_ptr == NULL) {
+    //     // Handle memory allocation failure here.
+    //     fprintf(stderr, "Error: Failed to create MOV/ALU hash table\n");
+    //     return;
+    // }
+    // }
+
+    // mov_alu_entry *entry = mov_alu_return_entry(voided_mov_alu_table_ptr, ic->fetch_addr);
+
+    // if (entry != NULL) {
+    //     // Instruction is a MOV, set the MOV hit flag.
+    //     consec_icache_hit_prev_mov = true;
+
+    //     alu_inst_from_prev_mov = entry->alu_addr; // Initialize this here safely
+
+    //     // Print the addresses in hex
+    //     sprintf(prev_address_as_string, "%016llX", entry->mov_addr);
+    //     sprintf(alu_address_as_string, "%016llX", entry->alu_addr);
+
+    //     // printf("MOV: %s, ALU: %s\n", prev_address_as_string, alu_address_as_string);
+
+    //     if (entry->mov_addr == ic->fetch_addr) {
+    //         mov_inst_icache_hit_prev_mov = entry->mov_addr;
+    //     }
+    // } else {
+    //     consec_icache_hit_prev_mov = false;
+    //     // printf("Could not find MOV entry in the hash table\n");
+    // }
+
+    //     // printf("icache fetch address: %lld\n", ic->fetch_addr);
+    //     // printf("ALU instruction from previous MOV: %lld\n", alu_inst_from_prev_mov);
+
+    // if (ic->fetch_addr == alu_inst_from_prev_mov) {
+    //     // printf("icache fetch address: %lld\n", ic->fetch_addr);
+    //     // printf("ALU instruction from previous MOV: %lld\n", alu_inst_from_prev_mov);
+    //     consec_icache_hit_curr_alu = true;
+    // } else {
+    //     consec_icache_hit_curr_alu = false;
+    // }
+
+    // if (consec_icache_hit_curr_alu) {
+    //     INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_HIT, mov_alu_stats_counter);
+    //     // printf("Found a consecutive MOV-ALU pair in the icache hit logic\n");
+
+    // }
+
+    // voided_mov_alu_ht = (void*)voided_mov_alu_table_ptr;
+
+    int alu_jump_stats_counter = 1;
+    alu_jump_hash_table *voided_alu_jump_table_ptr = (alu_jump_hash_table *) voided_alu_jump_ht;
+
+    if(voided_alu_jump_table_ptr == NULL){
+      voided_alu_jump_table_ptr = alu_jump_create_table(INITIAL_TABLE_SIZE, sizeof(alu_jump_entry));
+      if(voided_alu_jump_table_ptr == NULL){
+        fprintf(stderr, "Error: Failed to create ALU/JUMP hash table\n");
         return;
-    }
-    }
-
-    mov_alu_entry *entry = mov_alu_return_entry(voided_mov_alu_table_ptr, ic->fetch_addr);
-
-    if (entry != NULL) {
-        // Instruction is a MOV, set the MOV hit flag.
-        consec_icache_hit_prev_mov = true;
-
-        alu_inst_from_prev_mov = entry->alu_addr; // Initialize this here safely
-
-        // Print the addresses in hex
-        sprintf(prev_address_as_string, "%016llX", entry->mov_addr);
-        sprintf(alu_address_as_string, "%016llX", entry->alu_addr);
-
-        // printf("MOV: %s, ALU: %s\n", prev_address_as_string, alu_address_as_string);
-
-        if (entry->mov_addr == ic->fetch_addr) {
-            mov_inst_icache_hit_prev_mov = entry->mov_addr;
-        }
-    } else {
-        consec_icache_hit_prev_mov = false;
-        // printf("Could not find MOV entry in the hash table\n");
+      }
     }
 
-        // printf("icache fetch address: %lld\n", ic->fetch_addr);
-        // printf("ALU instruction from previous MOV: %lld\n", alu_inst_from_prev_mov);
+    alu_jump_entry *entry = alu_jump_return_entry(voided_alu_jump_table_ptr, ic->fetch_addr);
 
-    if (ic->fetch_addr == alu_inst_from_prev_mov) {
-        // printf("icache fetch address: %lld\n", ic->fetch_addr);
-        // printf("ALU instruction from previous MOV: %lld\n", alu_inst_from_prev_mov);
-        consec_icache_hit_curr_alu = true;
-    } else {
-        consec_icache_hit_curr_alu = false;
+    if(entry != NULL){
+      // Instruction is ALU, set the ALU hit flag;
+      consec_icache_hit_prev_alu = true;
+      jump_inst_from_prev_alu = entry->jump_addr; 
+
+      if(entry->alu_addr == ic->fetch_addr){
+        alu_inst_icache_hit_prev_alu = entry->alu_addr;
+      }
     }
 
-    if (consec_icache_hit_curr_alu) {
-        INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_HIT, mov_alu_stats_counter);
-        // printf("Found a consecutive MOV-ALU pair in the icache hit logic\n");
-
+    else{
+      consec_icache_hit_prev_alu = false;
     }
 
-    voided_mov_alu_ht = (void*)voided_mov_alu_table_ptr;
+    if(ic->fetch_addr == jump_inst_from_prev_alu){
+      consec_icache_hit_curr_jump = true;
+    } else{
+      consec_icache_hit_curr_jump = false;
+    }
 
+    if(consec_icache_hit_curr_jump){
+      INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_JUMP_HIT, alu_jump_stats_counter);
+    }
+
+    voided_alu_jump_ht = (void*)voided_alu_jump_table_ptr;
 
   prefetcher_update_on_icache_access(/*icache_hit*/ TRUE);
   log_stats_ic_hit();

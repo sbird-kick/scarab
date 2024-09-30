@@ -246,6 +246,19 @@ char deep_curr_address_as_string[128]; // The current instruction address in hex
 char alu_address_as_string[128]; // The ALU instruction address in hex
 
 
+bool consec_icache_hit_prev_alu = false;
+bool consec_icache_hit_curr_jump = false;
+unsigned long long jump_inst_from_prev_alu = 0;
+unsigned long long alu_inst_icache_hit_prev_alu = 0; // The ALU instruction corresponding to the previous ALU instruction from the hashtable
+char jump_address_as_string[128]; // The jump instruction address in hex
+
+void* voided_alu_jump_table_ptr = NULL;
+void* voided_alu_jump_ht = NULL;
+bool consec_prev_alu = false;
+bool consec_is_jump = false;
+
+
+
 int main(int argc, char* argv[], char* envp[]) {
   char** simulated_argv;
   time_t cur_time;
