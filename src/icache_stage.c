@@ -342,7 +342,25 @@ void icache_hit_events(Flag uop_cache_hit) {
     }
   }
 
-    int alu_jump_stats_counter = 1;
+   
+
+  prefetcher_update_on_icache_access(/*icache_hit*/ TRUE);
+  log_stats_ic_hit();
+}
+
+void icache_miss_events(Flag uop_cache_hit) {
+    DEBUG(ic->proc_id, "Cache miss on op_num:%s @ 0x%s\n",
+          unsstr64(op_count[ic->proc_id]), hexstr64s(ic->fetch_addr));
+
+    if (ALWAYS_LOOKUP_ICACHE) {
+      if (!ic->off_path) {
+        STAT_EVENT(ic->proc_id, ICACHE_MISS_UOP_CACHE_MISS_ON_PATH + uop_cache_hit);
+      } else {
+        STAT_EVENT(ic->proc_id, ICACHE_MISS_UOP_CACHE_MISS_OFF_PATH + uop_cache_hit);
+      }
+    }
+
+     int alu_jump_stats_counter = 1;
     alu_jump_hash_table *voided_alu_jump_table_ptr = (alu_jump_hash_table *) voided_alu_jump_ht;
 
     if(voided_alu_jump_table_ptr == NULL){
@@ -376,26 +394,10 @@ void icache_hit_events(Flag uop_cache_hit) {
     }
 
     if(consec_icache_hit_curr_jump){
-      INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_JUMP_HIT, alu_jump_stats_counter);
+      INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_JUMP_MISS, alu_jump_stats_counter);
     }
 
     voided_alu_jump_ht = (void*)voided_alu_jump_table_ptr;
-
-  prefetcher_update_on_icache_access(/*icache_hit*/ TRUE);
-  log_stats_ic_hit();
-}
-
-void icache_miss_events(Flag uop_cache_hit) {
-    DEBUG(ic->proc_id, "Cache miss on op_num:%s @ 0x%s\n",
-          unsstr64(op_count[ic->proc_id]), hexstr64s(ic->fetch_addr));
-
-    if (ALWAYS_LOOKUP_ICACHE) {
-      if (!ic->off_path) {
-        STAT_EVENT(ic->proc_id, ICACHE_MISS_UOP_CACHE_MISS_ON_PATH + uop_cache_hit);
-      } else {
-        STAT_EVENT(ic->proc_id, ICACHE_MISS_UOP_CACHE_MISS_OFF_PATH + uop_cache_hit);
-      }
-    }
 
     prefetcher_update_on_icache_access(/*icache_hit*/ FALSE);
     log_stats_ic_miss();
