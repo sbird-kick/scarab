@@ -552,11 +552,11 @@ void mov_alu_iterate_table(mov_alu_hash_table *hashtable, void (*print_value)(un
     }
 }
 
-void alu_jump_iterate_table(alu_jump_hash_table *hashtable, void (*print_value)(unsigned long long, unsigned long long)) {
+void alu_jump_iterate_table(alu_jump_hash_table *hashtable, void (*print_value)(unsigned long long, unsigned long long, unsigned long long)) {
     for (int i = 0; i < hashtable->size; i++) {
         alu_jump_entry *node = hashtable->table[i];
         while (node) {
-            print_value(node->alu_addr, node->jump_addr);
+            print_value(node->alu_addr, node->jump_addr, node->next_addr);
             node = node->next;
         }
     }

@@ -460,16 +460,16 @@ int get_count_mov_alu(mov_alu_hash_table* hashtable);
 void mov_alu_free_table(mov_alu_hash_table *hashtable);
 mov_alu_entry* mov_alu_return_entry(mov_alu_hash_table *hashtable, unsigned long long mov_addr);
 
-unsigned int alu_jump_hash(unsigned long long mov_address, int table_size);
+unsigned int alu_jump_hash(unsigned long long alu_addr, int table_size);
 alu_jump_hash_table* alu_jump_create_table(long size, size_t value_size);
 void alu_jump_resize_table(alu_jump_hash_table *hashtable);
 void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr, unsigned long long jump_addr, unsigned long long next_addr);
-void alu_jump_delete_key(alu_jump_hash_table *hashtable, unsigned long long mov_addr);
-unsigned long long  alu_jump_search(alu_jump_hash_table *hashtable, unsigned long long mov_addr);
-void alu_jump_iterate_table(alu_jump_hash_table *hashtable, void (*print_value)(unsigned long long, unsigned long long));
+void alu_jump_delete_key(alu_jump_hash_table *hashtable, unsigned long long alu_addr);
+unsigned long long  alu_jump_search(alu_jump_hash_table *hashtable, unsigned long long alu_addr);
+void alu_jump_iterate_table(alu_jump_hash_table *hashtable, void (*print_value)(unsigned long long, unsigned long long, unsigned long long));
 int get_count_alu_jump(alu_jump_hash_table* hashtable);
 void alu_jump_free_table(alu_jump_hash_table *hashtable);
-alu_jump_entry* alu_jump_return_entry(alu_jump_hash_table *hashtable, unsigned long long mov_addr);
+alu_jump_entry* alu_jump_return_entry(alu_jump_hash_table *hashtable, unsigned long long alu_addr);
 
 /* for use in qsort */
 int compare_uns64(const void*, const void*);
