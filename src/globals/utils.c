@@ -390,7 +390,7 @@ void mov_alu_insert(mov_alu_hash_table *hashtable, unsigned long long mov_addr, 
 }
 
 
-void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr, unsigned long long jump_addr) {
+void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr, unsigned long long jump_addr, unsigned long long next_addr) {
     if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
         alu_jump_resize_table(hashtable);
     }
@@ -402,6 +402,7 @@ void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr
     while (node) {
         if (node->alu_addr == alu_addr) {
             node->jump_addr = jump_addr;
+            node->next_addr = next_addr;
             return;
         }
         node = node->next;
@@ -410,6 +411,7 @@ void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr
     alu_jump_entry *new_node = (alu_jump_entry*) malloc(sizeof(alu_jump_entry));
     new_node->alu_addr = alu_addr;
     new_node->jump_addr = jump_addr; // Directly assign the value
+    new_node->next_addr = next_addr;
     new_node->next = hashtable->table[idx];
     hashtable->table[idx] = new_node;
     hashtable->count++;

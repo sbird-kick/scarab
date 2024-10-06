@@ -189,131 +189,62 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
     if (!off_path_mode[proc_id]) {
       ctype_pin_inst* starlab_pi = &next_onpath_pi[proc_id];
 
-       // DEEPANJALI
-    consec_curr_instr = starlab_pi->instruction_addr;
+      // DEEPANJALI
+      consec_curr_instr = starlab_pi->instruction_addr;
 
-    // // FOR <MOV, ALU> STATS
-    // if (consec_prev_instr == 0) {  // First instruction?
-    //     // Set the current instruction as previous for the next round
-    //     consec_prev_instr = consec_curr_instr;
-    //     consec_prev_mov = starlab_pi->is_move ? 1 : 0;  // Mark if the first instruction is a MOV
-    // } else {
-    //     // Determine conditions for ALU: copy Humza's logic
-    //     Flag has_load    = starlab_pi->num_ld > 0;
-    //     Flag has_push    = starlab_pi->has_push;
-    //     Flag has_pop     = starlab_pi->has_pop;
-    //     Flag has_store   = starlab_pi->num_st > 0;
-    //     Flag has_control = starlab_pi->cf_type != NOT_CF;  
+      // Determine conditions for ALU: copy Humza's logic
+      Flag has_load    = starlab_pi->num_ld > 0;
+      Flag has_push    = starlab_pi->has_push;
+      Flag has_pop     = starlab_pi->has_pop;
+      Flag has_store   = starlab_pi->num_st > 0;
+      Flag has_control = starlab_pi->cf_type != NOT_CF; 
 
-    //     // Check if the current instruction requires ALU
-    //     bool codverch_has_alu = 
-    //         !(starlab_pi->is_move && (has_load || has_store)) &&  // Not a simple LD/ST move
-    //         ((!has_control && !has_load && !has_store) ||          // Not memory, not control, must be an operation
-    //         has_push || has_pop ||                                 // ALU needed for stack address generation
-    //         starlab_pi->num_dst_regs > 0 ||                        // If it writes to registers, must be an operation
-    //         (has_load && has_store) ||                             // Read-modify-write operation
-    //         (starlab_pi->op_type >= OP_PIPELINED_FAST && 
-    //         starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));    // Special instructions need ALU
+      bool codverch_has_alu = 
+          !(starlab_pi->is_move && (has_load || has_store)) &&   // Not a simple LD/ST move
+          ((!has_control && !has_load && !has_store) ||          // Not memory, not control, must be an operation
+          has_push || has_pop ||                                 // ALU needed for stack address generation
+          starlab_pi->num_dst_regs > 0 ||                        // If it writes to registers, must be an operation
+          (has_load && has_store) ||                             // Read-modify-write operation
+          (starlab_pi->op_type >= OP_PIPELINED_FAST && 
+          starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));    // Special instructions need ALU 
 
-    //     if (starlab_pi->is_move) {  // Current instruction is a MOV
-    //         // Track the current instruction
-    //         consec_prev_instr = consec_curr_instr;  
-    //         consec_is_alu = 0;  // Current instruction is MOV, not ALU
-    //         consec_prev_mov = 1; // Mark current instruction as MOV
-    //     } else if (codverch_has_alu) {  // If the current instruction is an ALU operation
-    //         if (consec_prev_mov) {  // Previous instruction was a MOV
-    //             // printf("Consecutive <MOV, ALU> pair detected!\n");
+      if (is_first_inst == 0) { // First instruction?
+        // Set the current instruction as the first instruction 
+          is_first_inst = 1; // Initialize as first instruction
+          first_inst_in_trace = consec_curr_instr;
+          consec_prev_alu = codverch_has_alu ? 1 : 0; // Mark whether the first instruction is ALU
+      } else {
+          // Check whether the previous instruction was ALU
+          if (consec_prev_alu) {
+              consec_prev_instr_alu = first_inst_in_trace; // Previous ALU instruction tracking
+              
+              // Check whether the current instruction is a JUMP 
+              if (starlab_pi->cf_type) {
+                  // Track the Jump instruction 
+                  consec_prev_instr_jump = consec_curr_instr; // Track jump instruction
+                  consec_prev_jump = 1; // Mark jump instruction detected
+              }
+          } else if (codverch_has_alu) { // Check whether the current instruction is ALU
+              // Track the current instruction
+              consec_prev_instr_alu = consec_curr_instr; 
+              consec_prev_alu = 1; // Current instruction is ALU
+              consec_prev_jump = 0; // Reset jump tracking since current is ALU
+          } else if (starlab_pi->cf_type && consec_prev_alu) { // If current instruction is JUMP and previous was ALU
+              consec_prev_instr_jump = consec_curr_instr; // Track jump instruction
+              consec_prev_jump = 1; // Mark jump instruction detected
+          } 
 
-    //             // Insert the <MOV, ALU> pair into the hash table
-    //             mov_alu_insert(voided_mov_alu_table_ptr, 
-    //                           consec_prev_instr,  
-    //                           consec_curr_instr);  
+          // Check if we have an ALU followed by a JUMP
+          if (consec_prev_alu && consec_prev_jump) {
+              alu_jump_insert(voided_alu_jump_table_ptr, consec_prev_instr_alu, consec_prev_instr_jump, consec_curr_instr); 
 
-    //             // Uncomment to print the hash table (if needed for debugging)
-    //             // print_mov_alu_hashtable(voided_mov_alu_table_ptr);
-
-    //             consec_prev_mov = 0;  // Reset MOV flag after detection
-    //         }
-
-    //         // Since the previous instruction was not a MOV, we can't have a <MOV, ALU> pair
-    //         // No need to set consec_prev_mov here as it was already checked above
-
-    //         // Copy the current instruction to previous instruction for the next round
-    //         consec_prev_instr = consec_curr_instr;
-    //         // Reset the MOV and ALU flags for tracking the next pair
-    //         consec_is_alu = 0; 
-    //         consec_prev_mov = 0; 
-    //     }
-    // }
-
-
-    // voided_mov_alu_ht = (void*)voided_mov_alu_table_ptr;
-
-
-    // DEEPANJALI
-    // For <ALU, JUMP> stats
-
-            // Determine conditions for ALU: copy Humza's logic
-        Flag has_load    = starlab_pi->num_ld > 0;
-        Flag has_push    = starlab_pi->has_push;
-        Flag has_pop     = starlab_pi->has_pop;
-        Flag has_store   = starlab_pi->num_st > 0;
-        Flag has_control = starlab_pi->cf_type != NOT_CF; 
-
-          
-        bool codverch_has_alu = 
-
-           !(starlab_pi->is_move && (has_load || has_store)) &&  // Not a simple LD/ST move
-            ((!has_control && !has_load && !has_store) ||          // Not memory, not control, must be an operation
-            has_push || has_pop ||                                 // ALU needed for stack address generation
-            starlab_pi->num_dst_regs > 0 ||                        // If it writes to registers, must be an operation
-            (has_load && has_store) ||                             // Read-modify-write operation
-            (starlab_pi->op_type >= OP_PIPELINED_FAST && 
-            starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));    // Special instructions need ALU 
-        
-
-      if (consec_prev_instr == 0) {  // First instruction?
-        // Set the current instruction as previous for the next round
-        consec_prev_instr = consec_curr_instr;
-
-        // Logic for identifying an ALU instruction 
-
-        consec_prev_alu = codverch_has_alu ? 1 : 0;  // Mark if the first instruction is a MOV
-    } else {
-
-      // Not the first instruction in the trace
-
-      // Check whether the current instruction is ALU
-
-      if(codverch_has_alu){
-        // Track the current instruction
-        consec_prev_instr = consec_curr_instr; 
-        consec_prev_alu = 1; // Current instruction is ALU
-        consec_is_jump = 0; // 
+              // Reset the flags after detection
+              consec_prev_alu = 0; // Reset the ALU flag after detection
+              consec_prev_jump = 0; // Reset the jump flag after insertion
+          }
       }
 
-      else if(starlab_pi->cf_type){ // If the current instruction is a control flow change (jump instruction)
-
-      if(consec_prev_alu){  // Previous instruction was an ALU operation
-
-        alu_jump_insert(voided_alu_jump_table_ptr,
-                        consec_prev_instr,
-                        consec_curr_instr);
-
-        consec_prev_alu = 0; // Reset the ALU flag after detection
-
-      }
-
-      consec_prev_instr = consec_curr_instr;
-      consec_is_jump = 0;  // Not being used currently though
-      consec_prev_alu = 0; // Probably redundant
-
-      }
-
-    }
-  
-      voided_alu_jump_ht = (void*) voided_alu_jump_table_ptr;
-
+      voided_alu_jump_ht = (void *)voided_alu_jump_table_ptr;
 
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);

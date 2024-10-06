@@ -231,11 +231,8 @@ char prev_address_as_string[128];
 char deep_curr_address_as_string[128];
 unsigned long long starlab_prev_address = 0;
 
-void* voided_mov_alu_table_ptr = NULL;
-void* voided_mov_alu_ht = NULL;
 unsigned long long consec_curr_instr = 0;
 unsigned long long consec_prev_instr = 0;
-bool consec_prev_mov = false;
 bool consec_is_alu = false;
 unsigned long long mov_inst_icache_hit_prev_mov = 0;
 unsigned long long alu_inst_from_prev_mov = 0;
@@ -255,8 +252,12 @@ char jump_address_as_string[128]; // The jump instruction address in hex
 void* voided_alu_jump_table_ptr = NULL;
 void* voided_alu_jump_ht = NULL;
 bool consec_prev_alu = false;
-bool consec_is_jump = false;
-
+bool consec_prev_jump = false;
+unsigned long long consec_next_inst = 0;
+bool is_first_inst = 0;
+unsigned long long consec_prev_instr_alu = 0;
+unsigned long long first_inst_in_trace = 0;
+unsigned long long consec_prev_instr_jump = 0;
 
 
 int main(int argc, char* argv[], char* envp[]) {

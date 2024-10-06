@@ -393,6 +393,7 @@ typedef struct mov_alu_entry {
 typedef struct alu_jump_entry {
   unsigned long long alu_addr;
   unsigned long long jump_addr;
+  unsigned long long next_addr; // Address of the next instruction after JUMP
   struct alu_jump_entry *next; 
 } alu_jump_entry;
 
@@ -462,7 +463,7 @@ mov_alu_entry* mov_alu_return_entry(mov_alu_hash_table *hashtable, unsigned long
 unsigned int alu_jump_hash(unsigned long long mov_address, int table_size);
 alu_jump_hash_table* alu_jump_create_table(long size, size_t value_size);
 void alu_jump_resize_table(alu_jump_hash_table *hashtable);
-void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long mov_addr, unsigned long long alu_addr);
+void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr, unsigned long long jump_addr, unsigned long long next_addr);
 void alu_jump_delete_key(alu_jump_hash_table *hashtable, unsigned long long mov_addr);
 unsigned long long  alu_jump_search(alu_jump_hash_table *hashtable, unsigned long long mov_addr);
 void alu_jump_iterate_table(alu_jump_hash_table *hashtable, void (*print_value)(unsigned long long, unsigned long long));

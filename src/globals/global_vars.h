@@ -96,29 +96,26 @@ extern char prev_instruction_class[128];
 extern char prev_address_as_string[128];
 extern unsigned long long starlab_prev_address;
 
-extern void* voided_mov_alu_table_ptr;
-extern void* voided_mov_alu_ht;
-extern unsigned long long consec_prev_instr; // What was the previous instruction? 
-extern unsigned long long consec_curr_instr; // What is the current instruction? 
-extern bool consec_prev_mov; // Was the previous instruction in the consecutive instruction sequences MOV?
-extern bool consec_is_alu; // Is the current instruction performing an ALU operation? 
+extern unsigned long long consec_prev_instr_alu;
+extern unsigned long long first_inst_in_trace;
+extern unsigned long long consec_prev_instr_jump; 
+extern bool is_first_inst;
+extern unsigned long long consec_curr_instr; 
+extern bool consec_is_alu; 
 
-extern bool consec_icache_hit_prev_mov; // Was the previous instruction in the icache hit logic a MOV?
-extern bool consec_icache_hit_curr_alu; // Is the current instruction in the icache hit logic an ALU operation?
-extern unsigned long long alu_inst_from_prev_mov; // The ALU instruction corresponding to the previous MOV instruction from the hashtable
-extern unsigned long long mov_inst_icache_hit_prev_mov; // The MOV instruction corresponding to the previous MOV instruction from the hashtable
-extern char deep_curr_address_as_string[128]; // The current instruction address in hex
-extern char alu_address_as_string[128]; // The ALU instruction address in hex
-
+extern bool consec_icache_hit_prev_mov; 
+extern unsigned long long mov_inst_icache_hit_prev_mov; 
+extern char deep_curr_address_as_string[128]; 
+extern char alu_address_as_string[128]; 
 extern bool consec_icache_hit_prev_alu;
 extern bool consec_icache_hit_curr_jump;
 extern unsigned long long jump_inst_from_prev_alu;
-extern unsigned long long alu_inst_icache_hit_prev_alu; // The ALU instruction corresponding to the previous ALU instruction from the hashtable
-extern char jump_address_as_string[128]; // The jump instruction address in hex
-extern void* voided_alu_jump_table_ptr;
+extern unsigned long long alu_inst_icache_hit_prev_alu; 
+extern char jump_address_as_string[128]; 
 extern void* voided_alu_jump_ht;
 extern bool consec_prev_alu;
-extern bool consec_is_jump;
+extern bool consec_prev_jump;
+extern unsigned long long consec_next_inst;
 
 
 /**************************************************************************************/
