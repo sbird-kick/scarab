@@ -107,6 +107,7 @@ extern bool consec_icache_hit_prev_mov;
 extern unsigned long long mov_inst_icache_hit_prev_mov; 
 extern char deep_curr_address_as_string[128]; 
 extern char alu_address_as_string[128]; 
+extern char next_addr_address_as_string[128]; 
 extern bool consec_icache_hit_prev_alu;
 extern bool consec_icache_hit_prev_jump;
 extern unsigned long long jump_inst_from_prev_alu;

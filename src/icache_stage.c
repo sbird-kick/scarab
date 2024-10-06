@@ -380,6 +380,13 @@ void icache_miss_events(Flag uop_cache_hit) {
           jump_inst_from_prev_alu = entry->jump_addr; 
           next_addr_after_alu_jump = entry->next_addr;  // Track next instruction after jump
 
+          // Convert the addresses into string and print 
+          // sprintf(alu_address_as_string, "%016llX", entry->alu_addr);  
+          // sprintf(jump_address_as_string, "%016llX", entry->jump_addr);
+          // sprintf(next_addr_address_as_string, "%016llX", entry->next_addr);
+
+          // printf("ALU instruction detected: ALU address: %s, Jump address: %s, Next address: %s\n", alu_address_as_string, jump_address_as_string, next_addr_address_as_string);
+
           if (entry->alu_addr == ic->fetch_addr) {
               alu_inst_icache_hit_prev_alu = entry->alu_addr;  // Track ALU hit
           }

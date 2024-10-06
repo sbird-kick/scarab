@@ -200,13 +200,13 @@ unsigned int mov_alu_hash(unsigned long long mov_address, int table_size){
 
 }
 
-unsigned int alu_jump_hash(unsigned long long alu_address, int table_size){
+unsigned int alu_jump_hash(unsigned long long next_address, int table_size){
   unsigned int hash = 0; 
 
    // Hashing the address by processing each byte
-    for (int i = 0; i < sizeof(alu_address); i++) {
-        hash = (hash << 5) + (alu_address & 0xFF);  // Add the lowest byte of the address to the hash
-        alu_address >>= 8;  // Shift the address right by 8 bits (1 byte)
+    for (int i = 0; i < sizeof(next_address); i++) {
+        hash = (hash << 5) + (next_address & 0xFF);  // Add the lowest byte of the address to the hash
+        next_address >>= 8;  // Shift the address right by 8 bits (1 byte)
     }
     
     return hash % table_size;
@@ -325,7 +325,7 @@ void alu_jump_resize_table(alu_jump_hash_table *hashtable) {
     for (int i = 0; i < hashtable->size; i++) {
         alu_jump_entry *node = hashtable->table[i];
         while (node) {
-            unsigned int new_index = alu_jump_hash(node->alu_addr, new_size);
+            unsigned int new_index = alu_jump_hash(node->next_addr, new_size);
             alu_jump_entry *next_node = node->next;
             node->next = new_table[new_index];
             new_table[new_index] = node;
@@ -395,14 +395,14 @@ void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr
         alu_jump_resize_table(hashtable);
     }
 
-    unsigned int idx = alu_jump_hash(alu_addr, hashtable->size);
+    unsigned int idx = alu_jump_hash(next_addr, hashtable->size);
     alu_jump_entry *node = hashtable->table[idx];
 
     // Check whether the address already exists, if so just update it
     while (node) {
-        if (node->alu_addr == alu_addr) {
+        if (node->next_addr == next_addr) {
             node->jump_addr = jump_addr;
-            node->next_addr = next_addr;
+            node->alu_addr = alu_addr;
             return;
         }
         node = node->next;
@@ -505,12 +505,12 @@ void mov_alu_delete_key(mov_alu_hash_table *hashtable, unsigned long long mov_ad
     hashtable->count--;
 }
 
-void alu_jump_delete_key(alu_jump_hash_table *hashtable, unsigned long long alu_addr) {
-    unsigned int index = alu_jump_hash(alu_addr, hashtable->size);
+void alu_jump_delete_key(alu_jump_hash_table *hashtable, unsigned long long next_addr) {
+    unsigned int index = alu_jump_hash(next_addr, hashtable->size);
     alu_jump_entry *node = hashtable->table[index];
     alu_jump_entry *prev = NULL;
 
-    while (node && (node->alu_addr != alu_addr)) {
+    while (node && (node->next_addr != next_addr)) {
         prev = node;
         node = node->next;
     }
@@ -619,14 +619,14 @@ mov_alu_entry* mov_alu_return_entry(mov_alu_hash_table *hashtable, unsigned long
     return NULL;
 }
 
-alu_jump_entry* alu_jump_return_entry(alu_jump_hash_table *hashtable, unsigned long long alu_addr) {
+alu_jump_entry* alu_jump_return_entry(alu_jump_hash_table *hashtable, unsigned long long next_addr) {
     // Compute the index for the key using the hash function
-    unsigned int index = alu_jump_hash(alu_addr, hashtable->size);
+    unsigned int index = alu_jump_hash(next_addr, hashtable->size);
 
     // Traverse the linked list at the hashed index to find the correct entry
     alu_jump_entry *node = hashtable->table[index];
     while (node) {
-        if (node->alu_addr == alu_addr) {
+        if (node->next_addr == next_addr) {
             // If the entry with the given key is found, return the mov_alu_entry
             return node;
         }

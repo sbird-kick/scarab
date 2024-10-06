@@ -241,6 +241,7 @@ bool consec_icache_hit_curr_alu = false;
 
 char deep_curr_address_as_string[128]; // The current instruction address in hex
 char alu_address_as_string[128]; // The ALU instruction address in hex
+char next_addr_address_as_string[128]; // The next instruction address in hex
 
 bool consec_icache_hit_prev_alu = false;
 bool consec_icache_hit_prev_jump = false;

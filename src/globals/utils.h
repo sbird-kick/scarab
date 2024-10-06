@@ -460,7 +460,7 @@ int get_count_mov_alu(mov_alu_hash_table* hashtable);
 void mov_alu_free_table(mov_alu_hash_table *hashtable);
 mov_alu_entry* mov_alu_return_entry(mov_alu_hash_table *hashtable, unsigned long long mov_addr);
 
-unsigned int alu_jump_hash(unsigned long long alu_addr, int table_size);
+unsigned int alu_jump_hash(unsigned long long next_addr, int table_size);
 alu_jump_hash_table* alu_jump_create_table(long size, size_t value_size);
 void alu_jump_resize_table(alu_jump_hash_table *hashtable);
 void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr, unsigned long long jump_addr, unsigned long long next_addr);
