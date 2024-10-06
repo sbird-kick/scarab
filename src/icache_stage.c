@@ -375,45 +375,12 @@ void icache_miss_events(Flag uop_cache_hit) {
       alu_jump_entry *entry = alu_jump_return_entry(voided_alu_jump_table_ptr, ic->fetch_addr);
 
       if (entry != NULL) {
-          // Entry found in hash table: ALU instruction detected
-          consec_icache_hit_prev_alu = true;
-          jump_inst_from_prev_alu = entry->jump_addr; 
-          next_addr_after_alu_jump = entry->next_addr;  // Track next instruction after jump
+          // This miss address was a consequence of the previous instructions before it being ALU and JUMP
+         INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_JUMP_MISS, alu_jump_stats_counter); 
 
-          // Convert the addresses into string and print 
-          // sprintf(alu_address_as_string, "%016llX", entry->alu_addr);  
-          // sprintf(jump_address_as_string, "%016llX", entry->jump_addr);
-          // sprintf(next_addr_address_as_string, "%016llX", entry->next_addr);
-
-          // printf("ALU instruction detected: ALU address: %s, Jump address: %s, Next address: %s\n", alu_address_as_string, jump_address_as_string, next_addr_address_as_string);
-
-          if (entry->alu_addr == ic->fetch_addr) {
-              alu_inst_icache_hit_prev_alu = entry->alu_addr;  // Track ALU hit
-          }
-      } else {
-          // Entry not found: Not an ALU instruction
-          consec_icache_hit_prev_alu = false;
       }
-
-      // Check whether the current instruction is a JUMP
-      if (ic->fetch_addr == jump_inst_from_prev_alu) {
-          consec_icache_hit_prev_jump = true;  // Track JUMP hit
-      } else {
-          consec_icache_hit_prev_jump = false;
-      }
-
-      // If the current instruction is regular, but the previous ones were ALU and JUMP
-      if (consec_icache_hit_prev_alu && consec_icache_hit_prev_jump) {
-          // Both ALU and JUMP were detected in sequence, log the event
-          INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_JUMP_MISS, alu_jump_stats_counter);
-
-          // Reset tracking flags
-          consec_icache_hit_prev_alu = false;
-          consec_icache_hit_prev_jump = false;
-      }
-
+      
       voided_alu_jump_ht = (void *)voided_alu_jump_table_ptr;
-
 
     prefetcher_update_on_icache_access(/*icache_hit*/ FALSE);
     log_stats_ic_miss();
