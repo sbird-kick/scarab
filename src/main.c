@@ -242,9 +242,8 @@ bool consec_icache_hit_curr_alu = false;
 char deep_curr_address_as_string[128]; // The current instruction address in hex
 char alu_address_as_string[128]; // The ALU instruction address in hex
 
-
 bool consec_icache_hit_prev_alu = false;
-bool consec_icache_hit_curr_jump = false;
+bool consec_icache_hit_prev_jump = false;
 unsigned long long jump_inst_from_prev_alu = 0;
 unsigned long long alu_inst_icache_hit_prev_alu = 0; // The ALU instruction corresponding to the previous ALU instruction from the hashtable
 char jump_address_as_string[128]; // The jump instruction address in hex
@@ -258,7 +257,7 @@ bool is_first_inst = 0;
 unsigned long long consec_prev_instr_alu = 0;
 unsigned long long first_inst_in_trace = 0;
 unsigned long long consec_prev_instr_jump = 0;
-
+unsigned long long next_addr_after_alu_jump = 0;
 
 int main(int argc, char* argv[], char* envp[]) {
   char** simulated_argv;
@@ -338,8 +337,6 @@ int main(int argc, char* argv[], char* envp[]) {
   KeyValuePair *key_value_pairs;
   long count = get_count(voided_global_starlab_types_ht);
   key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
-  
-
 
   starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
 

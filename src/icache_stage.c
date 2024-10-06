@@ -341,9 +341,7 @@ void icache_hit_events(Flag uop_cache_hit) {
       STAT_EVENT(ic->proc_id, ICACHE_HIT_UOP_CACHE_MISS_OFF_PATH + uop_cache_hit);
     }
   }
-
-   
-
+  
   prefetcher_update_on_icache_access(/*icache_hit*/ TRUE);
   log_stats_ic_hit();
 }
@@ -360,44 +358,55 @@ void icache_miss_events(Flag uop_cache_hit) {
       }
     }
 
-     int alu_jump_stats_counter = 1;
-    alu_jump_hash_table *voided_alu_jump_table_ptr = (alu_jump_hash_table *) voided_alu_jump_ht;
+      // DEEPANJALI
 
-    if(voided_alu_jump_table_ptr == NULL){
-      voided_alu_jump_table_ptr = alu_jump_create_table(INITIAL_TABLE_SIZE, sizeof(alu_jump_entry));
-      if(voided_alu_jump_table_ptr == NULL){
-        fprintf(stderr, "Error: Failed to create ALU/JUMP hash table\n");
-        return;
+      int alu_jump_stats_counter = 1;
+
+      alu_jump_hash_table *voided_alu_jump_table_ptr = (alu_jump_hash_table *) voided_alu_jump_ht;
+
+      if (voided_alu_jump_table_ptr == NULL) {
+          voided_alu_jump_table_ptr = alu_jump_create_table(INITIAL_TABLE_SIZE, sizeof(alu_jump_entry));
+          if (voided_alu_jump_table_ptr == NULL) {
+              fprintf(stderr, "Error: Failed to create ALU/JUMP hash table\n");
+              return;
+          }
       }
-    }
 
-    alu_jump_entry *entry = alu_jump_return_entry(voided_alu_jump_table_ptr, ic->fetch_addr);
+      alu_jump_entry *entry = alu_jump_return_entry(voided_alu_jump_table_ptr, ic->fetch_addr);
 
-    if(entry != NULL){
-      // Instruction is ALU, set the ALU hit flag;
-      consec_icache_hit_prev_alu = true;
-      jump_inst_from_prev_alu = entry->jump_addr; 
-      
-      if(entry->alu_addr == ic->fetch_addr){
-        alu_inst_icache_hit_prev_alu = entry->alu_addr;
+      if (entry != NULL) {
+          // Entry found in hash table: ALU instruction detected
+          consec_icache_hit_prev_alu = true;
+          jump_inst_from_prev_alu = entry->jump_addr; 
+          next_addr_after_alu_jump = entry->next_addr;  // Track next instruction after jump
+
+          if (entry->alu_addr == ic->fetch_addr) {
+              alu_inst_icache_hit_prev_alu = entry->alu_addr;  // Track ALU hit
+          }
+      } else {
+          // Entry not found: Not an ALU instruction
+          consec_icache_hit_prev_alu = false;
       }
-    }
 
-    else{
-      consec_icache_hit_prev_alu = false;
-    }
+      // Check whether the current instruction is a JUMP
+      if (ic->fetch_addr == jump_inst_from_prev_alu) {
+          consec_icache_hit_prev_jump = true;  // Track JUMP hit
+      } else {
+          consec_icache_hit_prev_jump = false;
+      }
 
-    if(ic->fetch_addr == jump_inst_from_prev_alu){
-      consec_icache_hit_curr_jump = true;
-    } else{
-      consec_icache_hit_curr_jump = false;
-    }
+      // If the current instruction is regular, but the previous ones were ALU and JUMP
+      if (consec_icache_hit_prev_alu && consec_icache_hit_prev_jump) {
+          // Both ALU and JUMP were detected in sequence, log the event
+          INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_JUMP_MISS, alu_jump_stats_counter);
 
-    if(consec_icache_hit_curr_jump){
-      INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_JUMP_MISS, alu_jump_stats_counter);
-    }
+          // Reset tracking flags
+          consec_icache_hit_prev_alu = false;
+          consec_icache_hit_prev_jump = false;
+      }
 
-    voided_alu_jump_ht = (void*)voided_alu_jump_table_ptr;
+      voided_alu_jump_ht = (void *)voided_alu_jump_table_ptr;
+
 
     prefetcher_update_on_icache_access(/*icache_hit*/ FALSE);
     log_stats_ic_miss();
