@@ -602,6 +602,49 @@ void update_icache_stage() {
           ic->next_state = UOP_CACHE_SERVING;
         } else if (ic->line) {
           // uop cache miss and icache hit
+
+          // DEEPANJALI
+
+          int alu_jump_stats_counter = 1;
+
+          alu_jump_hash_table *voided_alu_jump_table_ptr = (alu_jump_hash_table *) voided_alu_jump_ht;
+
+          if (voided_alu_jump_table_ptr == NULL) {
+              voided_alu_jump_table_ptr = alu_jump_create_table(INITIAL_TABLE_SIZE, sizeof(alu_jump_entry));
+              if (voided_alu_jump_table_ptr == NULL) {
+                  fprintf(stderr, "Error: Failed to create ALU/JUMP hash table\n");
+                  return;
+              }
+          }
+
+          alu_jump_entry *entry = alu_jump_return_entry(voided_alu_jump_table_ptr, ic->fetch_addr);
+
+            if (entry != NULL) {
+              INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS, alu_jump_stats_counter);
+              INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_ICACHE_HIT, alu_jump_stats_counter);
+
+              if(entry->is_mov) {
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_MOV, alu_jump_stats_counter);
+            }
+
+            else if(entry->has_push){
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_HAS_PUSH, alu_jump_stats_counter);
+            }
+
+            else if(entry->has_pop){
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_HAS_POP, alu_jump_stats_counter);
+            }
+
+            else if(entry->is_prefetch){
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_PREFETCH, alu_jump_stats_counter);
+            }
+
+            else if(entry->is_call){
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_CALL, alu_jump_stats_counter);
+            }
+
+        }
+
           if (!ic->off_path) {
             STAT_EVENT(ic->proc_id, FT_UOP_CACHE_MISS_ICACHE_HIT_ON_PATH);
           } else {
@@ -615,6 +658,48 @@ void update_icache_stage() {
           }
         } else {
           // uop cache miss and icache miss
+           // DEEPANJALI
+
+          int alu_jump_stats_counter = 1;
+
+          alu_jump_hash_table *voided_alu_jump_table_ptr = (alu_jump_hash_table *) voided_alu_jump_ht;
+
+          if (voided_alu_jump_table_ptr == NULL) {
+              voided_alu_jump_table_ptr = alu_jump_create_table(INITIAL_TABLE_SIZE, sizeof(alu_jump_entry));
+              if (voided_alu_jump_table_ptr == NULL) {
+                  fprintf(stderr, "Error: Failed to create ALU/JUMP hash table\n");
+                  return;
+              }
+          }
+
+          alu_jump_entry *entry = alu_jump_return_entry(voided_alu_jump_table_ptr, ic->fetch_addr);
+
+            if (entry != NULL) {
+              INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS, alu_jump_stats_counter);
+              INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_ICACHE_MISS, alu_jump_stats_counter);
+
+              if(entry->is_mov) {
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_MOV, alu_jump_stats_counter);
+            }
+
+            else if(entry->has_push){
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_HAS_PUSH, alu_jump_stats_counter);
+            }
+
+            else if(entry->has_pop){
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_HAS_POP, alu_jump_stats_counter);
+            }
+
+            else if(entry->is_prefetch){
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_PREFETCH, alu_jump_stats_counter);
+            }
+
+            else if(entry->is_call){
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_CALL, alu_jump_stats_counter);
+            }
+
+        }
+
           if (!ic->off_path) {
             STAT_EVENT(ic->proc_id, FT_UOP_CACHE_MISS_ICACHE_MISS_ON_PATH);
           } else {
