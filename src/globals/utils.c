@@ -390,7 +390,8 @@ void mov_alu_insert(mov_alu_hash_table *hashtable, unsigned long long mov_addr, 
 }
 
 
-void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr, unsigned long long jump_addr, unsigned long long next_addr) {
+void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr, unsigned long long jump_addr, unsigned long long next_addr,
+                     bool is_mov, bool has_push, bool has_pop, bool is_prefetch, bool is_call) {
     if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
         alu_jump_resize_table(hashtable);
     }
@@ -403,6 +404,11 @@ void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr
         if (node->next_addr == next_addr) {
             node->jump_addr = jump_addr;
             node->alu_addr = alu_addr;
+            node->is_mov = is_mov;
+            node->has_push = has_push;
+            node->has_pop = has_pop;
+            node->is_prefetch = is_prefetch;
+            node->is_call = is_call;
             return;
         }
         node = node->next;
@@ -412,6 +418,11 @@ void alu_jump_insert(alu_jump_hash_table *hashtable, unsigned long long alu_addr
     new_node->alu_addr = alu_addr;
     new_node->jump_addr = jump_addr; // Directly assign the value
     new_node->next_addr = next_addr;
+    new_node->is_mov = is_mov;
+    new_node->has_push = has_push;
+    new_node->has_pop = has_pop;
+    new_node->is_prefetch = is_prefetch;
+    new_node->is_call = is_call;
     new_node->next = hashtable->table[idx];
     hashtable->table[idx] = new_node;
     hashtable->count++;

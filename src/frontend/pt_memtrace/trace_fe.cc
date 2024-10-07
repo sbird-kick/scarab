@@ -225,7 +225,16 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             else if (consec_prev_jump) {
                 // Here, we are after a JUMP and looking for SOMETHING
                 // ALU -> JUMP -> SOMETHING sequence detected
-                alu_jump_insert(voided_alu_jump_table_ptr, consec_prev_instr_alu, consec_prev_instr_jump, consec_curr_instr);
+
+                // check whether current instruction is is_mov or has_push or has_pop or is_call or is_prefetch
+                Flag codverch_is_mov = starlab_pi->is_move;
+                Flag codverch_has_push = starlab_pi->has_push;
+                Flag codverch_has_pop = starlab_pi->has_pop;
+                Flag codverch_is_call = starlab_pi->is_call;
+                Flag codverch_is_prefetch = starlab_pi->is_prefetch;
+
+                alu_jump_insert(voided_alu_jump_table_ptr, consec_prev_instr_alu, consec_prev_instr_jump, consec_curr_instr,
+                                codverch_is_mov, codverch_has_push, codverch_has_pop, codverch_is_prefetch, codverch_is_call);
 
                 // printf("ALU->JUMP->SOMETHING Detected: ALU: %016llX, JUMP: %016llX, NEXT: %016llX\n", 
                       // consec_prev_instr_alu, consec_prev_instr_jump, consec_curr_instr);

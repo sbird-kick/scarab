@@ -376,7 +376,27 @@ void icache_miss_events(Flag uop_cache_hit) {
 
       if (entry != NULL) {
           // This miss address was a consequence of the previous instructions before it being ALU and JUMP
-         INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_JUMP_MISS, alu_jump_stats_counter); 
+         INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_CF_MISS, alu_jump_stats_counter); 
+
+         if(entry->is_mov) {
+            INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_CF_MISS_IS_MOV, alu_jump_stats_counter);
+         }
+
+         else if(entry->has_push){
+            INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_CF_MISS_HAS_PUSH, alu_jump_stats_counter);
+         }
+
+         else if(entry->has_pop){
+            INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_CF_MISS_HAS_POP, alu_jump_stats_counter);
+         }
+
+         else if(entry->is_prefetch){
+            INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_CF_MISS_IS_PREFETCH, alu_jump_stats_counter);
+         }
+
+         else if(entry->is_call){
+            INC_STAT_EVENT(ic->proc_id, CODVERCH_ICACHE_ALU_CF_MISS_IS_CALL, alu_jump_stats_counter);
+         }
 
       }
       
