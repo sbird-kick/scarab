@@ -167,38 +167,104 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);
 
-      // DEEPANJALI - Begin
 
-      char insert_string[128] = {0};
-
-      if(starlab_pi->cf_type == CF_CBR)
+   if(!starlab_search(address_to_type_ptr, address_as_string))
       {
-        // This is a conditional branch instruction: just set the flag
-        prev_cond_branch = 1;
-        sprintf(insert_string, "%s", "CBR");
-        starlab_insert(address_to_type_ptr, address_as_string, insert_string); 
-      }
-      else{
-        // This is not a conditional branch instruction: just reset the flag
-        prev_cond_branch = 0;
-      }
-
-      // Check whether the current instruction is MOV 
-      if(starlab_pi->is_move)
-      {
-        // This is a mov instruction: set the flag 
-        curr_is_mov = 1;
-        sprintf(insert_string, "%s", "MOV");
-        // Check whether the previous instruction was a conditional branch instruction
-        if(prev_cond_branch){
-          // We need the CPU cycles consumed by a <conditional branch, mov> 
-          // insert the pair into the hash table
-          // address_as_string: current instruction, hashing based on the mov instruction then 
-          starlab_insert(address_to_type_ptr, address_as_string, insert_string); 
+        char insert_string[128] = {0};
+        sprintf(insert_string, "%s", "NOP");
+        if(starlab_pi->is_move)
+        {
+          sprintf(insert_string, "%s", "MOV");
         }
-      }
+        else if(starlab_pi->is_call)
+        {
+          sprintf(insert_string, "%s", "CALL");
+        }
+        else if(starlab_pi->is_prefetch)
+        {
+          sprintf(insert_string, "%s", "PREFETCH");
+        }
+        else if(starlab_pi->has_push)
+        {
+          sprintf(insert_string, "%s", "PUSH");
+        }
+        else if(starlab_pi->has_pop)
+        {
+          sprintf(insert_string, "%s", "POP");
+        }
+        else if(starlab_pi->is_lock)
+        {
+          sprintf(insert_string, "%s", "LOCK");
+        }
+        else 
+        {
+          Flag has_load    = starlab_pi->num_ld > 0;
+          Flag has_push    = starlab_pi->has_push;
+          Flag has_pop     = starlab_pi->has_pop;
+          Flag has_store   = starlab_pi->num_st > 0;
+          Flag has_control = starlab_pi->cf_type != NOT_CF;  
+          Flag has_alu =
+            !(starlab_pi->is_move && (has_load || has_store)) &&  // not a simple LD/ST move
+            ((!has_control && !has_load &&
+              !has_store)             // not memory, not control, must be operate
+            || has_push || has_pop   // need ALU for stack address generation
+            || starlab_pi->num_dst_regs > 0  // if it writes to a registers, must be operate
+            || (has_load &&
+                has_store)  // must be read-modify-write operate (e.g. add $1, [%eax])
+            || (starlab_pi->op_type >= OP_PIPELINED_FAST &&  // special instructions always
+                starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));  // need an alu uop
 
-      // DEEPANJALI - end
+          if(has_control)
+            {
+              if(starlab_pi->cf_type == CF_CBR)
+              {
+                sprintf(insert_string, "%s", "CF_CBR");
+              }
+
+              else if(starlab_pi->cf_type == CF_BR)
+              {
+                // unconditional branch
+                sprintf(insert_string, "%s", "CF_BR");
+              }
+
+              else if(starlab_pi->cf_type == CF_CALL)
+              {
+                sprintf(insert_string, "%s", "CF_CALL");
+              }
+
+              else if(starlab_pi->cf_type == CF_IBR)
+              {
+                sprintf(insert_string, "%s", "CF_IBR");
+              }
+
+              else if(starlab_pi->cf_type == CF_ICALL)
+              {
+                sprintf(insert_string, "%s", "CF_ICALL");
+              }
+
+              else if(starlab_pi->cf_type == CF_ICO)
+              {
+                sprintf(insert_string, "%s", "CF_ICO");
+              }
+
+              else if(starlab_pi->cf_type == CF_RET)
+              {
+                sprintf(insert_string, "%s", "CF_RET");
+              }
+
+              else if(starlab_pi->cf_type == CF_SYS)
+              {
+                sprintf(insert_string, "%s", "CF_SYS");
+              }
+
+            }
+          else if(has_alu)
+          {
+            sprintf(insert_string, "%s", "ALU");
+          }
+        }
+        starlab_insert(address_to_type_ptr, address_as_string, insert_string);
+      }
 
       uop_generator_get_uop(proc_id, op, &next_onpath_pi[proc_id]);
     }

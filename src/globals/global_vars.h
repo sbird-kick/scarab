@@ -91,8 +91,7 @@ extern char prev_instruction_class[128];
 
 extern char prev_address_as_string[128];
 extern unsigned long long starlab_prev_address;
-extern bool prev_cond_branch;
-extern bool curr_is_mov; 
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */
