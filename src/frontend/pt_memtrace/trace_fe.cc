@@ -160,7 +160,6 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
     address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
   }
 
-  static int prev_was_move = 0;
   if(uop_generator_get_bom(proc_id)) {
     if (!off_path_mode[proc_id]) {
       ctype_pin_inst* starlab_pi = &next_onpath_pi[proc_id];
@@ -168,82 +167,39 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);
 
-      if(!starlab_search(address_to_type_ptr, address_as_string))
+      char insert_string[128] = {0};
+
+      if(starlab_pi->cf_type == CF_CBR)
       {
-        char insert_string[128] = {0};
-        sprintf(insert_string, "%s", "NOP");
-        if(starlab_pi->is_move)
-        {
-          sprintf(insert_string, "%s", "MOV");
-        }
-        else if(starlab_pi->is_call)
-        {
-          sprintf(insert_string, "%s", "CALL");
-        }
-        else if(starlab_pi->is_prefetch)
-        {
-          sprintf(insert_string, "%s", "PREFETCH");
-        }
-        else if(starlab_pi->has_push)
-        {
-          sprintf(insert_string, "%s", "PUSH");
-        }
-        else if(starlab_pi->has_pop)
-        {
-          sprintf(insert_string, "%s", "POP");
-        }
-        else if(starlab_pi->is_lock)
-        {
-          sprintf(insert_string, "%s", "LOCK");
-        }
-        else 
-        {
-          Flag has_load    = starlab_pi->num_ld > 0;
-          Flag has_push    = starlab_pi->has_push;
-          Flag has_pop     = starlab_pi->has_pop;
-          Flag has_store   = starlab_pi->num_st > 0;
-          Flag has_control = starlab_pi->cf_type != NOT_CF;  
-          Flag has_alu =
-            !(starlab_pi->is_move && (has_load || has_store)) &&  // not a simple LD/ST move
-            ((!has_control && !has_load &&
-              !has_store)             // not memory, not control, must be operate
-            || has_push || has_pop   // need ALU for stack address generation
-            || starlab_pi->num_dst_regs > 0  // if it writes to a registers, must be operate
-            || (has_load &&
-                has_store)  // must be read-modify-write operate (e.g. add $1, [%eax])
-            || (starlab_pi->op_type >= OP_PIPELINED_FAST &&  // special instructions always
-                starlab_pi->op_type <= OP_NOTPIPELINED_VERY_SLOW));  // need an alu uop
-          if(has_control)
-            sprintf(insert_string, "%s", "JUMP");
-          else if(has_alu)
-          {
-            sprintf(insert_string, "%s", "ALU");
-          }
-        }
-        starlab_insert(address_to_type_ptr, address_as_string, insert_string);
+        // This is a conditional branch instruction: just set the flag
+        prev_cond_branch = 1;
+        sprintf(insert_string, "%s", "CBR");
+        starlab_insert(address_to_type_ptr, address_as_string, insert_string); 
+      }
+      else{
+        // This is not a conditional branch instruction: just reset the flag
+        prev_cond_branch = 0;
       }
 
-      if(starlab_pi->is_move && (prev_was_move == 0))
+      // Check whether the current instruction is MOV 
+      if(starlab_pi->is_move)
       {
-        prev_was_move = 1;
+        // This is a mov instruction: set the flag 
+        curr_is_mov = 1;
+        sprintf(insert_string, "%s", "MOV");
+        // Check whether the previous instruction was a conditional branch instruction
+        if(prev_cond_branch){
+          // We need the CPU cycles consumed by a <conditional branch, mov> 
+          // insert the pair into the hash table
+          // address_as_string: current instruction, hashing based on the mov instruction then 
+          starlab_insert(address_to_type_ptr, address_as_string, insert_string); 
+        }
       }
-      else 
-      if (starlab_pi->is_move && prev_was_move == 1)
-      {
-        prev_was_move = 0;
-        // starlab_pi->is_move = 0;
-        // starlab_pi->num_ld = 0;
-        // starlab_pi->has_push = 0;
-        // starlab_pi->has_pop = 0;
-        // starlab_pi->num_st = 0;
-        // starlab_pi->cf_type = NOT_CF;
-        // starlab_pi->op_type = OP_NOP;
-      }
+
       uop_generator_get_uop(proc_id, op, &next_onpath_pi[proc_id]);
     }
     else {
       uop_generator_get_uop(proc_id, op, &next_offpath_pi[proc_id]);
-      prev_was_move = 0;
     }
   } else {
     uop_generator_get_uop(proc_id, op, NULL);

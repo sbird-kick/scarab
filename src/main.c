@@ -230,6 +230,8 @@ char prev_instruction_class[128];
 char prev_address_as_string[128];
 unsigned long long starlab_prev_address = 0;
 
+bool prev_cond_branch = 0;
+bool curr_is_mov = 0;
 
 int main(int argc, char* argv[], char* envp[]) {
   char** simulated_argv;
