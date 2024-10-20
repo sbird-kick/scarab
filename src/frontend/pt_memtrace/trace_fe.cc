@@ -167,6 +167,8 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);
 
+      // DEEPANJALI - Begin
+
       char insert_string[128] = {0};
 
       if(starlab_pi->cf_type == CF_CBR)
@@ -195,6 +197,8 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
           starlab_insert(address_to_type_ptr, address_as_string, insert_string); 
         }
       }
+
+      // DEEPANJALI - end
 
       uop_generator_get_uop(proc_id, op, &next_onpath_pi[proc_id]);
     }
