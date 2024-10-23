@@ -216,46 +216,8 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
 
           if(has_control)
             {
-              if(starlab_pi->cf_type == CF_CBR)
-              {
-                sprintf(insert_string, "%s", "CF_CBR");
-              }
-
-              else if(starlab_pi->cf_type == CF_BR)
-              {
-                // unconditional branch
-                sprintf(insert_string, "%s", "CF_BR");
-              }
-
-              else if(starlab_pi->cf_type == CF_CALL)
-              {
-                sprintf(insert_string, "%s", "CF_CALL");
-              }
-
-              else if(starlab_pi->cf_type == CF_IBR)
-              {
-                sprintf(insert_string, "%s", "CF_IBR");
-              }
-
-              else if(starlab_pi->cf_type == CF_ICALL)
-              {
-                sprintf(insert_string, "%s", "CF_ICALL");
-              }
-
-              else if(starlab_pi->cf_type == CF_ICO)
-              {
-                sprintf(insert_string, "%s", "CF_ICO");
-              }
-
-              else if(starlab_pi->cf_type == CF_RET)
-              {
-                sprintf(insert_string, "%s", "CF_RET");
-              }
-
-              else if(starlab_pi->cf_type == CF_SYS)
-              {
-                sprintf(insert_string, "%s", "CF_SYS");
-              }
+              
+              sprintf(insert_string, "%s", "CF"); // Control Flow
 
             }
           else if(has_alu)
