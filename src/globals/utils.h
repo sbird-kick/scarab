@@ -385,6 +385,7 @@ int   parse_string_array(char dest[][MAX_STR_LENGTH + 1], const void* str,
 typedef struct starlab_hash_node {
     char *key;
     void *value;
+    char *addr_space;
     struct starlab_hash_node *next;
 } starlab_hash_node;
 
@@ -411,10 +412,10 @@ const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);
 starlab_hash_table* starlab_create_table(long size, size_t value_size);
 void starlab_resize_table(starlab_hash_table *hashtable);
-void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value);
-void* starlab_search(starlab_hash_table *hashtable, const char *key);
+void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value, const char *addr_space);
+starlab_hash_node* starlab_search(starlab_hash_table *hashtable, const char *key);
 void starlab_delete_key(starlab_hash_table *hashtable, const char *key);
-void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *));
+void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *, const char *));
 void starlab_free_table(starlab_hash_table *hashtable);
 void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, void ***values);
 int compare_key_value_pairs(const void *a, const void *b);

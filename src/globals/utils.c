@@ -223,7 +223,8 @@ void starlab_resize_table(starlab_hash_table *hashtable) {
     hashtable->size = new_size;
 }
 
-void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value) {
+void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value, const char *addr_space) {
+    
     if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
         starlab_resize_table(hashtable);
     }
@@ -232,31 +233,35 @@ void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value)
     starlab_hash_node *node = hashtable->table[index];
     while (node) {
         if (strcmp(node->key, key) == 0) {
-            memcpy(node->value, value, hashtable->value_size);
+           memcpy(node->value, value, hashtable->value_size);     
+            free(node->addr_space);  
+            node->addr_space = strdup(addr_space);  
             return;
         }
         node = node->next;
     }
 
     starlab_hash_node *new_node = (starlab_hash_node*) malloc(sizeof(starlab_hash_node));
-    new_node->key = strdup(key);
-    new_node->value = malloc(hashtable->value_size);
-    memcpy(new_node->value, value, hashtable->value_size);
-    new_node->next = hashtable->table[index];
-    hashtable->table[index] = new_node;
-    hashtable->count++;
+    new_node->key = strdup(key); 
+    new_node->value = malloc(hashtable->value_size);  
+    memcpy(new_node->value, value, hashtable->value_size);  
+    new_node->addr_space = strdup(addr_space);  
+    new_node->next = hashtable->table[index];  
+    hashtable->table[index] = new_node;  
+    hashtable->count++;  
 }
 
-void* starlab_search(starlab_hash_table *hashtable, const char *key) {
+starlab_hash_node* starlab_search(starlab_hash_table *hashtable, const char *key) {
     unsigned int index = starlab_hash(key, hashtable->size);
     starlab_hash_node *node = hashtable->table[index];
+
     while (node) {
         if (strcmp(node->key, key) == 0) {
-            return node->value;
+            return node;
         }
         node = node->next;
     }
-    return NULL; // Indicates that the key is not found
+    return NULL; 
 }
 
 void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
@@ -285,16 +290,28 @@ void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
     hashtable->count--;
 }
 
-void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *)) {
+// void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *)) {
+//     for (int i = 0; i < hashtable->size; i++) {
+//         starlab_hash_node *node = hashtable->table[i];
+//         while (node) {
+//             printf("Key: %s, Value: ", node->key);
+//             print_value(node->value);
+//             node = node->next;
+//         }
+//     }
+// }
+
+void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *, const char *)) {
     for (int i = 0; i < hashtable->size; i++) {
         starlab_hash_node *node = hashtable->table[i];
         while (node) {
-            printf("Key: %s, Value: ", node->key);
-            print_value(node->value);
+            // Call the print_value function with value and metadata (name)
+            print_value(node->value, node->addr_space);
             node = node->next;
         }
     }
 }
+
 
 int compare_key_value_pairs(const void *a, const void *b) {
     KeyValuePair *pairA = (KeyValuePair *)a;

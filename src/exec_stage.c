@@ -374,6 +374,13 @@ void update_exec_stage(Stage_Data* src_sd) {
     char address_as_string[128] = {0};
     sprintf(address_as_string, "%016llX", op->inst_info->addr);
 
+    unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+    unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+
+    char spaceTypeCurr[16];
+    unsigned long long currAddressHex = strtoull(address_as_string, NULL, 16);
+    strcpy(spaceTypeCurr, (currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
+
     bool first_time_exec = false;
     unsigned long extra_exec_cycles = 0;
     // update the inst_fetch_exec_truple
@@ -391,7 +398,7 @@ void update_exec_stage(Stage_Data* src_sd) {
       temp_truple_to_insert.exec_cycle = -1;
       temp_truple_to_insert.fetch_cycle = op->fetch_cycle;
       temp_truple_to_insert.prev_fetch_cycle = op->fetch_cycle;
-      starlab_insert(inst_truple_ptr, address_as_string, &temp_truple_to_insert);
+      starlab_insert(inst_truple_ptr, address_as_string, &temp_truple_to_insert, spaceTypeCurr);
     }
     else
     {
@@ -449,7 +456,7 @@ void update_exec_stage(Stage_Data* src_sd) {
           }
           if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
           {
-            starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
+            starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add, spaceTypeCurr);
           }
           else
           {

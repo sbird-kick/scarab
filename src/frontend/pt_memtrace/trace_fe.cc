@@ -168,6 +168,14 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);
 
+
+    unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+    unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+
+    char spaceTypeCurr[16];
+    unsigned long long currAddressHex = strtoull(address_as_string, NULL, 16);
+    strcpy(spaceTypeCurr, (currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
+
       if(!starlab_search(address_to_type_ptr, address_as_string))
       {
         char insert_string[128] = {0};
@@ -220,7 +228,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             sprintf(insert_string, "%s", "ALU");
           }
         }
-        starlab_insert(address_to_type_ptr, address_as_string, insert_string);
+        starlab_insert(address_to_type_ptr, address_as_string, insert_string, spaceTypeCurr);
       }
 
       if(starlab_pi->is_move && (prev_was_move == 0))
