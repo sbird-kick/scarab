@@ -187,6 +187,7 @@ unsigned int starlab_hash(const char *key, int table_size) {
     return hash % table_size;
 }
 
+
 starlab_hash_table* starlab_create_table(long size, size_t value_size) {
     starlab_hash_table *hashtable = (starlab_hash_table *) malloc(sizeof(starlab_hash_table));
     hashtable->table = (starlab_hash_node**) malloc(sizeof(starlab_hash_node *) * size);
@@ -198,6 +199,7 @@ starlab_hash_table* starlab_create_table(long size, size_t value_size) {
     hashtable->value_size = value_size;
     return hashtable;
 }
+
 
 void starlab_resize_table(starlab_hash_table *hashtable) {
     printf("resizing hash table\n");
@@ -223,6 +225,7 @@ void starlab_resize_table(starlab_hash_table *hashtable) {
     hashtable->size = new_size;
 }
 
+
 void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value) {
     if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
         starlab_resize_table(hashtable);
@@ -247,6 +250,8 @@ void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value)
     hashtable->count++;
 }
 
+
+
 void* starlab_search(starlab_hash_table *hashtable, const char *key) {
     unsigned int index = starlab_hash(key, hashtable->size);
     starlab_hash_node *node = hashtable->table[index];
@@ -258,6 +263,7 @@ void* starlab_search(starlab_hash_table *hashtable, const char *key) {
     }
     return NULL; // Indicates that the key is not found
 }
+
 
 void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
     unsigned int index = starlab_hash(key, hashtable->size);
@@ -285,6 +291,7 @@ void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
     hashtable->count--;
 }
 
+
 void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *)) {
     for (int i = 0; i < hashtable->size; i++) {
         starlab_hash_node *node = hashtable->table[i];
@@ -295,6 +302,8 @@ void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(vo
         }
     }
 }
+
+
 
 int compare_key_value_pairs(const void *a, const void *b) {
     KeyValuePair *pairA = (KeyValuePair *)a;
@@ -335,6 +344,8 @@ void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, v
 
     free(pairs);
 }
+
+
 
 int get_count(starlab_hash_table* hashtable)
 {

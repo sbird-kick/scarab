@@ -154,11 +154,11 @@ void assert_ctype_pin_inst_same(uns proc_id, ctype_pin_inst inst_a, ctype_pin_in
 
 void ext_trace_fetch_op(uns proc_id, Op* op) {
 
-  starlab_hash_table* address_to_type_ptr = (starlab_hash_table*) voided_address_to_type_ptr;
-  if(address_to_type_ptr == NULL)
-  {
-    address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
-  }
+
+    starlab_hash_table* address_to_type_ptr = (starlab_hash_table*) voided_address_to_type_ptr;
+    if (address_to_type_ptr == NULL) {
+        address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+    }
 
   if(uop_generator_get_bom(proc_id)) {
     if (!off_path_mode[proc_id]) {
@@ -226,6 +226,14 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
           }
         }
         starlab_insert(address_to_type_ptr, address_as_string, insert_string);
+
+
+        // unsigned long long currAddressHex = std::stoull(address_as_string, nullptr, 16);
+        // std::string spaceTypeCurr = (currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User";
+
+
+
+
       }
 
       uop_generator_get_uop(proc_id, op, &next_onpath_pi[proc_id]);

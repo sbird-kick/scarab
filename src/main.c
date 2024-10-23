@@ -225,6 +225,7 @@ void* voided_address_to_type_ptr = NULL;
 void* voided_address_to_prev_address = NULL;
 void* voided_inst_truple_ptr = NULL;
 
+
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
 char prev_address_as_string[128];
@@ -309,8 +310,6 @@ int main(int argc, char* argv[], char* envp[]) {
   KeyValuePair *key_value_pairs;
   long count = get_count(voided_global_starlab_types_ht);
   key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
-  
-
 
   starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
 
@@ -319,21 +318,38 @@ int main(int argc, char* argv[], char* envp[]) {
       key_value_pairs[i].value = values_array[i];
   }
 
-    qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+  qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
-    unsigned long total_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        total_cc_count += *(unsigned long *)key_value_pairs[i].value;
+  unsigned long total_cc_count = 0;
+  for (long i = 0; i < count; i++) {
+      inst_fetch_exec_truple *tuple = (inst_fetch_exec_truple *)key_value_pairs[i].value;
+      total_cc_count += tuple->exec_cycle;
+  }
+
+  unsigned long running_cc_count = 0;
+  unsigned long user_cc_count = 0;
+  unsigned long kernel_cc_count = 0;
+
+  for (long i = 0; i < count; i++) {
+      inst_fetch_exec_truple *tuple = (inst_fetch_exec_truple *)key_value_pairs[i].value;
+      double cumulative_cc_percentage = ((double)tuple->exec_cycle / (double)total_cc_count) * 100;
+
+      printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, cumulative_cc_percentage);
+
+      running_cc_count += tuple->exec_cycle;
+      if (strcmp(tuple->addr_space, "User") == 0) {
+          user_cc_count += tuple->exec_cycle;
+      } else if (strcmp(tuple->addr_space, "Kernel") == 0) {
+          kernel_cc_count += tuple->exec_cycle;
+      }
+
+      if (running_cc_count > ((total_cc_count * 99) / 100)) 
+          break;
     }
 
-    unsigned long running_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
-        running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-        if (running_cc_count > ((total_cc_count * 99) / 100)) 
-            break;
-    }
+    printf("User space CCs: %.2f%%\n", ((double)user_cc_count / (double)total_cc_count) * 100);
+    printf("Kernel space CCs: %.2f%%\n", ((double)kernel_cc_count / (double)total_cc_count) * 100);
 
-
-  return 0;
-}
+    free(key_value_pairs);
+    return 0;
+  }

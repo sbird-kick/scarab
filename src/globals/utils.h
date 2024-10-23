@@ -382,27 +382,6 @@ int   parse_string_array(char dest[][MAX_STR_LENGTH + 1], const void* str,
 #define INITIAL_TABLE_SIZE 10000000
 #define LOAD_FACTOR_THRESHOLD 0.75
 
-// DEEPANJALI BEGIN
-
-typedef struct {
-  char *inst_type;   // Instruction type (e.g., "MOV")
-  char *addr_space;  // Address space (e.g., "Kernel" or "User")
-} string_pair;
-
-typedef struct addr_space_hash_node {
-  char *key;  // Instruction address as a string
-  string_pair *value;  // Struct storing instruction type and address space
-  struct addr_space_hash_node *next;  // Pointer to handle collisions
-} addr_space_hash_node;
-
-typedef struct addr_space_hash_table {
-   addr_space_hash_node **table;
-    long size;
-    long count;
-    size_t value_size;
-} addr_space_hash_table;
-
-// DEEPANJALI END
 
 typedef struct starlab_hash_node {
     char *key;
@@ -421,6 +400,7 @@ typedef struct starlab_table_value {
     unsigned long prev_fetch_cycle;
     unsigned long fetch_cycle;
     unsigned long exec_cycle;
+    char* addr_space;
 } inst_fetch_exec_truple;
 
 typedef struct {
@@ -442,22 +422,6 @@ void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, v
 int compare_key_value_pairs(const void *a, const void *b);
 int get_count(starlab_hash_table* hashtable);
 
-// DEEPANJALI BEGIN
-
-const char* addr_space_get_opcode_string(int op_type);  
-unsigned int addr_space_hash(const char *key, int table_size);  
-addr_space_hash_table* addr_space_create_table(long size, size_t value_size);  
-void addr_space_resize_table(addr_space_hash_table *hashtable);  
-void addr_space_insert(addr_space_hash_table *hashtable, const char *key, void *value);  
-void* addr_space_search(addr_space_hash_table *hashtable, const char *key);  
-void addr_space_delete_key(addr_space_hash_table *hashtable, const char *key);  
-void addr_space_iterate_table(addr_space_hash_table *hashtable, void (*print_value)(void *));  
-void addr_space_free_table(addr_space_hash_table *hashtable); 
-void addr_space_return_key_value_arr(addr_space_hash_table *hashtable, char ***keys, void ***values);  
-int addr_space_compare_key_value_pairs(const void *a, const void *b);  
-int addr_space_get_count(addr_space_hash_table* hashtable);  
-
-// DEEPANJALI END
 
 /* for use in qsort */
 int compare_uns64(const void*, const void*);

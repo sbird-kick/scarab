@@ -27,6 +27,7 @@
  ***************************************************************************************/
 
 #include <math.h>
+#include <string.h>
 #include "debug/debug_macros.h"
 #include "debug/debug_print.h"
 #include "globals/assert.h"
@@ -869,17 +870,29 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
 
+    unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+    unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+
+     char spaceTypeCurr[16];
+
+
     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
 
     char address_as_string[128] = {0};
     char prev_address_as_string[128] = {0};
     sprintf(address_as_string, "%016llX", op->inst_info->addr);
     sprintf(prev_address_as_string, "%016llX", starlab_prev_address);
+
+    sprintf(address_as_string, "%016llX", op->inst_info->addr);
+    unsigned long long currAddressHex = strtoull(address_as_string, NULL, 16);
+    strcpy(spaceTypeCurr, (currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
     
     if(!starlab_search(address_to_prev_address, address_as_string))
     {
         starlab_insert(address_to_prev_address, address_as_string, &starlab_prev_address);
     }
+
+
     if(op->inst_info->addr != starlab_prev_address) // track changes only
       starlab_prev_address = op->inst_info->addr;
 
@@ -895,11 +908,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     // is this already present?
     if(!starlab_search(inst_truple_ptr, address_as_string))
     {
+
       // dummy values
       inst_fetch_exec_truple temp_truple_to_insert;
       temp_truple_to_insert.exec_cycle = -1;
       temp_truple_to_insert.fetch_cycle = op->fetch_cycle;
       temp_truple_to_insert.prev_fetch_cycle = op->fetch_cycle;
+      temp_truple_to_insert.addr_space = spaceTypeCurr;
       starlab_insert(inst_truple_ptr, address_as_string, &temp_truple_to_insert);
     }
     else
@@ -918,6 +933,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       {
         // printf("Replaced fetch cycle %lu -> %lu\n", ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, address_as_string))->fetch_cycle, temp_truple_to_insert.fetch_cycle);
         temp_truple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, address_as_string))->fetch_cycle;
+        temp_truple_to_insert.addr_space = spaceTypeCurr;
         starlab_insert(inst_truple_ptr, address_as_string, &temp_truple_to_insert);
       }
     }
