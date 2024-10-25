@@ -399,6 +399,8 @@ typedef struct starlab_table_value {
     unsigned long prev_fetch_cycle;
     unsigned long fetch_cycle;
     unsigned long exec_cycle;
+    char prev_addr_space[128]; // To track the address space 
+    char curr_addr_space[128]; 
 } inst_fetch_exec_tuple;
 
 typedef struct {

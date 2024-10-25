@@ -306,17 +306,41 @@ int main(int argc, char* argv[], char* envp[]) {
   char **keys;
   void **values_array;
 
+  char **keys2;
+  void **values_array_2;
+
   KeyValuePair *key_value_pairs;
   long count = get_count(voided_global_starlab_types_ht);
   key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
   
+  KeyValuePair *key_value_pairs2;
+  long count2 = get_count(voided_inst_tuple_ptr);
+  key_value_pairs2 = (KeyValuePair *) malloc(count2 * sizeof(KeyValuePair));
 
 
   starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
+  starlab_return_key_value_arr(voided_inst_tuple_ptr, &keys2, &values_array_2);
 
   for (long i = 0; i < count; i++) {
       key_value_pairs[i].key = keys[i];
       key_value_pairs[i].value = values_array[i];
+  }
+
+  for(long i = 0; i < count2; i++){
+    key_value_pairs2[i].key = keys2[i];
+    key_value_pairs2[i].value = values_array_2[i];
+  }
+
+  // printf("Number of tuples in this hashtable: %ld\n", count2);
+
+    for (long i = 0; i < count2; i++) {
+    inst_fetch_exec_tuple *tuple = (inst_fetch_exec_tuple *)key_value_pairs2[i].value;
+    if (tuple != NULL && tuple->prev_addr_space != NULL) {
+        // printf("prev address space: %s\n", tuple->prev_addr_space);
+        // printf("curr address space: %s\n", tuple->curr_addr_space);
+    } else {
+        printf("prev address space: (null)\n");
+    }
   }
 
     qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
@@ -333,7 +357,6 @@ int main(int argc, char* argv[], char* envp[]) {
         if (running_cc_count > ((total_cc_count * 99) / 100)) 
             break;
     }
-
 
   return 0;
 }

@@ -34,6 +34,7 @@
 #include "globals/global_types.h"
 #include "globals/global_vars.h"
 #include "globals/utils.h"
+#include <string.h>
 
 #include "bp/bp.h"
 #include "icache_stage.h"
@@ -863,6 +864,9 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     op->fetch_cycle = cycle_count;
 
     
+    // -------------------------------------------------------------------------------------------------
+
+
     starlab_hash_table* address_to_prev_address = (starlab_hash_table*) voided_address_to_prev_address;
     if(address_to_prev_address == NULL)
     {
@@ -875,6 +879,45 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     char prev_address_as_string[128] = {0};
     sprintf(address_as_string, "%016llX", op->inst_info->addr);
     sprintf(prev_address_as_string, "%016llX", starlab_prev_address);
+
+    unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+    unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+
+    char spaceTypeCurr[128] = {"meh"};
+    char spaceTypePrev[128] = {"meh2"};
+    unsigned long long currAddressHex = strtoull(address_as_string, NULL, 16);
+    unsigned long long prevAddressHex = strtoull(prev_address_as_string, NULL, 16); 
+    strcpy(spaceTypePrev, (prevAddressHex >= KERNEL_SPACE_START && prevAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
+    strcpy(spaceTypeCurr, (currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
+
+    // char *temp1 = (char*) malloc(128 * sizeof(char));
+    // char *temp2 = (char*) malloc(128 * sizeof(char));
+
+    // if(prevAddressHex >= KERNEL_SPACE_START && prevAddressHex <= KERNEL_SPACE_END)
+    // {
+    //   temp1 = "Kernel";
+
+    // }
+
+    // else{
+    //   temp1 = "User";
+    // }
+
+    // if(currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END)
+    // {
+    //   temp2 = "Kernel";
+
+    // }
+
+    // else{
+    //   temp2 = "User";
+    // }
+
+    // printf("temp1 %s\n", temp1);
+
+      // strcpy(spaceTypeCurr, temp1);
+      // strcpy(spaceTypePrev, temp2);
+
     
     if(!starlab_search(address_to_prev_address, address_as_string))
     {
@@ -896,55 +939,68 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     if(!starlab_search(inst_tuple_ptr, address_as_string))
     {
       // dummy values
-      inst_fetch_exec_tuple temp_truple_to_insert;
-      temp_truple_to_insert.exec_cycle = -1;
-      temp_truple_to_insert.fetch_cycle = op->fetch_cycle;
-      temp_truple_to_insert.prev_fetch_cycle = op->fetch_cycle;
-      starlab_insert(inst_tuple_ptr, address_as_string, &temp_truple_to_insert);
+      inst_fetch_exec_tuple temp_tuple_to_insert;
+      temp_tuple_to_insert.exec_cycle = -1;
+      temp_tuple_to_insert.fetch_cycle = op->fetch_cycle;
+      temp_tuple_to_insert.prev_fetch_cycle = op->fetch_cycle;
+      strcpy(temp_tuple_to_insert.prev_addr_space, spaceTypePrev);
+      strcpy(temp_tuple_to_insert.curr_addr_space, spaceTypeCurr);
+      // printf("Inserting spacetype: %s\n", temp_tuple_to_insert.prev_addr_space);
+      // printf("Inserting spaceType current: %s\n",temp_tuple_to_insert.curr_addr_space);
+      starlab_insert(inst_tuple_ptr, address_as_string, &temp_tuple_to_insert);
     }
     else
     {
 
-      inst_fetch_exec_tuple temp_truple_to_insert;
-      temp_truple_to_insert.fetch_cycle = op->fetch_cycle;
+      inst_fetch_exec_tuple temp_tuple_to_insert;
+      temp_tuple_to_insert.fetch_cycle = op->fetch_cycle;
+
+      // printf("spacetype prev: %s\n", temp_tuple_to_insert.prev_addr_space);
+
+
       if(((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle == -1)
       {
-        temp_truple_to_insert.prev_fetch_cycle = -1;
+        temp_tuple_to_insert.prev_fetch_cycle = -1;
       }
       else
-        temp_truple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle;
-      temp_truple_to_insert.exec_cycle = -1; // should be -1
+      {
+
+        temp_tuple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle;
+        temp_tuple_to_insert.exec_cycle = -1; // should be -1
+
+      }        
       if(op->eom)
       {
-        // printf("Replaced fetch cycle %lu -> %lu\n", ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle, temp_truple_to_insert.fetch_cycle);
-        temp_truple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle;
-        starlab_insert(inst_tuple_ptr, address_as_string, &temp_truple_to_insert);
+        // printf("Replaced fetch cycle %lu -> %lu\n", ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle, temp_tuple_to_insert.fetch_cycle);
+        temp_tuple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle;
+        
+        starlab_insert(inst_tuple_ptr, address_as_string, &temp_tuple_to_insert);
       }
     }
 
     // calculate values
-    inst_fetch_exec_tuple* prev_truple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
+    inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
     inst_fetch_exec_tuple* this_truple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
 
-    if(prev_truple_ptr == NULL)
+    if(prev_tuple_ptr == NULL)
     {
       // printf("Doing nothing1\n");
     }
     else
     {
-      if(prev_truple_ptr->prev_fetch_cycle == -1 || this_truple_ptr->prev_fetch_cycle == -1)
+      if(prev_tuple_ptr->prev_fetch_cycle == -1 || this_truple_ptr->prev_fetch_cycle == -1)
       {
         //  printf("Doing nothing2\n");
       }
       else
       {
-        unsigned long cc_to_add = this_truple_ptr->fetch_cycle - prev_truple_ptr->prev_fetch_cycle;
+        unsigned long cc_to_add = this_truple_ptr->fetch_cycle - prev_tuple_ptr->prev_fetch_cycle;
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
 
         // printf("[icache] Adding %lu\n", cc_to_add);
 
-        if(prev_truple_ptr->prev_fetch_cycle == -1)
+        if(prev_tuple_ptr->prev_fetch_cycle == -1)
         {
           // do nothing
         }
@@ -969,7 +1025,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
             {
               *cc_ptr+= cc_to_add;
               // printf("[%016llX] Successfully added %lu %lu!\n", op->inst_info->addr, *cc_ptr, cc_to_add);
-              // printf("%lu %lu\n %lu %lu\n", this_truple_ptr->fetch_cycle, this_truple_ptr->prev_fetch_cycle,prev_truple_ptr->fetch_cycle, prev_truple_ptr->prev_fetch_cycle );
+              // printf("%lu %lu\n %lu %lu\n", this_truple_ptr->fetch_cycle, this_truple_ptr->prev_fetch_cycle,prev_tuple_ptr->fetch_cycle, prev_tuple_ptr->prev_fetch_cycle );
             }
           }
         }
@@ -977,6 +1033,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     voided_inst_tuple_ptr = (void *) inst_tuple_ptr;
+
+    // -----------------------------------------------------------------------
 
 
     op_count[ic->proc_id]++;          /* increment instruction counters */
@@ -1025,7 +1083,16 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       // pass the global branch history to all the instructions
       op->oracle_info.pred_global_hist = g_bp_data->global_hist;
     }
+
+
+
   }
+
+
+
+
+
+
 }
 
 /**************************************************************************************/
