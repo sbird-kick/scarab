@@ -80,7 +80,7 @@ extern Counter roi_dump_ID;
 extern void* voided_global_starlab_ht_ptr;
 extern void* voided_global_starlab_types_ht;
 
-extern void* voided_inst_truple_ptr;
+extern void* voided_inst_tuple_ptr;
 
 extern void* voided_address_to_type_ptr;
 extern void* voided_address_to_prev_address;

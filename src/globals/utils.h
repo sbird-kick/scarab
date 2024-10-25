@@ -399,7 +399,7 @@ typedef struct starlab_table_value {
     unsigned long prev_fetch_cycle;
     unsigned long fetch_cycle;
     unsigned long exec_cycle;
-} inst_fetch_exec_truple;
+} inst_fetch_exec_tuple;
 
 typedef struct {
     char *key;

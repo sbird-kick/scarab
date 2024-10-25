@@ -885,46 +885,46 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
     voided_address_to_prev_address = (void *) address_to_prev_address;
 
-    // update the inst_fetch_exec_truple
-    starlab_hash_table* inst_truple_ptr = (starlab_hash_table*) voided_inst_truple_ptr;
-    if(inst_truple_ptr == NULL)
+    // update the inst_fetch_exec_tuple
+    starlab_hash_table* inst_tuple_ptr = (starlab_hash_table*) voided_inst_tuple_ptr;
+    if(inst_tuple_ptr == NULL)
     {
-      inst_truple_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_fetch_exec_truple));
+      inst_tuple_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_fetch_exec_tuple));
     }
 
     // is this already present?
-    if(!starlab_search(inst_truple_ptr, address_as_string))
+    if(!starlab_search(inst_tuple_ptr, address_as_string))
     {
       // dummy values
-      inst_fetch_exec_truple temp_truple_to_insert;
+      inst_fetch_exec_tuple temp_truple_to_insert;
       temp_truple_to_insert.exec_cycle = -1;
       temp_truple_to_insert.fetch_cycle = op->fetch_cycle;
       temp_truple_to_insert.prev_fetch_cycle = op->fetch_cycle;
-      starlab_insert(inst_truple_ptr, address_as_string, &temp_truple_to_insert);
+      starlab_insert(inst_tuple_ptr, address_as_string, &temp_truple_to_insert);
     }
     else
     {
 
-      inst_fetch_exec_truple temp_truple_to_insert;
+      inst_fetch_exec_tuple temp_truple_to_insert;
       temp_truple_to_insert.fetch_cycle = op->fetch_cycle;
-      if(((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, address_as_string))->exec_cycle == -1)
+      if(((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle == -1)
       {
         temp_truple_to_insert.prev_fetch_cycle = -1;
       }
       else
-        temp_truple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, address_as_string))->fetch_cycle;
+        temp_truple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle;
       temp_truple_to_insert.exec_cycle = -1; // should be -1
       if(op->eom)
       {
-        // printf("Replaced fetch cycle %lu -> %lu\n", ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, address_as_string))->fetch_cycle, temp_truple_to_insert.fetch_cycle);
-        temp_truple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, address_as_string))->fetch_cycle;
-        starlab_insert(inst_truple_ptr, address_as_string, &temp_truple_to_insert);
+        // printf("Replaced fetch cycle %lu -> %lu\n", ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle, temp_truple_to_insert.fetch_cycle);
+        temp_truple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle;
+        starlab_insert(inst_tuple_ptr, address_as_string, &temp_truple_to_insert);
       }
     }
 
     // calculate values
-    inst_fetch_exec_truple* prev_truple_ptr = ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, prev_address_as_string));
-    inst_fetch_exec_truple* this_truple_ptr = ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, address_as_string));
+    inst_fetch_exec_tuple* prev_truple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
+    inst_fetch_exec_tuple* this_truple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
 
     if(prev_truple_ptr == NULL)
     {
@@ -976,7 +976,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       }
     }
 
-    voided_inst_truple_ptr = (void *) inst_truple_ptr;
+    voided_inst_tuple_ptr = (void *) inst_tuple_ptr;
 
 
     op_count[ic->proc_id]++;          /* increment instruction counters */

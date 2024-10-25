@@ -223,7 +223,7 @@ void* voided_global_starlab_ht_ptr = NULL;
 void* voided_global_starlab_types_ht = NULL;
 void* voided_address_to_type_ptr = NULL;
 void* voided_address_to_prev_address = NULL;
-void* voided_inst_truple_ptr = NULL;
+void* voided_inst_tuple_ptr = NULL;
 
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
