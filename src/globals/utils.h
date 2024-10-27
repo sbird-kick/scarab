@@ -38,6 +38,7 @@
 #include "globals/global_defs.h"
 #include "globals/global_vars.h"
 #include "statistics.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -402,6 +403,7 @@ typedef struct starlab_hash_table {
     long size;
     long count;
     size_t value_size;
+    bool table_type; // 0 for instructionAddressCycleInfo, 1 for inst_fetch_exec_tuple
 } starlab_hash_table;
 
 typedef struct starlab_table_value {
