@@ -223,6 +223,30 @@ void starlab_resize_table(starlab_hash_table *hashtable) {
     hashtable->size = new_size;
 }
 
+// void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value) {
+//     if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
+//         starlab_resize_table(hashtable);
+//     }
+
+//     unsigned int index = starlab_hash(key, hashtable->size);
+//     starlab_hash_node *node = hashtable->table[index];
+//     while (node) {
+//         if (strcmp(node->key, key) == 0) {
+//             memcpy(node->value, value, hashtable->value_size);
+//             return;
+//         }
+//         node = node->next;
+//     }
+
+//     starlab_hash_node *new_node = (starlab_hash_node*) malloc(sizeof(starlab_hash_node));
+//     new_node->key = strdup(key);
+//     new_node->value = malloc(hashtable->value_size);
+//     memcpy(new_node->value, value, hashtable->value_size);
+//     new_node->next = hashtable->table[index];
+//     hashtable->table[index] = new_node;
+//     hashtable->count++;
+// }
+
 void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value) {
     if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
         starlab_resize_table(hashtable);
@@ -230,22 +254,56 @@ void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value)
 
     unsigned int index = starlab_hash(key, hashtable->size);
     starlab_hash_node *node = hashtable->table[index];
+
     while (node) {
         if (strcmp(node->key, key) == 0) {
-            memcpy(node->value, value, hashtable->value_size);
-            return;
+
+            if (hashtable->table_type == 0)
+            { // For instructionAddressCycleInfo
+                instructionAddressCycleInfo *newValue = (instructionAddressCycleInfo *)value;
+                instructionAddressCycleInfo *existingValue = (instructionAddressCycleInfo *)node->value;
+                // Copy the data from newValue to existingValue
+                existingValue->firstInstructionAddressSpace = strdup(newValue->firstInstructionAddressSpace);
+                existingValue->secondInstructionAddressSpace = strdup(newValue->secondInstructionAddressSpace);
+                // Assuming value is a pointer to clock cycles, copy as well
+                existingValue->value = newValue->value; // Update the clock cycles (assuming appropriate type)
+            } 
+            else if (hashtable->table_type == 1) 
+            {   // For inst_fetch_exec_tuple
+                inst_fetch_exec_tuple *newValue = (inst_fetch_exec_tuple *)value;
+                inst_fetch_exec_tuple *existingValue = (inst_fetch_exec_tuple *)node->value;
+                // Copy the data from newValue to existingValue
+                existingValue->prev_fetch_cycle = newValue->prev_fetch_cycle;
+                existingValue->fetch_cycle = newValue->fetch_cycle;
+                existingValue->exec_cycle = newValue->exec_cycle;
+            }
+            return; 
         }
-        node = node->next;
+        node = node->next; 
     }
 
-    starlab_hash_node *new_node = (starlab_hash_node*) malloc(sizeof(starlab_hash_node));
-    new_node->key = strdup(key);
-    new_node->value = malloc(hashtable->value_size);
-    memcpy(new_node->value, value, hashtable->value_size);
+    // Key does not exist, create a new node
+    starlab_hash_node *new_node = (starlab_hash_node *)malloc(sizeof(starlab_hash_node));
+    new_node->key = strdup(key); // Duplicate the key
+
+    // Allocate space for the value based on table type
+    if (hashtable->table_type == 0) { // For instructionAddressCycleInfo
+        new_node->value = malloc(sizeof(instructionAddressCycleInfo));
+        instructionAddressCycleInfo *newValue = (instructionAddressCycleInfo *)new_node->value;
+        newValue->firstInstructionAddressSpace = strdup(((instructionAddressCycleInfo *)value)->firstInstructionAddressSpace);
+        newValue->secondInstructionAddressSpace = strdup(((instructionAddressCycleInfo *)value)->secondInstructionAddressSpace);
+        newValue->value = ((instructionAddressCycleInfo *)value)->value; // Update clock cycles
+    } else if (hashtable->table_type == 1) { // For inst_fetch_exec_tuple
+        new_node->value = malloc(sizeof(inst_fetch_exec_tuple));
+        memcpy(new_node->value, value, sizeof(inst_fetch_exec_tuple)); // Copy the fetch and execute cycles
+    }
+
+    // Insert the new node at the beginning of the list
     new_node->next = hashtable->table[index];
     hashtable->table[index] = new_node;
-    hashtable->count++;
+    hashtable->count++; // Increment the count
 }
+
 
 void* starlab_search(starlab_hash_table *hashtable, const char *key) {
     unsigned int index = starlab_hash(key, hashtable->size);
