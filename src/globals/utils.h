@@ -382,15 +382,18 @@ int   parse_string_array(char dest[][MAX_STR_LENGTH + 1], const void* str,
 #define INITIAL_TABLE_SIZE 10000000
 #define LOAD_FACTOR_THRESHOLD 0.75
 
-typedef struct{
-  void* value;
-  char first_inst_addr_space[128];
-  char second_inst_addr_space[128];
-} starlab_value;
+// Store both value (probably clock cycles) and address space
+// (user vs kernel) in the same hash table for instruction tuples
+
+typedef struct instructionAddressCycleInfo {
+    void *value; 
+    char *firstInstructionAddressSpace;
+    char *secondInstructionAddressSpace;
+} instructionAddressCycleInfo;
 
 typedef struct starlab_hash_node {
     char *key;
-    starlab_value value; 
+    instructionAddressCycleInfo *value;
     struct starlab_hash_node *next;
 } starlab_hash_node;
 
@@ -401,48 +404,28 @@ typedef struct starlab_hash_table {
     size_t value_size;
 } starlab_hash_table;
 
-typedef struct starlab_tuple_hash_node {
-    char *key;
-    void* value; 
-    struct starlab_hash_node *next;
-} starlab_tuple_hash_node;
-
-typedef struct starlab_tuple_hash_table {
-    starlab_tuple_hash_node **table;
-    long size;
-    long count;
-    size_t value_size;
-} starlab_tuple_hash_table;
-
 typedef struct starlab_table_value {
     unsigned long prev_fetch_cycle;
     unsigned long fetch_cycle;
     unsigned long exec_cycle;
 } inst_fetch_exec_tuple;
 
-// update when its clock cycles to add stuff - this is when a tuple cc is complete try identifying address space here
-
 typedef struct {
-    char *key;               
-    starlab_value *value;     
+    char *key;
+    void *value;
 } KeyValuePair;
-
 
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);
 starlab_hash_table* starlab_create_table(long size, size_t value_size);
 void starlab_resize_table(starlab_hash_table *hashtable);
-void starlab_resize_tuple_table(starlab_tuple_hash_table *hashtable);
-void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value, 
-                    const char *first_addr_space, const char *second_addr_space);
-void starlab_insert_tuple(starlab_tuple_hash_table *hashtable, const char *key, void *value);
-starlab_value* starlab_search(starlab_hash_table *hashtable, const char *key);
-starlab_value* starlab_tuple_search(starlab_tuple_hash_table *hashtable, const char *key);
+void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value);
+void* starlab_search(starlab_hash_table *hashtable, const char *key);
 void starlab_delete_key(starlab_hash_table *hashtable, const char *key);
-void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(starlab_value *));
+void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *));
 void starlab_free_table(starlab_hash_table *hashtable);
-void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, starlab_value ***values) ;
+void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, void ***values);
 int compare_key_value_pairs(const void *a, const void *b);
 int get_count(starlab_hash_table* hashtable);
 

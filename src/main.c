@@ -223,15 +223,13 @@ void* voided_global_starlab_ht_ptr = NULL;
 void* voided_global_starlab_types_ht = NULL;
 void* voided_address_to_type_ptr = NULL;
 void* voided_address_to_prev_address = NULL;
-void* voided_inst_tuple_ptr = NULL;
+void* voided_inst_truple_ptr = NULL;
 
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
 char prev_address_as_string[128];
 unsigned long long starlab_prev_address = 0;
 
-unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
-unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
 
 int main(int argc, char* argv[], char* envp[]) {
   char** simulated_argv;
@@ -302,50 +300,38 @@ int main(int argc, char* argv[], char* envp[]) {
 
   close_output_streams();
 
-    if (opt2_in_use()) {
-        opt2_sim_complete();
-    }
-        
+  if(opt2_in_use())
+    opt2_sim_complete();
+  
+  char **keys;
+  void **values_array;
 
-    starlab_value **values_array; 
-    char **keys;
+  KeyValuePair *key_value_pairs;
+  long count = get_count(voided_global_starlab_types_ht);
+  key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
+  
 
 
-    long count = get_count(voided_global_starlab_types_ht);
+  starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
 
-    KeyValuePair *key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
-
-    starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
-
-    for (long i = 0; i < count; i++) {
-        key_value_pairs[i].key = keys[i];             
-        key_value_pairs[i].value = values_array[i];  
-
-    }
+  for (long i = 0; i < count; i++) {
+      key_value_pairs[i].key = keys[i];
+      key_value_pairs[i].value = values_array[i];
+  }
 
     qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
-    // Initialize total_cc_count to accumulate the total counts
     unsigned long total_cc_count = 0;
     for (long i = 0; i < count; i++) {
-        starlab_value *value = (starlab_value *)key_value_pairs[i].value;
-        total_cc_count += *(unsigned long *)value->value;
+        total_cc_count += *(unsigned long *)key_value_pairs[i].value;
     }
 
-    // Initialize running_cc_count for the cumulative sum
     unsigned long running_cc_count = 0;
     for (long i = 0; i < count; i++) {
-        starlab_value *value = (starlab_value *)key_value_pairs[i].value; 
-        printf("inst tuple: %s, first address space: %s, second address space: %s, cumulative CCs: %.2f%%\n", 
-              key_value_pairs[i].key, 
-              value->first_inst_addr_space,
-              value->second_inst_addr_space, 
-              ((double)*(unsigned long *)value->value / (double)total_cc_count) * 100); 
-              
-        running_cc_count += *(unsigned long *)value->value; 
-    
+        printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
+        running_cc_count += *(unsigned long *)key_value_pairs[i].value;
         if (running_cc_count > ((total_cc_count * 99) / 100)) 
-            break; 
+            break;
     }
 
 

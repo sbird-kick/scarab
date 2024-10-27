@@ -222,11 +222,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
         }
 
 
-        char addrSpaceCurr[128];
-
-        unsigned long long currAddressHex = strtoull(address_as_string, NULL, 16);
-        strcpy(addrSpaceCurr, (currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
-        starlab_insert(address_to_type_ptr, address_as_string, insert_string, addrSpaceCurr, addrSpaceCurr ); // it is fine to insert incorrect address space since it will get updated in the next stages
+        starlab_insert(address_to_type_ptr, address_as_string, insert_string);
       }
 
       if(starlab_pi->is_move && (prev_was_move == 0))
