@@ -283,7 +283,6 @@ void starlab_resize_tuple_table(starlab_tuple_hash_table *hashtable) {
     hashtable->size = new_size;
 }
 
-
 void starlab_insert_tuple(starlab_tuple_hash_table *hashtable, const char *key, void *value){
     if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
         starlab_resize_tuple_table(hashtable);
