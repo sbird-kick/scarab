@@ -382,9 +382,15 @@ int   parse_string_array(char dest[][MAX_STR_LENGTH + 1], const void* str,
 #define INITIAL_TABLE_SIZE 10000000
 #define LOAD_FACTOR_THRESHOLD 0.75
 
+typedef struct{
+  void* value;
+  char first_inst_addr_space[128];
+  char second_inst_addr_space[128];
+} starlab_value;
+
 typedef struct starlab_hash_node {
     char *key;
-    void *value;
+    starlab_value value; 
     struct starlab_hash_node *next;
 } starlab_hash_node;
 
@@ -399,26 +405,28 @@ typedef struct starlab_table_value {
     unsigned long prev_fetch_cycle;
     unsigned long fetch_cycle;
     unsigned long exec_cycle;
-    char prev_addr_space[128]; // To track the address space 
-    char curr_addr_space[128]; 
 } inst_fetch_exec_tuple;
 
+// update when its clock cycles to add stuff - this is when a tuple cc is complete try identifying address space here
+
 typedef struct {
-    char *key;
-    void *value;
+    char *key;               
+    starlab_value *value;     
 } KeyValuePair;
+
 
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);
 starlab_hash_table* starlab_create_table(long size, size_t value_size);
 void starlab_resize_table(starlab_hash_table *hashtable);
-void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value);
-void* starlab_search(starlab_hash_table *hashtable, const char *key);
+void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value, 
+                    const char *first_addr_space, const char *second_addr_space);
+starlab_value* starlab_search(starlab_hash_table *hashtable, const char *key);
 void starlab_delete_key(starlab_hash_table *hashtable, const char *key);
-void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *));
+void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(starlab_value *));
 void starlab_free_table(starlab_hash_table *hashtable);
-void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, void ***values);
+void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, starlab_value ***values) ;
 int compare_key_value_pairs(const void *a, const void *b);
 int get_count(starlab_hash_table* hashtable);
 

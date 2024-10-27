@@ -373,9 +373,6 @@ void update_exec_stage(Stage_Data* src_sd) {
 
     char address_as_string[128] = {0};
     sprintf(address_as_string, "%016llX", op->inst_info->addr);
-    char prev_address_as_string[128] = {0};
-    
-    unsigned long long* starlab_prev_address_for_exec_stage_ptr = (unsigned long long*) starlab_search(voided_address_to_prev_address, address_as_string);
 
     bool first_time_exec = false;
     unsigned long extra_exec_cycles = 0;
@@ -385,6 +382,17 @@ void update_exec_stage(Stage_Data* src_sd) {
     {
       inst_tuple_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_fetch_exec_tuple));
     }
+
+      char addrSpacePrev[128];
+      char addrSpaceCurr[128];
+
+      unsigned long long currAddressHex = strtoull(address_as_string, NULL, 16);
+      unsigned long long prevAddressHex = strtoull(prev_address_as_string, NULL, 16); 
+
+      strcpy(addrSpacePrev, (prevAddressHex >= KERNEL_SPACE_START && prevAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
+      strcpy(addrSpaceCurr, (currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
+
+
     // is this already present? 
     if(!starlab_search(inst_tuple_ptr, address_as_string))
     {
@@ -394,7 +402,7 @@ void update_exec_stage(Stage_Data* src_sd) {
       temp_tuple_to_insert.exec_cycle = -1;
       temp_tuple_to_insert.fetch_cycle = op->fetch_cycle;
       temp_tuple_to_insert.prev_fetch_cycle = op->fetch_cycle;
-      starlab_insert(inst_tuple_ptr, address_as_string, &temp_tuple_to_insert);
+      starlab_insert(inst_tuple_ptr, address_as_string, &temp_tuple_to_insert, addrSpacePrev, addrSpaceCurr);
     }
     else
     {
@@ -402,7 +410,7 @@ void update_exec_stage(Stage_Data* src_sd) {
       if(((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle == -1)
       {
         first_time_exec = true;
-
+        ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle = op->exec_cycle;
       }
       else if(op->exec_cycle > ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle)
       {
@@ -413,7 +421,9 @@ void update_exec_stage(Stage_Data* src_sd) {
       // printf("[%016llu] set %lu whenin %llu\n", op->inst_info->addr, ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle, op->exec_cycle);
     }
 
-
+    char prev_address_as_string[128] = {0};
+    
+    unsigned long long* starlab_prev_address_for_exec_stage_ptr = (unsigned long long*) starlab_search(voided_address_to_prev_address, address_as_string);
     
     if(starlab_prev_address_for_exec_stage_ptr == NULL)
     {
@@ -424,14 +434,14 @@ void update_exec_stage(Stage_Data* src_sd) {
       sprintf(prev_address_as_string, "%016llX", *starlab_prev_address_for_exec_stage_ptr);
 
       inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
-      inst_fetch_exec_tuple* this_truple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
-      if(prev_tuple_ptr == NULL || this_truple_ptr == NULL)
+      inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
+      if(prev_tuple_ptr == NULL || this_tuple_ptr == NULL)
       {
         // do nothing
       }
       else
       {
-        unsigned long cc_to_add = this_truple_ptr->exec_cycle - prev_tuple_ptr->fetch_cycle;
+        unsigned long cc_to_add = this_tuple_ptr->exec_cycle - prev_tuple_ptr->fetch_cycle;
         if(!first_time_exec)
         {
           cc_to_add = extra_exec_cycles;
@@ -450,14 +460,16 @@ void update_exec_stage(Stage_Data* src_sd) {
           }
           if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
           {
-            starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
+
+
+            starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add, addrSpacePrev, addrSpaceCurr);
           }
           else
           {
             
             unsigned long* cc_ptr = (unsigned long*) starlab_search(voided_global_starlab_types_ht, tuple_string);
             // printf("[exec] succesfully added %lu %lu\n", *cc_ptr, cc_to_add);
-            // printf("%lu %lu\n %lu %lu    %llu\n", this_truple_ptr->exec_cycle, this_truple_ptr->fetch_cycle,prev_tuple_ptr->exec_cycle, prev_tuple_ptr->fetch_cycle, op->exec_cycle );
+            // printf("%lu %lu\n %lu %lu    %llu\n", this_tuple_ptr->exec_cycle, this_tuple_ptr->fetch_cycle,prev_tuple_ptr->exec_cycle, prev_tuple_ptr->fetch_cycle, op->exec_cycle );
             *cc_ptr+= cc_to_add;
           }
         }

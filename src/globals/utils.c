@@ -38,6 +38,9 @@
 #include "general.param.h"
 
 #define CMP_ADDR_MASK (((Addr)-1) << 58)
+
+
+
 /**************************************************************************************/
 /* breakpoint: A function to help debugging. */
 
@@ -223,7 +226,10 @@ void starlab_resize_table(starlab_hash_table *hashtable) {
     hashtable->size = new_size;
 }
 
-void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value) {
+
+void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value, 
+                    const char *first_addr_space, const char *second_addr_space){
+
     if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
         starlab_resize_table(hashtable);
     }
@@ -232,7 +238,10 @@ void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value)
     starlab_hash_node *node = hashtable->table[index];
     while (node) {
         if (strcmp(node->key, key) == 0) {
-            memcpy(node->value, value, hashtable->value_size);
+            memcpy(node->value.value, value, hashtable->value_size);
+            strcpy(node->value.first_inst_addr_space, first_addr_space);
+            strcpy(node->value.second_inst_addr_space, second_addr_space);
+
             return;
         }
         node = node->next;
@@ -240,19 +249,21 @@ void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value)
 
     starlab_hash_node *new_node = (starlab_hash_node*) malloc(sizeof(starlab_hash_node));
     new_node->key = strdup(key);
-    new_node->value = malloc(hashtable->value_size);
-    memcpy(new_node->value, value, hashtable->value_size);
+    new_node->value.value = malloc(hashtable->value_size);
+    memcpy(new_node->value.value, value, hashtable->value_size);
+    strcpy(new_node->value.first_inst_addr_space, first_addr_space);
+    strcpy(new_node->value.second_inst_addr_space, second_addr_space);
     new_node->next = hashtable->table[index];
     hashtable->table[index] = new_node;
     hashtable->count++;
 }
 
-void* starlab_search(starlab_hash_table *hashtable, const char *key) {
+starlab_value* starlab_search(starlab_hash_table *hashtable, const char *key) {
     unsigned int index = starlab_hash(key, hashtable->size);
     starlab_hash_node *node = hashtable->table[index];
     while (node) {
         if (strcmp(node->key, key) == 0) {
-            return node->value;
+            return &node->value;
         }
         node = node->next;
     }
@@ -280,36 +291,34 @@ void starlab_delete_key(starlab_hash_table *hashtable, const char *key) {
     }
 
     free(node->key);
-    free(node->value);
-    free(node);
+    free(node->value.value); // Free the allocated memory for the value inside starlab_value
+    free(node); // Free the node itself
     hashtable->count--;
 }
 
-void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(void *)) {
+void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(starlab_value *)) {
     for (int i = 0; i < hashtable->size; i++) {
         starlab_hash_node *node = hashtable->table[i];
         while (node) {
             printf("Key: %s, Value: ", node->key);
-            print_value(node->value);
+            print_value(&node->value); // Pass a pointer to the starlab_value
             node = node->next;
         }
     }
 }
+
 
 int compare_key_value_pairs(const void *a, const void *b) {
     KeyValuePair *pairA = (KeyValuePair *)a;
     KeyValuePair *pairB = (KeyValuePair *)b;
     return (*(long*)pairB->value - *(long*)pairA->value);  // Adjust this comparison based on the actual type of the value
 }
-
-
-
-void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, void ***values) {
+void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, starlab_value ***values) {
     int count = hashtable->count;
 
     // Allocate memory for keys and values arrays
     *keys = (char **)malloc(count * sizeof(char *));
-    *values = (void **)malloc(count * sizeof(void *));
+    *values = (starlab_value **)malloc(count * sizeof(starlab_value *)); // Change to starlab_value**
 
     KeyValuePair *pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
 
@@ -318,23 +327,24 @@ void starlab_return_key_value_arr(starlab_hash_table *hashtable, char ***keys, v
         starlab_hash_node *node = hashtable->table[i];
         while (node) {
             pairs[index].key = node->key;
-            pairs[index].value = node->value;
+            pairs[index].value = &node->value; // Change to point to starlab_value
             index++;
             node = node->next;
         }
     }
 
-    // Sort the key-value pairs by value
+    // Sort the key-value pairs by value (if needed)
     qsort(pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
     // Fill the keys and values arrays
     for (long i = 0; i < count; i++) {
         (*keys)[i] = pairs[i].key;
-        (*values)[i] = pairs[i].value;
+        (*values)[i] = pairs[i].value; // Change to store starlab_value*
     }
 
     free(pairs);
 }
+
 
 int get_count(starlab_hash_table* hashtable)
 {
@@ -350,14 +360,16 @@ void starlab_free_table(starlab_hash_table *hashtable) {
             starlab_hash_node *temp = node;
             node = node->next;
             free(temp->key);
-            free(temp->value);
-            free(temp);
+
+            // Free the starlab_value struct correctly
+            starlab_value *value = &temp->value; // Use & to get the address of the starlab_value
+            free(value->value); // Free the allocated value inside starlab_value
+            free(temp); // Free the hash node itself
         }
     }
     free(hashtable->table);
     free(hashtable);
 }
-
 
 /**************************************************************************************/
 /* hexstr64: This little function exists to convert a 64-bit integer into a

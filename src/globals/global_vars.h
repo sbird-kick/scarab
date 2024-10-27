@@ -90,6 +90,9 @@ extern char prev_instruction_class[128];
 
 extern char prev_address_as_string[128];
 extern unsigned long long starlab_prev_address;
+
+extern unsigned long long KERNEL_SPACE_START;
+extern unsigned long long KERNEL_SPACE_END;
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */
