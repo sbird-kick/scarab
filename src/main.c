@@ -306,51 +306,46 @@ int main(int argc, char* argv[], char* envp[]) {
         opt2_sim_complete();
     }
         
-    // Declare as starlab_value **
+
     starlab_value **values_array; 
     char **keys;
 
-    // Get the count of items in the hash table
+
     long count = get_count(voided_global_starlab_types_ht);
 
     KeyValuePair *key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
 
-    // Update the function call to match the new prototype
     starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
 
     for (long i = 0; i < count; i++) {
-        key_value_pairs[i].key = keys[i];             // Assign the key
-        key_value_pairs[i].value = values_array[i];   // Assign the value (starlab_value *)
+        key_value_pairs[i].key = keys[i];             
+        key_value_pairs[i].value = values_array[i];  
 
-        // No need to store address_space in KeyValuePair anymore
     }
 
-    // Sort the key-value pairs
     qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
     // Initialize total_cc_count to accumulate the total counts
     unsigned long total_cc_count = 0;
     for (long i = 0; i < count; i++) {
-        // Cast to the correct type before accessing the value
         starlab_value *value = (starlab_value *)key_value_pairs[i].value;
-        total_cc_count += *(unsigned long *)value->value; // Access the value correctly
+        total_cc_count += *(unsigned long *)value->value;
     }
 
     // Initialize running_cc_count for the cumulative sum
     unsigned long running_cc_count = 0;
     for (long i = 0; i < count; i++) {
-        starlab_value *value = (starlab_value *)key_value_pairs[i].value; // Cast again
+        starlab_value *value = (starlab_value *)key_value_pairs[i].value; 
         printf("inst tuple: %s, first address space: %s, second address space: %s, cumulative CCs: %.2f%%\n", 
               key_value_pairs[i].key, 
-              value->first_inst_addr_space, // Access the first address space directly
-              value->second_inst_addr_space, // Access the second address space directly
-              ((double)*(unsigned long *)value->value / (double)total_cc_count) * 100); // Correct value access
+              value->first_inst_addr_space,
+              value->second_inst_addr_space, 
+              ((double)*(unsigned long *)value->value / (double)total_cc_count) * 100); 
               
-        running_cc_count += *(unsigned long *)value->value; // Update running count
-
-        // Check if we have reached 99% of the total count
+        running_cc_count += *(unsigned long *)value->value; 
+    
         if (running_cc_count > ((total_cc_count * 99) / 100)) 
-            break; // Exit if the running count exceeds 99% of the total
+            break; 
     }
 
 

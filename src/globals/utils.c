@@ -258,6 +258,68 @@ void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value,
     hashtable->count++;
 }
 
+void starlab_resize_tuple_table(starlab_tuple_hash_table *hashtable) {
+    printf("resizing hash table\n");
+    int new_size = hashtable->size * 2;
+    starlab_tuple_hash_node **new_table = (starlab_tuple_hash_node**) malloc(sizeof(starlab_tuple_hash_node *) * new_size);
+
+    for (int i = 0; i < new_size; i++) {
+        new_table[i] = NULL;
+    }
+
+    for (int i = 0; i < hashtable->size; i++) {
+        starlab_tuple_hash_node *node = hashtable->table[i];
+        while (node) {
+            unsigned int new_index = starlab_hash(node->key, new_size);
+            starlab_tuple_hash_node *next_node = node->next;
+            node->next = new_table[new_index];
+            new_table[new_index] = node;
+            node = next_node;
+        }
+    }
+
+    free(hashtable->table);
+    hashtable->table = new_table;
+    hashtable->size = new_size;
+}
+
+
+void starlab_insert_tuple(starlab_tuple_hash_table *hashtable, const char *key, void *value){
+    if ((float)hashtable->count / hashtable->size >= LOAD_FACTOR_THRESHOLD) {
+        starlab_resize_tuple_table(hashtable);
+    }
+
+    unsigned int index = starlab_hash(key, hashtable->size);
+    starlab_tuple_hash_node *node = hashtable->table[index];
+    while (node) {
+        if (strcmp(node->key, key) == 0) {
+            memcpy(node->value, value, hashtable->value_size);
+            return;
+        }
+        node = node->next;
+    }
+
+    starlab_tuple_hash_node *new_node = (starlab_tuple_hash_node*) malloc(sizeof(starlab_tuple_hash_node));
+    new_node->key = strdup(key);
+    new_node->value = malloc(hashtable->value_size);
+    memcpy((void *)node->value, (const void *)value, hashtable->value_size);
+    new_node->next = hashtable->table[index];
+    hashtable->table[index] = new_node;
+    hashtable->count++;
+}
+
+starlab_value* starlab_search(starlab_tuple_hash_table *hashtable, const char *key) {
+    unsigned int index = starlab_hash(key, hashtable->size);
+    starlab_tuple_hash_node *node = hashtable->table[index];
+    while (node) {
+        if (strcmp(node->key, key) == 0) {
+            return &node->value;
+        }
+        node = node->next;
+    }
+    return NULL; // Indicates that the key is not found
+}
+
 starlab_value* starlab_search(starlab_hash_table *hashtable, const char *key) {
     unsigned int index = starlab_hash(key, hashtable->size);
     starlab_hash_node *node = hashtable->table[index];

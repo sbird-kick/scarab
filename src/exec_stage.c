@@ -377,7 +377,7 @@ void update_exec_stage(Stage_Data* src_sd) {
     bool first_time_exec = false;
     unsigned long extra_exec_cycles = 0;
     // update the inst_fetch_exec_tuple
-    starlab_hash_table* inst_tuple_ptr = (starlab_hash_table*) voided_inst_tuple_ptr;
+    starlab_tuple_hash_table* inst_tuple_ptr = (starlab_tuple_hash_table*) voided_inst_tuple_ptr;
     if(inst_tuple_ptr == NULL)
     {
       inst_tuple_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_fetch_exec_tuple));
@@ -402,22 +402,22 @@ void update_exec_stage(Stage_Data* src_sd) {
       temp_tuple_to_insert.exec_cycle = -1;
       temp_tuple_to_insert.fetch_cycle = op->fetch_cycle;
       temp_tuple_to_insert.prev_fetch_cycle = op->fetch_cycle;
-      starlab_insert(inst_tuple_ptr, address_as_string, &temp_tuple_to_insert, addrSpacePrev, addrSpaceCurr);
+      starlab_insert_tuple(inst_tuple_ptr, address_as_string, &temp_tuple_to_insert);
     }
     else
     {
       // ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle = op->fetch_cycle;
-      if(((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle == -1)
+      if(((inst_fetch_exec_tuple*) starlab_tuple_search(inst_tuple_ptr, address_as_string))->exec_cycle == -1)
       {
         first_time_exec = true;
-        ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle = op->exec_cycle;
+        ((inst_fetch_exec_tuple*) starlab_tuple_search(inst_tuple_ptr, address_as_string))->exec_cycle = op->exec_cycle;
       }
-      else if(op->exec_cycle > ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle)
+      else if(op->exec_cycle > ((inst_fetch_exec_tuple*) starlab_tuple_search(inst_tuple_ptr, address_as_string))->exec_cycle)
       {
-        extra_exec_cycles = op->exec_cycle - ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle;
-        ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle = op->exec_cycle;
+        extra_exec_cycles = op->exec_cycle - ((inst_fetch_exec_tuple*) starlab_tuple_search(inst_tuple_ptr, address_as_string))->exec_cycle;
+        ((inst_fetch_exec_tuple*) starlab_tuple_search(inst_tuple_ptr, address_as_string))->exec_cycle = op->exec_cycle;
       }
-      ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->prev_fetch_cycle = -1;
+      ((inst_fetch_exec_tuple*) starlab_tuple_search(inst_tuple_ptr, address_as_string))->prev_fetch_cycle = -1;
       // printf("[%016llu] set %lu whenin %llu\n", op->inst_info->addr, ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle, op->exec_cycle);
     }
 
@@ -433,8 +433,8 @@ void update_exec_stage(Stage_Data* src_sd) {
     {
       sprintf(prev_address_as_string, "%016llX", *starlab_prev_address_for_exec_stage_ptr);
 
-      inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
-      inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
+      inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_tuple_search(inst_tuple_ptr, prev_address_as_string));
+      inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_tuple_search(inst_tuple_ptr, address_as_string));
       if(prev_tuple_ptr == NULL || this_tuple_ptr == NULL)
       {
         // do nothing

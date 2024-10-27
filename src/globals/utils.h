@@ -401,6 +401,19 @@ typedef struct starlab_hash_table {
     size_t value_size;
 } starlab_hash_table;
 
+typedef struct starlab_tuple_hash_node {
+    char *key;
+    void* value; 
+    struct starlab_hash_node *next;
+} starlab_tuple_hash_node;
+
+typedef struct starlab_tuple_hash_table {
+    starlab_tuple_hash_node **table;
+    long size;
+    long count;
+    size_t value_size;
+} starlab_tuple_hash_table;
+
 typedef struct starlab_table_value {
     unsigned long prev_fetch_cycle;
     unsigned long fetch_cycle;
@@ -420,9 +433,12 @@ const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);
 starlab_hash_table* starlab_create_table(long size, size_t value_size);
 void starlab_resize_table(starlab_hash_table *hashtable);
+void starlab_resize_tuple_table(starlab_tuple_hash_table *hashtable);
 void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value, 
                     const char *first_addr_space, const char *second_addr_space);
+void starlab_insert_tuple(starlab_tuple_hash_table *hashtable, const char *key, void *value);
 starlab_value* starlab_search(starlab_hash_table *hashtable, const char *key);
+starlab_value* starlab_tuple_search(starlab_tuple_hash_table *hashtable, const char *key);
 void starlab_delete_key(starlab_hash_table *hashtable, const char *key);
 void starlab_iterate_table(starlab_hash_table *hashtable, void (*print_value)(starlab_value *));
 void starlab_free_table(starlab_hash_table *hashtable);
