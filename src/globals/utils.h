@@ -393,7 +393,7 @@ typedef struct instructionAddressCycleInfo {
 
 typedef struct starlab_hash_node {
     char *key;
-    instructionAddressCycleInfo *value;
+    void *value; // Will point to either an instructionAddressCycleInfo or inst_fetch_exec_tuple
     struct starlab_hash_node *next;
 } starlab_hash_node;
 
