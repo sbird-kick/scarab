@@ -226,11 +226,7 @@ void* voided_address_to_prev_address = NULL;
 void* voided_inst_tuple_ptr = NULL;
 
 // Instruction tuple address spaces (user vs kernel)
-void* voided_user_user_ptr = NULL;
-void* voided_user_kernel_ptr = NULL;
-void* voided_kernel_kernel_ptr = NULL; 
-unsigned long long prev_addr;
-unsigned long long curr_addr;
+void* voided_inst_tuple_info_ptr = NULL;
 
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
