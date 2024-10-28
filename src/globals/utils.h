@@ -383,18 +383,32 @@ int   parse_string_array(char dest[][MAX_STR_LENGTH + 1], const void* str,
 #define INITIAL_TABLE_SIZE 10000000
 #define LOAD_FACTOR_THRESHOLD 0.75
 
-// Store both value (probably clock cycles) and address space
-// (user vs kernel) in the same hash table for instruction tuples
+typedef struct inst_tuple_info{
 
-typedef struct instructionAddressCycleInfo {
-    void *value; 
-    char *firstInstructionAddressSpace;
-    char *secondInstructionAddressSpace;
-} instructionAddressCycleInfo;
+  // Will be populated in the icache stage
+  unsigned long long inst1_addr;
+  unsigned long long inst2_addr;
+
+  // Populate in the icache stage: fetch iclass from address stored in address_to_type_ptr hashtable
+  char *inst1_iclass;
+  char *inst2_iclass;
+
+  // Populate in the icache stage: add the compute logic here 
+  char *inst1_addr_space;
+  char *inst2_addr_space;
+
+  // Populate in the exec stage: this is where the final clock cycle for a tuple will be computed 
+  // Essentially copy the computation result for a tuple from the existing logic in exec stage
+  unsigned long clock_cycles;
+
+  // To check whether a tuple info is complete  
+  bool is_info_complete;
+
+} inst_tuple_info;
 
 typedef struct starlab_hash_node {
     char *key;
-    void *value; // Will point to either an instructionAddressCycleInfo or inst_fetch_exec_tuple
+    void *value;
     struct starlab_hash_node *next;
 } starlab_hash_node;
 
@@ -403,7 +417,6 @@ typedef struct starlab_hash_table {
     long size;
     long count;
     size_t value_size;
-    bool table_type; // 0 for instructionAddressCycleInfo, 1 for inst_fetch_exec_tuple
 } starlab_hash_table;
 
 typedef struct starlab_table_value {
@@ -420,7 +433,7 @@ typedef struct {
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);
-starlab_hash_table* starlab_create_table(long size, size_t value_size, bool table_type);
+starlab_hash_table* starlab_create_table(long size, size_t value_size);
 void starlab_resize_table(starlab_hash_table *hashtable);
 void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value);
 void* starlab_search(starlab_hash_table *hashtable, const char *key);

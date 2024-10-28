@@ -380,7 +380,7 @@ void update_exec_stage(Stage_Data* src_sd) {
     starlab_hash_table* inst_tuple_ptr = (starlab_hash_table*) voided_inst_tuple_ptr;
     if(inst_tuple_ptr == NULL)
     {
-      inst_tuple_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_fetch_exec_tuple), 1);
+      inst_tuple_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_fetch_exec_tuple));
     }
     // is this already present? 
     if(!starlab_search(inst_tuple_ptr, address_as_string))
@@ -445,30 +445,11 @@ void update_exec_stage(Stage_Data* src_sd) {
 
           if(voided_global_starlab_types_ht == NULL)
           {
-            voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long), 0);
+            voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
           }
           if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
           {
-
-            unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
-            unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
-
-            char prevInstAddrSpace[128];
-            char currInstAddrSpace[128];
-
-            unsigned long long currAddressHex = strtoull(address_as_string, NULL, 16);
-            unsigned long long prevAddressHex = strtoull(prev_address_as_string, NULL, 16); 
-            strcpy(prevInstAddrSpace, (prevAddressHex >= KERNEL_SPACE_START && prevAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
-            strcpy(currInstAddrSpace, (currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
-
-            instructionAddressCycleInfo temp;
-            temp.value = &cc_to_add;
-
-            strcpy(temp.firstInstructionAddressSpace, prevInstAddrSpace);
-            strcpy(temp.secondInstructionAddressSpace, currInstAddrSpace);
-
-            
-            starlab_insert(voided_global_starlab_types_ht, tuple_string, &temp);
+            starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
           }
           else
           {

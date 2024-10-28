@@ -157,7 +157,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
   starlab_hash_table* address_to_type_ptr = (starlab_hash_table*) voided_address_to_type_ptr;
   if(address_to_type_ptr == NULL)
   {
-    address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128, 0);
+    address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
   }
 
   static int prev_was_move = 0;
@@ -167,6 +167,9 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
 
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);
+      curr_addr = starlab_pi->instruction_addr; 
+
+
 
       if(!starlab_search(address_to_type_ptr, address_as_string))
       {
@@ -220,8 +223,6 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             sprintf(insert_string, "%s", "ALU");
           }
         }
-
-
         starlab_insert(address_to_type_ptr, address_as_string, insert_string);
       }
 
@@ -242,6 +243,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
         // starlab_pi->op_type = OP_NOP;
       }
       uop_generator_get_uop(proc_id, op, &next_onpath_pi[proc_id]);
+
     }
     else {
       uop_generator_get_uop(proc_id, op, &next_offpath_pi[proc_id]);
@@ -250,6 +252,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
   } else {
     uop_generator_get_uop(proc_id, op, NULL);
   }
+  
 
   voided_address_to_type_ptr = (void *) address_to_type_ptr;
 
