@@ -157,7 +157,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
   starlab_hash_table* address_to_type_ptr = (starlab_hash_table*) voided_address_to_type_ptr;
   if(address_to_type_ptr == NULL)
   {
-    address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+    address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128, 0);
   }
 
   static int prev_was_move = 0;

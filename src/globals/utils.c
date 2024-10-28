@@ -187,7 +187,7 @@ unsigned int starlab_hash(const char *key, int table_size) {
     return hash % table_size;
 }
 
-starlab_hash_table* starlab_create_table(long size, size_t value_size) {
+starlab_hash_table* starlab_create_table(long size, size_t value_size, bool type) {
     starlab_hash_table *hashtable = (starlab_hash_table *) malloc(sizeof(starlab_hash_table));
     hashtable->table = (starlab_hash_node**) malloc(sizeof(starlab_hash_node *) * size);
     for (int i = 0; i < size; i++) {
@@ -196,6 +196,7 @@ starlab_hash_table* starlab_create_table(long size, size_t value_size) {
     hashtable->size = size;
     hashtable->count = 0;
     hashtable->value_size = value_size;
+    hashtable->table_type = type; 
     return hashtable;
 }
 

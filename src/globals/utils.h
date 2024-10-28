@@ -420,7 +420,7 @@ typedef struct {
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);
-starlab_hash_table* starlab_create_table(long size, size_t value_size);
+starlab_hash_table* starlab_create_table(long size, size_t value_size, bool table_type);
 void starlab_resize_table(starlab_hash_table *hashtable);
 void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value);
 void* starlab_search(starlab_hash_table *hashtable, const char *key);

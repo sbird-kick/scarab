@@ -866,7 +866,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     starlab_hash_table* address_to_prev_address = (starlab_hash_table*) voided_address_to_prev_address;
     if(address_to_prev_address == NULL)
     {
-      address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
+      address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long), 0);
     }
 
     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
@@ -875,10 +875,27 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     char prev_address_as_string[128] = {0};
     sprintf(address_as_string, "%016llX", op->inst_info->addr);
     sprintf(prev_address_as_string, "%016llX", starlab_prev_address);
+    unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+    unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+
+    char prevInstAddrSpace[128];
+    char currInstAddrSpace[128];
+
+    unsigned long long currAddressHex = strtoull(address_as_string, NULL, 16);
+    unsigned long long prevAddressHex = strtoull(prev_address_as_string, NULL, 16); 
+    strcpy(prevInstAddrSpace, (prevAddressHex >= KERNEL_SPACE_START && prevAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
+    strcpy(currInstAddrSpace, (currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
+
     
     if(!starlab_search(address_to_prev_address, address_as_string))
     {
-        starlab_insert(address_to_prev_address, address_as_string, &starlab_prev_address);
+       instructionAddressCycleInfo temp;
+       temp.value = &starlab_prev_address;
+
+       strcpy(temp.firstInstructionAddressSpace, prevInstAddrSpace);
+       strcpy(temp.secondInstructionAddressSpace, currInstAddrSpace);
+
+        starlab_insert(address_to_prev_address, address_as_string, &temp);
     }
     if(op->inst_info->addr != starlab_prev_address) // track changes only
       starlab_prev_address = op->inst_info->addr;
@@ -889,7 +906,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     starlab_hash_table* inst_tuple_ptr = (starlab_hash_table*) voided_inst_tuple_ptr;
     if(inst_tuple_ptr == NULL)
     {
-      inst_tuple_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_fetch_exec_tuple));
+      inst_tuple_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_fetch_exec_tuple), 1);
     }
 
     // is this already present?
@@ -955,7 +972,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
           if(voided_global_starlab_types_ht == NULL)
           {
-            voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
+            voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long), 0);
           }
           if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
           {
