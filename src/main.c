@@ -310,13 +310,54 @@ int main(int argc, char* argv[], char* envp[]) {
   char **keys;
   void **values_array;
 
+  // for another hashtable inst_tuple_info_ptr
+  char **inst_tuple_keys;
+  void **inst_tuple_values_array;
+
   KeyValuePair *key_value_pairs;
   long count = get_count(voided_global_starlab_types_ht);
   key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
+
+  KeyValuePair *inst_tuple_key_value_pairs;
+  long inst_tuple_count = get_count(voided_inst_tuple_ptr);
+  inst_tuple_key_value_pairs = (KeyValuePair *)malloc(inst_tuple_count * sizeof(KeyValuePair));
   
 
-
   starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
+  starlab_return_key_value_arr(voided_inst_tuple_ptr, &inst_tuple_keys, &inst_tuple_values_array);
+
+  // Print stuff in the hashtable inst_tuple_info_ptr: it has two instruction addresses in the value which is of type inst_tuple_info
+  for (long i = 0; i < inst_tuple_count; i++) {
+      inst_tuple_key_value_pairs[i].key = inst_tuple_keys[i];
+      inst_tuple_key_value_pairs[i].value = inst_tuple_values_array[i];
+  }
+
+  qsort(inst_tuple_key_value_pairs, inst_tuple_count, sizeof(KeyValuePair), compare_key_value_pairs);
+
+  for (long i = 0; i < inst_tuple_count; i++) {
+      inst_tuple_info *tuple = (inst_tuple_info *)inst_tuple_key_value_pairs[i].value;
+
+      // convert the addresses into string and print
+      sprintf(prev_address_as_string, "%016llX", tuple->inst1_addr);
+      char address_as_string[128] = {0};
+      sprintf(address_as_string, "%016llX", tuple->inst2_addr);
+
+      printf("inst key: %s, inst addr 1: %s, inst addr 2: %s\n", inst_tuple_key_value_pairs[i].key, prev_address_as_string, address_as_string);
+
+      // Check if the address space pointers are valid before printing
+      if (tuple != NULL) {
+          if (tuple->inst1_addr_space && tuple->inst2_addr_space) {
+              printf("address space of inst 1: %s, address space of inst 2: %s\n", tuple->inst1_addr_space, tuple->inst2_addr_space);
+          } else {
+              printf("address space of inst 1 or inst 2 is NULL\n");
+          }
+      } else {
+          printf("tuple is NULL\n");
+      }
+  }
+
+
+
 
   for (long i = 0; i < count; i++) {
       key_value_pairs[i].key = keys[i];

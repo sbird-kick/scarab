@@ -390,8 +390,8 @@ typedef struct inst_tuple_info{
   unsigned long long inst2_addr;
 
   // Populate in the icache stage: fetch iclass from address stored in address_to_type_ptr hashtable
-  char *inst1_iclass;
-  char *inst2_iclass;
+  // char *inst1_iclass;
+  // char *inst2_iclass;
 
   // Populate in the icache stage: add the compute logic here 
   char *inst1_addr_space;
@@ -402,7 +402,7 @@ typedef struct inst_tuple_info{
   unsigned long clock_cycles;
 
   // To check whether a tuple info is complete  
-  bool is_info_complete;
+  bool complete;
 
 } inst_tuple_info;
 

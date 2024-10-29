@@ -248,6 +248,9 @@ void starlab_insert(starlab_hash_table *hashtable, const char *key, void *value)
 }
 
 void* starlab_search(starlab_hash_table *hashtable, const char *key) {
+    if (hashtable == NULL || key == NULL) {
+        return NULL; // Indicates invalid input
+    }
     unsigned int index = starlab_hash(key, hashtable->size);
     starlab_hash_node *node = hashtable->table[index];
     while (node) {

@@ -882,69 +882,45 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     sprintf(address_as_string, "%016llX", op->inst_info->addr);
     sprintf(prev_address_as_string, "%016llX", starlab_prev_address); 
     
-    if(!starlab_search(address_to_prev_address, address_as_string))
+    unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+    unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+
+    unsigned long long prevAddressHex = strtoull(prev_address_as_string, NULL, 16); 
+    unsigned long long currAddressHex = strtoull(address_as_string, NULL, 16);
+
+    if(!starlab_search(address_to_prev_address, address_as_string)) // if the address is not present
     {
+        // Insert the address to prev address mapping entry
         starlab_insert(address_to_prev_address, address_as_string, &starlab_prev_address);
 
-        // For debugging
-        // void* value = starlab_search(address_to_prev_address, address_as_string);
-        // if (value != NULL) {
-        //     printf("Inserted %s %ld\n", address_as_string, *((unsigned long*) value));
-        // } else {
-        //     printf("Failed to insert %s\n", address_as_string);
-        // }
     }
-    if(op->inst_info->addr != starlab_prev_address) // track changes only
-      starlab_prev_address = op->inst_info->addr;
 
-    // Check whether an entry exists otherwise create one
-    if (starlab_prev_address != 0) { // Check if there is a previous instruction
-      if (inst_tuple_info_ptr == NULL) {
-        inst_tuple_info_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_tuple_info));
-      }
-      if (voided_address_to_type_ptr == NULL) {
-        voided_address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char*));
-      }
-      if (!starlab_search(inst_tuple_info_ptr, address_as_string)) {
-      // key will be the second address in a tuple and value will be a struct of type inst_tuple_info
+    // Check our new hashtable for the address
+    // If it is not present, insert it
+    if(!starlab_search(inst_tuple_info_ptr, address_as_string))
+    {
+      // Create a packet of type inst_tuple_info
       inst_tuple_info temp_tuple_to_insert;
-      temp_tuple_to_insert.inst1_addr = starlab_prev_address;
-      temp_tuple_to_insert.inst2_addr = op->inst_info->addr;
-      // fetch iclass from address stored in address_to_type_ptr hashtable
-      char* inst1_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
-      char* inst2_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
-      temp_tuple_to_insert.inst1_iclass = inst1_iclass ? inst1_iclass : "Unknown";
-      temp_tuple_to_insert.inst2_iclass = inst2_iclass ? inst2_iclass : "Unknown";
+      // inst1_addr is the previous addrl inst2_addr is the current address
+      temp_tuple_to_insert.inst1_addr = prevAddressHex;
+      temp_tuple_to_insert.inst2_addr = currAddressHex;
+      // Address spaces need to be computed 
+      temp_tuple_to_insert.inst1_addr_space = strdup((prevAddressHex >= KERNEL_SPACE_START && prevAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
+      temp_tuple_to_insert.inst2_addr_space = strdup((currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
+      // Clock cycles will be populated in the execution stage
+      temp_tuple_to_insert.clock_cycles = -1;
+      // information is not complete yet, so
+      temp_tuple_to_insert.complete = 0;
+    }
 
-      // compute address space 
-      unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
-      unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
-
-      unsigned long long prevAddressHex = strtoull(prev_address_as_string, NULL, 16); 
-      unsigned long long currAddressHex = strtoull(address_as_string, NULL, 16);
-
-      strcpy(temp_tuple_to_insert.inst1_addr_space, (prevAddressHex >= KERNEL_SPACE_START && prevAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
-      strcpy(temp_tuple_to_insert.inst2_addr_space, (currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
-
-      // insert into the hashtable
-      starlab_insert(inst_tuple_info_ptr, address_as_string, &temp_tuple_to_insert);
-
-      // For debugging
-      void* value = starlab_search(inst_tuple_info_ptr, address_as_string);
-      if (value != NULL) {
-        printf("Inserted %s %s %s %s %s\n", address_as_string, 
-           ((inst_tuple_info*) value)->inst1_iclass ? ((inst_tuple_info*) value)->inst1_iclass : "Unknown", 
-           ((inst_tuple_info*) value)->inst2_iclass ? ((inst_tuple_info*) value)->inst2_iclass : "Unknown", 
-           ((inst_tuple_info*) value)->inst1_addr_space, 
-           ((inst_tuple_info*) value)->inst2_addr_space);
-      } else {
-        printf("Failed to insert %s\n", address_as_string);
-      }
-      }
+    if(op->inst_info->addr != starlab_prev_address) // track changes only
+    {
+       starlab_prev_address = op->inst_info->addr;
     }
 
     voided_address_to_prev_address = (void *) address_to_prev_address;
 
+   
     // update the inst_fetch_exec_tuple
     starlab_hash_table* inst_tuple_ptr = (starlab_hash_table*) voided_inst_tuple_ptr;
     if(inst_tuple_ptr == NULL)
@@ -1033,11 +1009,12 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
             }
           }
         }
-      }
+      
+    }
     }
 
-    voided_inst_tuple_ptr = (void *) inst_tuple_ptr;
-
+        voided_inst_tuple_ptr = (void *) inst_tuple_info_ptr;
+   
 
     op_count[ic->proc_id]++;          /* increment instruction counters */
     unique_count_per_core[ic->proc_id]++;
