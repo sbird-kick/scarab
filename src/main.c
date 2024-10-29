@@ -310,26 +310,30 @@ int main(int argc, char* argv[], char* envp[]) {
   char **keys;
   void **values_array;
 
-  // for another hashtable inst_tuple_info_ptr
-  char **inst_tuple_keys;
-  void **inst_tuple_values_array;
-
   KeyValuePair *key_value_pairs;
   long count = get_count(voided_global_starlab_types_ht);
   key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
 
+  starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
+
+  // for another hashtable inst_tuple_info_ptr
+  char **inst_tuple_keys; // Keys are previous addresses of instructions
+  void **inst_tuple_values_array;
+
   KeyValuePair *inst_tuple_key_value_pairs;
   long inst_tuple_count = get_count(voided_inst_tuple_ptr);
   inst_tuple_key_value_pairs = (KeyValuePair *)malloc(inst_tuple_count * sizeof(KeyValuePair));
-  
 
-  starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
+  // voided_inst_tuple_ptr is a hashtable with keys as instruction addresses and values as inst_tuple_info
+  // inst_tuple_keys are the previous addresses of the instructions
+  // inst_tuple_values_array are the inst_tuple_info values
   starlab_return_key_value_arr(voided_inst_tuple_ptr, &inst_tuple_keys, &inst_tuple_values_array);
 
-  // Print stuff in the hashtable inst_tuple_info_ptr: it has two instruction addresses in the value which is of type inst_tuple_info
-  for (long i = 0; i < inst_tuple_count; i++) {
-      inst_tuple_key_value_pairs[i].key = inst_tuple_keys[i];
-      inst_tuple_key_value_pairs[i].value = inst_tuple_values_array[i];
+  // Print stuff in the hashtable inst_tuple_info_ptr: 
+  for (long i = 0; i < inst_tuple_count; i++) // inst_tuple_count is the number of elements in the hashtable
+  {
+      inst_tuple_key_value_pairs[i].key = inst_tuple_keys[i]; // Previous instruction addresses - we don't really need this since we track it in the value
+      inst_tuple_key_value_pairs[i].value = inst_tuple_values_array[i]; // Contains inst_tuple_info (previous and current instruction addresses, address spaces, clock cycles, and completeness)
   }
 
   qsort(inst_tuple_key_value_pairs, inst_tuple_count, sizeof(KeyValuePair), compare_key_value_pairs);
