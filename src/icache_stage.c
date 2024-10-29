@@ -911,6 +911,12 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       temp_tuple_to_insert.clock_cycles = -1;
       // information is not complete yet, so
       temp_tuple_to_insert.complete = 0;
+
+      // print the addresses being inserted and their address spaces - TESTED, inserts correctly
+      // printf("Inserting %s %s %s %s\n", address_as_string, prev_address_as_string, temp_tuple_to_insert.inst1_addr_space, temp_tuple_to_insert.inst2_addr_space);
+
+      // Insert the tuple into the hashtable
+      starlab_insert(inst_tuple_info_ptr, address_as_string, &temp_tuple_to_insert);
     }
 
     if(op->inst_info->addr != starlab_prev_address) // track changes only
