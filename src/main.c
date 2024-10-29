@@ -316,6 +316,28 @@ int main(int argc, char* argv[], char* envp[]) {
 
   starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
 
+  for (long i = 0; i < count; i++) {
+      key_value_pairs[i].key = keys[i];
+      key_value_pairs[i].value = values_array[i];
+  }
+
+    qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+
+    unsigned long total_cc_count = 0;
+    for (long i = 0; i < count; i++) {
+        total_cc_count += *(unsigned long *)key_value_pairs[i].value;
+    }
+
+    unsigned long running_cc_count = 0;
+    for (long i = 0; i < count; i++) {
+        printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
+        running_cc_count += *(unsigned long *)key_value_pairs[i].value;
+        if (running_cc_count > ((total_cc_count * 99) / 100)) 
+            break;
+    }
+
+  // --------------------------------------------------------------------------------
+
   // for another hashtable inst_tuple_info_ptr
   char **inst_tuple_keys; // Keys are previous addresses of instructions
   void **inst_tuple_values_array;
@@ -336,52 +358,44 @@ int main(int argc, char* argv[], char* envp[]) {
       inst_tuple_key_value_pairs[i].value = inst_tuple_values_array[i]; // Contains inst_tuple_info (previous and current instruction addresses, address spaces, clock cycles, and completeness)
   }
 
-  qsort(inst_tuple_key_value_pairs, inst_tuple_count, sizeof(KeyValuePair), compare_key_value_pairs);
+  // qsort(inst_tuple_key_value_pairs, inst_tuple_count, sizeof(KeyValuePair), compare_key_value_pairs); // we dont need this since we are not sorting the keys
 
-  for (long i = 0; i < inst_tuple_count; i++) {
-      inst_tuple_info *tuple = (inst_tuple_info *)inst_tuple_key_value_pairs[i].value;
+  int count_test = 0;
+  for (int i=0 ; i < inst_tuple_count; i++)
+  {
+      inst_tuple_info *tuple = (inst_tuple_info *)inst_tuple_key_value_pairs[i].value; // This value is an inst_tuple_info struct
 
-      // convert the addresses into string and print
-      sprintf(prev_address_as_string, "%016llX", tuple->inst1_addr);
-      char address_as_string[128] = {0};
-      sprintf(address_as_string, "%016llX", tuple->inst2_addr);
+        // tuple->inst1_addr is in unsigned long long format
+        // tuple->inst2_addr is in unsigned long long format
 
-      printf("inst key: %s, inst addr 1: %s, inst addr 2: %s\n", inst_tuple_key_value_pairs[i].key, prev_address_as_string, address_as_string);
+        // printf("Original inst1_addr: %llu\n", tuple->inst1_addr);
+        // printf("Original inst2_addr: %llu\n", tuple->inst2_addr);
+
+        char *curr_as_string = (char *)malloc(128 * sizeof(char));
+        char *prev_as_string = (char *)malloc(128 * sizeof(char));
+
+        // convert the addresses into string and print
+        sprintf(prev_as_string, "%016llX", tuple->inst1_addr);
+        sprintf(curr_as_string, "%016llX", tuple->inst2_addr); // populated with inst2 (current address)
+
+        // printf("Converted inst1_addr: %s\n", prev_as_string);
+        // printf("Converted inst2_addr: %s\n", curr_as_string);
+
+        printf("idx: %d, inst key: %s, prev: %s, curr: %s\n", count_test, inst_tuple_key_value_pairs[i].key, prev_as_string, curr_as_string);
+
+      count_test++;
 
       // Check if the address space pointers are valid before printing
-      if (tuple != NULL) {
-          if (tuple->inst1_addr_space && tuple->inst2_addr_space) {
-              printf("address space of inst 1: %s, address space of inst 2: %s\n", tuple->inst1_addr_space, tuple->inst2_addr_space);
-          } else {
-              printf("address space of inst 1 or inst 2 is NULL\n");
-          }
-      } else {
-          printf("tuple is NULL\n");
-      }
+      // if (tuple != NULL) {
+      //     if (tuple->inst1_addr_space && tuple->inst2_addr_space) {
+      //         printf("address space of inst 1: %s, address space of inst 2: %s\n", tuple->inst1_addr_space, tuple->inst2_addr_space);
+      //     } else {
+      //         printf("address space of inst 1 or inst 2 is NULL\n");
+      //     }
+      // } else {
+      //     printf("tuple is NULL\n");
+      // }
   }
-
-
-
-
-  for (long i = 0; i < count; i++) {
-      key_value_pairs[i].key = keys[i];
-      key_value_pairs[i].value = values_array[i];
-  }
-
-    qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
-
-    unsigned long total_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        total_cc_count += *(unsigned long *)key_value_pairs[i].value;
-    }
-
-    unsigned long running_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
-        running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-        if (running_cc_count > ((total_cc_count * 99) / 100)) 
-            break;
-    }
 
   return 0;
 }

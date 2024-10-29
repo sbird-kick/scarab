@@ -2,53 +2,53 @@
 ####################################################################################################
 Core 0
 ####################################################################################################
-Cumulative:        Cycles: 170                   Instructions: 3                     IPC: 0.01765
+Cumulative:        Cycles: 328                   Instructions: 5                     IPC: 0.01524
 
-Periodic:          Cycles: 170                   Instructions: 3                     IPC: 0.01765
+Periodic:          Cycles: 328                   Instructions: 5                     IPC: 0.01524
 
 POWER_STATS_BEGIN                                    0                              0              
 
-POWER_TIME                                    53125000                       53125000              
+POWER_TIME                                   102500000                      102500000              
 
-POWER_CYCLE                                        170                            170              
+POWER_CYCLE                                        328                            328              
 
 POWER_ITLB_ACCESS                                    3                              3              
 
-POWER_DTLB_ACCESS                                    0                              0              
+POWER_DTLB_ACCESS                                    1                              1              
 
 POWER_ICACHE_ACCESS                                  3                              3              
 
-POWER_ICACHE_MISS                                    2                              2              
+POWER_ICACHE_MISS                                    3                              3              
 
 POWER_BTB_READ                                       0                              0              
 
 POWER_BTB_WRITE                                      1                              1              
 
-POWER_ROB_READ                                      11                             11              
+POWER_ROB_READ                                       7                              7              
 
-POWER_ROB_WRITE                                     11                             11              
+POWER_ROB_WRITE                                      7                              7              
 
-POWER_RENAME_READ                                   22                             22              
+POWER_RENAME_READ                                   14                             14              
 
-POWER_RENAME_WRITE                                  11                             11              
+POWER_RENAME_WRITE                                   7                              7              
 
 POWER_FP_RENAME_READ                                 0                              0              
 
 POWER_FP_RENAME_WRITE                                0                              0              
 
-POWER_FUNCTION_CALL                                  0                              0              
+POWER_FUNCTION_CALL                                  1                              1              
 
-POWER_INST_WINDOW_READ                              11                             11              
+POWER_INST_WINDOW_READ                               7                              7              
 
-POWER_INST_WINDOW_WRITE                             11                             11              
+POWER_INST_WINDOW_WRITE                              7                              7              
 
-POWER_INT_REGFILE_READ                               3                              3              
+POWER_INT_REGFILE_READ                               6                              6              
 
-POWER_INT_REGFILE_WRITE                              1                              1              
+POWER_INT_REGFILE_WRITE                              4                              4              
 
-POWER_IALU_ACCESS                                   11                             11              
+POWER_IALU_ACCESS                                    7                              7              
 
-POWER_CDB_IALU_ACCESS                               11                             11              
+POWER_CDB_IALU_ACCESS                                7                              7              
 
 POWER_MUL_ACCESS                                     0                              0              
 
@@ -68,11 +68,11 @@ POWER_CDB_FPU_ACCESS                                 0                          
 
 POWER_DCACHE_READ_ACCESS                             0                              0              
 
-POWER_DCACHE_WRITE_ACCESS                            0                              0              
+POWER_DCACHE_WRITE_ACCESS                            1                              1              
 
 POWER_DCACHE_READ_MISS                               0                              0              
 
-POWER_DCACHE_WRITE_MISS                              0                              0              
+POWER_DCACHE_WRITE_MISS                              1                              1              
 
 POWER_MLC_READ_ACCESS                                0                              0              
 
@@ -82,11 +82,11 @@ POWER_MLC_READ_MISS                                  0                          
 
 POWER_MLC_WRITE_MISS                                 0                              0              
 
-POWER_LLC_READ_ACCESS                               28                             28              
+POWER_LLC_READ_ACCESS                               31                             31              
 
 POWER_LLC_WRITE_ACCESS                               0                              0              
 
-POWER_LLC_READ_MISS                                 28                             28              
+POWER_LLC_READ_MISS                                 31                             31              
 
 POWER_LLC_WRITE_MISS                                 0                              0              
 
@@ -96,7 +96,7 @@ POWER_MEMORY_READ_ACCESS                             0                          
 
 POWER_MEMORY_WRITE_ACCESS                            0                              0              
 
-POWER_INST_WINDOW_WAKEUP_ACCESS                     11                             11              
+POWER_INST_WINDOW_WAKEUP_ACCESS                      7                              7              
 
 POWER_FP_INST_WINDOW_WAKEUP_ACCESS                   0                              0              
 
@@ -116,27 +116,27 @@ POWER_L2DIREC_READ_MISS                              0                          
 
 POWER_L2DIREC_WRITE_MISS                             0                              0              
 
-POWER_MEMORY_CTRL_ACCESS                            28                             28              
+POWER_MEMORY_CTRL_ACCESS                            31                             31              
 
-POWER_MEMORY_CTRL_READ                              28                             28              
+POWER_MEMORY_CTRL_READ                              31                             31              
 
 POWER_MEMORY_CTRL_WRITE                              0                              0              
 
-POWER_OP                                            11                             11              
+POWER_OP                                             7                              7              
 
-POWER_INT_OP                                         3                              3              
+POWER_INT_OP                                         7                              7              
 
 POWER_FP_OP                                          0                              0              
 
 POWER_LD_OP                                          0                              0              
 
-POWER_ST_OP                                          0                              0              
+POWER_ST_OP                                          1                              1              
 
 POWER_BRANCH_MISPREDICT                              1                              1              
 
-POWER_COMMITTED_OP                                   3                              3              
+POWER_COMMITTED_OP                                   7                              7              
 
-POWER_COMMITTED_INT_OP                               3                              3              
+POWER_COMMITTED_INT_OP                               7                              7              
 
 POWER_COMMITTED_FP_OP                                0                              0              
 
@@ -144,9 +144,9 @@ POWER_BRANCH_OP                                      2                          
 
 POWER_DRAM_PRECHARGE                                 0                              0              
 
-POWER_DRAM_ACTIVATE                                  1                              1              
+POWER_DRAM_ACTIVATE                                  4                              4              
 
-POWER_DRAM_READ                                      5                              5              
+POWER_DRAM_READ                                     19                             19              
 
 POWER_DRAM_WRITE                                     0                              0              
 

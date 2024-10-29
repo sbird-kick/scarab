@@ -894,6 +894,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         starlab_insert(address_to_prev_address, address_as_string, &starlab_prev_address);
 
     }
+    static int count = 0; 
 
     // Check our new hashtable for the address
     // If it is not present, insert it
@@ -902,8 +903,10 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       // Create a packet of type inst_tuple_info
       inst_tuple_info temp_tuple_to_insert;
       // inst1_addr is the previous addrl inst2_addr is the current address
-      temp_tuple_to_insert.inst1_addr = prevAddressHex;
-      temp_tuple_to_insert.inst2_addr = currAddressHex;
+      // convert addresses from hext to unsigned long long
+
+      temp_tuple_to_insert.inst1_addr = starlab_prev_address;
+      temp_tuple_to_insert.inst2_addr = op->inst_info->addr;
       // Address spaces need to be computed 
       temp_tuple_to_insert.inst1_addr_space = strdup((prevAddressHex >= KERNEL_SPACE_START && prevAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
       temp_tuple_to_insert.inst2_addr_space = strdup((currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
@@ -915,6 +918,10 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       // print the addresses being inserted and their address spaces - TESTED, inserts correctly
       // printf("Inserting %s %s %s %s\n", address_as_string, prev_address_as_string, temp_tuple_to_insert.inst1_addr_space, temp_tuple_to_insert.inst2_addr_space);
 
+      // What are the addresses that we are inserting? 
+      printf("idx:%d, Key: %s, prev: %s, curr: %s\n", count, address_as_string, prev_address_as_string, address_as_string);
+      count++;
+
       // Insert the tuple into the hashtable
       starlab_insert(inst_tuple_info_ptr, address_as_string, &temp_tuple_to_insert);
     }
@@ -925,8 +932,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     voided_address_to_prev_address = (void *) address_to_prev_address;
+    voided_inst_tuple_ptr = (void *) inst_tuple_info_ptr;
 
-   
     // update the inst_fetch_exec_tuple
     starlab_hash_table* inst_tuple_ptr = (starlab_hash_table*) voided_inst_tuple_ptr;
     if(inst_tuple_ptr == NULL)
@@ -1019,7 +1026,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
     }
 
-        voided_inst_tuple_ptr = (void *) inst_tuple_info_ptr;
+    //  voided_inst_tuple_ptr = (void *) inst_tuple_info_ptr;
    
 
     op_count[ic->proc_id]++;          /* increment instruction counters */
