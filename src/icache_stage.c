@@ -1027,7 +1027,21 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
           }
           else
           {
-            unsigned long* cc_ptr = (unsigned long*) starlab_search(voided_global_starlab_types_ht, tuple_string);
+
+            unsigned long* cc_ptr = NULL;
+
+            if (starlab_search(voided_user_space_types_ht, tuple_string)) 
+            {
+                cc_ptr = (unsigned long*)starlab_search(voided_user_space_types_ht, tuple_string);
+            } 
+            else if (starlab_search(voided_kernel_space_types_ht, tuple_string)) 
+            {
+                cc_ptr = (unsigned long*)starlab_search(voided_kernel_space_types_ht, tuple_string);
+            }
+            else
+            {
+                // do nothing
+            }
             if(op->eom)
             {
               *cc_ptr+= cc_to_add;
