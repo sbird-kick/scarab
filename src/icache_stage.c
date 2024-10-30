@@ -952,26 +952,40 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
 
         // Identify whether the instruction sequence fits in user/kernel space 
-        bool user_space, kernel_space;
+        bool user_space = false;
+        bool kernel_space = false;
 
         // Condition holds true if:
           // (1) Both addresses are in kernel space, or
           // (2) Only one of the addresses is in kernel space
 
-      if ((prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END 
-            && this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END) 
-            || 
-            ((prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END) 
-            != (this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END)))
-      {
-          kernel_space = true;
-        
-      }
+        bool prev_in_kernel = (prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END);
+        bool this_in_kernel = (this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END);
 
-      else 
-      {
-        user_space = true;
-      }
+        if(prev_in_kernel && this_in_kernel)
+        {
+         
+          kernel_space = true;
+        }
+
+        else if(prev_in_kernel && !this_in_kernel) // prev instr in kernel and this in user
+        {
+         
+          kernel_space = true;
+
+        }
+
+        else if(!prev_in_kernel && this_in_kernel) // prev instr in user and this in kernel
+        {
+          kernel_space = true;
+        }
+
+        else // both instructions are in user space
+        {
+          user_space = true;
+        }
+
+         printf("user space: %d, kernel space: %d\n", user_space, kernel_space);
 
         // printf("[icache] Adding %lu\n", cc_to_add);
 
@@ -983,11 +997,6 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         {
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, this_iclass);
-
-          if(voided_global_starlab_types_ht == NULL)
-          {
-            voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
-          }
 
           // Setup hashtables for address space segregation
 
@@ -1008,13 +1017,15 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
           {
             if(op->eom)
             {
-              if(kernel_space)
+              if(kernel_space == 1)
               {
+                  printf("EEin kernel\n");
                  starlab_insert(voided_kernel_space_types_ht, tuple_string, &cc_to_add);
               }
 
-              else if(user_space)
+              else if(user_space == 1)
               {
+                  printf("in user\n");
                  starlab_insert(voided_user_space_types_ht, tuple_string, &cc_to_add);
               }
 

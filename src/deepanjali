@@ -1,0 +1,51 @@
+Scarab gitrev: 4065cc4
+Scarab started at Wed Oct 30 12:25:04 2024
+
+Initialized Ramulator. 
+** Heartbeat: 100% -- { 1000000 } -- 0.00 KIPS (43.48 KIPS)
+** Core 0 Finished:    insts:1000000     cycles:894978      time:279680625000        -- 1.12 IPC (1.12 IPC) --  N/A  KIPS (43.48 KIPS)
+Scarab finished at Wed Oct 30 12:25:28 2024
+
+User space
+inst tuple (User): <CALL,MOV>, cumulative CCs: 1.26%
+inst tuple (User): <PUSH,ALU>, cumulative CCs: 0.69%
+inst tuple (User): <CALL,ALU>, cumulative CCs: 0.63%
+inst tuple (User): <CALL,PUSH>, cumulative CCs: 0.44%
+inst tuple (User): <MOV,PUSH>, cumulative CCs: 0.18%
+inst tuple (User): <JUMP,PUSH>, cumulative CCs: 0.16%
+inst tuple (User): <ALU,PUSH>, cumulative CCs: 0.14%
+inst tuple (User): <POP,PUSH>, cumulative CCs: 0.09%
+inst tuple (User): <CALL,JUMP>, cumulative CCs: 0.06%
+inst tuple (User): <MOV,POP>, cumulative CCs: 0.03%
+inst tuple (User): <JUMP,POP>, cumulative CCs: 0.01%
+inst tuple (User): <MOV,CALL>, cumulative CCs: 0.01%
+inst tuple (User): <ALU,POP>, cumulative CCs: 0.01%
+inst tuple (User): <CALL,POP>, cumulative CCs: 0.00%
+inst tuple (User): <ALU,CALL>, cumulative CCs: 0.00%
+inst tuple (User): <PUSH,CALL>, cumulative CCs: 0.00%
+inst tuple (User): <JUMP,CALL>, cumulative CCs: 0.00%
+inst tuple (User): <JUMP,LOCK>, cumulative CCs: 0.00%
+inst tuple (User): <MOV,LOCK>, cumulative CCs: 0.00%
+inst tuple (User): <ALU,LOCK>, cumulative CCs: 0.00%
+inst tuple (User): <POP,CALL>, cumulative CCs: 0.00%
+inst tuple (Kernel): <MOV,ALU>, cumulative CCs: 10.54%
+inst tuple (Kernel): <ALU,ALU>, cumulative CCs: 10.14%
+inst tuple (Kernel): <ALU,JUMP>, cumulative CCs: 8.92%
+inst tuple (Kernel): <POP,POP>, cumulative CCs: 8.27%
+inst tuple (Kernel): <ALU,MOV>, cumulative CCs: 8.00%
+inst tuple (Kernel): <PUSH,PUSH>, cumulative CCs: 6.58%
+inst tuple (Kernel): <JUMP,MOV>, cumulative CCs: 6.23%
+inst tuple (Kernel): <CALL,CALL>, cumulative CCs: 4.12%
+inst tuple (Kernel): <JUMP,ALU>, cumulative CCs: 3.11%
+inst tuple (Kernel): <PUSH,MOV>, cumulative CCs: 2.98%
+inst tuple (Kernel): <MOV,JUMP>, cumulative CCs: 2.14%
+inst tuple (Kernel): <POP,MOV>, cumulative CCs: 1.25%
+inst tuple (Kernel): <POP,ALU>, cumulative CCs: 0.79%
+inst tuple (Kernel): <JUMP,JUMP>, cumulative CCs: 0.30%
+inst tuple (Kernel): <LOCK,LOCK>, cumulative CCs: 0.22%
+inst tuple (Kernel): <POP,JUMP>, cumulative CCs: 0.21%
+inst tuple (Kernel): <LOCK,ALU>, cumulative CCs: 0.09%
+inst tuple (Kernel): <LOCK,JUMP>, cumulative CCs: 0.07%
+inst tuple (Kernel): <LOCK,MOV>, cumulative CCs: 0.05%
+inst tuple (Kernel): <PUSH,JUMP>, cumulative CCs: 0.01%
+inst tuple (Kernel): <MOV,MOV>, cumulative CCs: 22.27%

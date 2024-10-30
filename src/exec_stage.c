@@ -453,20 +453,34 @@ void update_exec_stage(Stage_Data* src_sd) {
           // (1) Both addresses are in kernel space, or
           // (2) Only one of the addresses is in kernel space
 
-      if ((prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END 
-            && this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END) 
-            || 
-            ((prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END) 
-            != (this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END)))
+
+        bool prev_in_kernel = (prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END);
+        bool this_in_kernel = (this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END);
+
+        printf("prev addr: %llx, curr addr: %llx\n", prev_addr_hex, this_addr_hex);
+
+        if(prev_in_kernel && this_in_kernel)
         {
-            kernel_space = true;
-          
+          kernel_space = true;
         }
 
-        else 
+        else if(prev_in_kernel && !this_in_kernel) // prev instr in kernel and this in user
+        {
+          kernel_space = true;
+
+        }
+
+        else if(!prev_in_kernel && this_in_kernel) // prev instr in user and this in kernel
+        {
+          kernel_space = true;
+        }
+
+        else // both instructions are in user space
         {
           user_space = true;
         }
+
+        // printf("user space: %d, kernel space: %d\n", user_space, kernel_space);
 
         if(prev_iclass != NULL && this_iclass != NULL)
         {
@@ -488,13 +502,15 @@ void update_exec_stage(Stage_Data* src_sd) {
           if ((!starlab_search(voided_user_space_types_ht, tuple_string)) && 
                   (!starlab_search(voided_kernel_space_types_ht, tuple_string)))
           {
-            if(kernel_space)
+            if(kernel_space == 1)
             {
+              
               starlab_insert(voided_kernel_space_types_ht, tuple_string, &cc_to_add);
             }
 
-            else if(user_space)
+            else if(user_space == 1)
             {
+             
               starlab_insert(voided_user_space_types_ht, tuple_string, &cc_to_add);
             }
 
