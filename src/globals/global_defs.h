@@ -62,6 +62,9 @@
 #define MAX_UNS 0xffffffffU
 #define MAX_ADDR 0xffffffffffffffffULL
 
+#define USER_SPACE_HT_SIZE sizeof(unsigned long)
+#define KERNEL_SPACE_HT_SIZE sizeof(unsigned long)
+
 #undef UNUSED
 #define UNUSED(X) (void)(X)
 

@@ -38,7 +38,6 @@
 #include "globals/global_defs.h"
 #include "globals/global_vars.h"
 #include "statistics.h"
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -382,29 +381,6 @@ int   parse_string_array(char dest[][MAX_STR_LENGTH + 1], const void* str,
 
 #define INITIAL_TABLE_SIZE 10000000
 #define LOAD_FACTOR_THRESHOLD 0.75
-
-typedef struct inst_tuple_info{
-
-  // Will be populated in the icache stage
-  unsigned long long inst1_addr;
-  unsigned long long inst2_addr;
-
-  // Populate in the icache stage: fetch iclass from address stored in address_to_type_ptr hashtable
-  // char *inst1_iclass;
-  // char *inst2_iclass;
-
-  // Populate in the icache stage: add the compute logic here 
-  char *inst1_addr_space;
-  char *inst2_addr_space;
-
-  // Populate in the exec stage: this is where the final clock cycle for a tuple will be computed 
-  // Essentially copy the computation result for a tuple from the existing logic in exec stage
-  unsigned long clock_cycles;
-
-  // To check whether a tuple info is complete  
-  bool complete;
-
-} inst_tuple_info;
 
 typedef struct starlab_hash_node {
     char *key;

@@ -438,23 +438,90 @@ void update_exec_stage(Stage_Data* src_sd) {
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
 
+        // Convert string addresses to hex 
+        unsigned long long this_addr_hex = strtoull(address_as_string, NULL, 16);
+        unsigned long long prev_addr_hex = strtoull(prev_address_as_string, NULL, 16);
+
+        unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+        unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+
+        // Identify whether the instruction sequence fits in user/kernel space 
+        bool user_space = false;
+        bool kernel_space = false;
+
+         // Condition holds true if:
+          // (1) Both addresses are in kernel space, or
+          // (2) Only one of the addresses is in kernel space
+
+      if ((prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END 
+            && this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END) 
+            || 
+            ((prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END) 
+            != (this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END)))
+        {
+            kernel_space = true;
+          
+        }
+
+        else 
+        {
+          user_space = true;
+        }
+
         if(prev_iclass != NULL && this_iclass != NULL)
         {
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, this_iclass);
 
-          if(voided_global_starlab_types_ht == NULL)
+          if(voided_user_space_types_ht == NULL) // This means this hashtable doesn't exist
           {
-            voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
+            // Therefore, create one
+            voided_user_space_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+
           }
-          if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
+
+          if(voided_kernel_space_types_ht == NULL)
           {
-            starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
+            voided_kernel_space_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, KERNEL_SPACE_HT_SIZE);
           }
+
+          if ((!starlab_search(voided_user_space_types_ht, tuple_string)) && 
+                  (!starlab_search(voided_kernel_space_types_ht, tuple_string)))
+          {
+            if(kernel_space)
+            {
+              starlab_insert(voided_kernel_space_types_ht, tuple_string, &cc_to_add);
+            }
+
+            else if(user_space)
+            {
+              starlab_insert(voided_user_space_types_ht, tuple_string, &cc_to_add);
+            }
+
+            else
+            {
+              // do nothing
+            }
+
+          }
+
           else
           {
-            
-            unsigned long* cc_ptr = (unsigned long*) starlab_search(voided_global_starlab_types_ht, tuple_string);
+            unsigned long* cc_ptr = NULL;
+
+            if (starlab_search(voided_user_space_types_ht, tuple_string)) 
+            {
+                cc_ptr = (unsigned long*)starlab_search(voided_user_space_types_ht, tuple_string);
+            } 
+            else if (starlab_search(voided_kernel_space_types_ht, tuple_string)) 
+            {
+                cc_ptr = (unsigned long*)starlab_search(voided_kernel_space_types_ht, tuple_string);
+            }
+            else
+            {
+                // do nothing
+            }
+          
             // printf("[exec] succesfully added %lu %lu\n", *cc_ptr, cc_to_add);
             // printf("%lu %lu\n %lu %lu    %llu\n", this_tuple_ptr->exec_cycle, this_tuple_ptr->fetch_cycle,prev_tuple_ptr->exec_cycle, prev_tuple_ptr->fetch_cycle, op->exec_cycle );
             *cc_ptr+= cc_to_add;

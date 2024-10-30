@@ -82,9 +82,6 @@ extern void* voided_global_starlab_types_ht;
 
 extern void* voided_inst_tuple_ptr;
 
-// Instruction tuple address spaces (user vs kernel)
-extern void* voided_inst_tuple_info_ptr;
-
 extern void* voided_address_to_type_ptr;
 extern void* voided_address_to_prev_address;
 
@@ -99,6 +96,9 @@ extern unsigned long long curr_addr;
 
 extern unsigned long long KERNEL_SPACE_START;
 extern unsigned long long KERNEL_SPACE_END;
+
+extern void* voided_user_space_types_ht;
+extern void* voided_kernel_space_types_ht;
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */

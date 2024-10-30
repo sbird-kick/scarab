@@ -869,70 +869,23 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
 
-    starlab_hash_table *inst_tuple_info_ptr = (starlab_hash_table*) voided_inst_tuple_ptr;
-    if(inst_tuple_info_ptr == NULL)
-    {
-      inst_tuple_info_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_tuple_info));
-    }
+
 
     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
 
     char address_as_string[128] = {0};
     char prev_address_as_string[128] = {0};
     sprintf(address_as_string, "%016llX", op->inst_info->addr);
-    sprintf(prev_address_as_string, "%016llX", starlab_prev_address); 
+    sprintf(prev_address_as_string, "%016llX", starlab_prev_address);
     
-    unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
-    unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
-
-    unsigned long long prevAddressHex = strtoull(prev_address_as_string, NULL, 16); 
-    unsigned long long currAddressHex = strtoull(address_as_string, NULL, 16);
-
-    if(!starlab_search(address_to_prev_address, address_as_string)) // if the address is not present
+    if(!starlab_search(address_to_prev_address, address_as_string))
     {
-        // Insert the address to prev address mapping entry
         starlab_insert(address_to_prev_address, address_as_string, &starlab_prev_address);
-
     }
-    static int count = 0; 
-
-    // Check our new hashtable for the address
-    // If it is not present, insert it
-    if(!starlab_search(inst_tuple_info_ptr, address_as_string))
-    {
-      // Create a packet of type inst_tuple_info
-      inst_tuple_info temp_tuple_to_insert;
-      // inst1_addr is the previous addrl inst2_addr is the current address
-      // convert addresses from hext to unsigned long long
-
-      temp_tuple_to_insert.inst1_addr = starlab_prev_address;
-      temp_tuple_to_insert.inst2_addr = op->inst_info->addr;
-      // Address spaces need to be computed 
-      temp_tuple_to_insert.inst1_addr_space = strdup((prevAddressHex >= KERNEL_SPACE_START && prevAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
-      temp_tuple_to_insert.inst2_addr_space = strdup((currAddressHex >= KERNEL_SPACE_START && currAddressHex <= KERNEL_SPACE_END) ? "Kernel" : "User");
-      // Clock cycles will be populated in the execution stage
-      temp_tuple_to_insert.clock_cycles = -1;
-      // information is not complete yet, so
-      temp_tuple_to_insert.complete = 0;
-
-      // print the addresses being inserted and their address spaces - TESTED, inserts correctly
-      // printf("Inserting %s %s %s %s\n", address_as_string, prev_address_as_string, temp_tuple_to_insert.inst1_addr_space, temp_tuple_to_insert.inst2_addr_space);
-
-      // What are the addresses that we are inserting? 
-      printf("idx:%d, Key: %s, prev: %s, curr: %s\n", count, address_as_string, prev_address_as_string, address_as_string);
-      count++;
-
-      // Insert the tuple into the hashtable
-      starlab_insert(inst_tuple_info_ptr, address_as_string, &temp_tuple_to_insert);
-    }
-
     if(op->inst_info->addr != starlab_prev_address) // track changes only
-    {
-       starlab_prev_address = op->inst_info->addr;
-    }
+      starlab_prev_address = op->inst_info->addr;
 
     voided_address_to_prev_address = (void *) address_to_prev_address;
-    voided_inst_tuple_ptr = (void *) inst_tuple_info_ptr;
 
     // update the inst_fetch_exec_tuple
     starlab_hash_table* inst_tuple_ptr = (starlab_hash_table*) voided_inst_tuple_ptr;
@@ -991,6 +944,35 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
 
+        // Convert string addresses to hex 
+        unsigned long long this_addr_hex = strtoull(address_as_string, NULL, 16);
+        unsigned long long prev_addr_hex = strtoull(prev_address_as_string, NULL, 16);
+
+        unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+        unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+
+        // Identify whether the instruction sequence fits in user/kernel space 
+        bool user_space, kernel_space;
+
+        // Condition holds true if:
+          // (1) Both addresses are in kernel space, or
+          // (2) Only one of the addresses is in kernel space
+
+      if ((prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END 
+            && this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END) 
+            || 
+            ((prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END) 
+            != (this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END)))
+      {
+          kernel_space = true;
+        
+      }
+
+      else 
+      {
+        user_space = true;
+      }
+
         // printf("[icache] Adding %lu\n", cc_to_add);
 
         if(prev_tuple_ptr->prev_fetch_cycle == -1)
@@ -1006,10 +988,42 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
           {
             voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
           }
-          if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
+
+          // Setup hashtables for address space segregation
+
+          if(voided_user_space_types_ht == NULL) // This means this hashtable doesn't exist
+          {
+            // Therefore, create one
+            voided_user_space_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+
+          }
+
+          if(voided_kernel_space_types_ht == NULL) 
+          {
+            voided_kernel_space_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, KERNEL_SPACE_HT_SIZE);
+          }
+
+          if (!starlab_search(voided_user_space_types_ht, tuple_string) && 
+                  !starlab_search(voided_kernel_space_types_ht, tuple_string)) 
           {
             if(op->eom)
-              starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
+            {
+              if(kernel_space)
+              {
+                 starlab_insert(voided_kernel_space_types_ht, tuple_string, &cc_to_add);
+              }
+
+              else if(user_space)
+              {
+                 starlab_insert(voided_user_space_types_ht, tuple_string, &cc_to_add);
+              }
+
+              else 
+              {
+                // do nothing
+              }
+            }
+
           }
           else
           {
@@ -1022,12 +1036,11 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
             }
           }
         }
-      
-    }
+      }
     }
 
-    //  voided_inst_tuple_ptr = (void *) inst_tuple_info_ptr;
-   
+    voided_inst_tuple_ptr = (void *) inst_tuple_ptr;
+
 
     op_count[ic->proc_id]++;          /* increment instruction counters */
     unique_count_per_core[ic->proc_id]++;

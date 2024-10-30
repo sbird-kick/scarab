@@ -225,15 +225,16 @@ void* voided_address_to_type_ptr = NULL;
 void* voided_address_to_prev_address = NULL;
 void* voided_inst_tuple_ptr = NULL;
 
-// Instruction tuple address spaces (user vs kernel)
-void* voided_inst_tuple_info_ptr = NULL;
+void* voided_user_space_types_ht = NULL;
+void* voided_kernel_space_types_ht = NULL;
 
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
 char prev_address_as_string[128];
 unsigned long long starlab_prev_address = 0;
 
-
+unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
 
 int main(int argc, char* argv[], char* envp[]) {
   char** simulated_argv;
@@ -311,10 +312,11 @@ int main(int argc, char* argv[], char* envp[]) {
   void **values_array;
 
   KeyValuePair *key_value_pairs;
-  long count = get_count(voided_global_starlab_types_ht);
+  long count = get_count(voided_user_space_types_ht);
   key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
+  
 
-  starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
+  starlab_return_key_value_arr(voided_user_space_types_ht, &keys, &values_array);
 
   for (long i = 0; i < count; i++) {
       key_value_pairs[i].key = keys[i];
@@ -335,67 +337,5 @@ int main(int argc, char* argv[], char* envp[]) {
         if (running_cc_count > ((total_cc_count * 99) / 100)) 
             break;
     }
-
-  // --------------------------------------------------------------------------------
-
-  // for another hashtable inst_tuple_info_ptr
-  char **inst_tuple_keys; // Keys are previous addresses of instructions
-  void **inst_tuple_values_array;
-
-  KeyValuePair *inst_tuple_key_value_pairs;
-  long inst_tuple_count = get_count(voided_inst_tuple_ptr);
-  inst_tuple_key_value_pairs = (KeyValuePair *)malloc(inst_tuple_count * sizeof(KeyValuePair));
-
-  // voided_inst_tuple_ptr is a hashtable with keys as instruction addresses and values as inst_tuple_info
-  // inst_tuple_keys are the previous addresses of the instructions
-  // inst_tuple_values_array are the inst_tuple_info values
-  starlab_return_key_value_arr(voided_inst_tuple_ptr, &inst_tuple_keys, &inst_tuple_values_array);
-
-  // Print stuff in the hashtable inst_tuple_info_ptr: 
-  for (long i = 0; i < inst_tuple_count; i++) // inst_tuple_count is the number of elements in the hashtable
-  {
-      inst_tuple_key_value_pairs[i].key = inst_tuple_keys[i]; // Previous instruction addresses - we don't really need this since we track it in the value
-      inst_tuple_key_value_pairs[i].value = inst_tuple_values_array[i]; // Contains inst_tuple_info (previous and current instruction addresses, address spaces, clock cycles, and completeness)
-  }
-
-  // qsort(inst_tuple_key_value_pairs, inst_tuple_count, sizeof(KeyValuePair), compare_key_value_pairs); // we dont need this since we are not sorting the keys
-
-  int count_test = 0;
-  for (int i=0 ; i < inst_tuple_count; i++)
-  {
-      inst_tuple_info *tuple = (inst_tuple_info *)inst_tuple_key_value_pairs[i].value; // This value is an inst_tuple_info struct
-
-        // tuple->inst1_addr is in unsigned long long format
-        // tuple->inst2_addr is in unsigned long long format
-
-        // printf("Original inst1_addr: %llu\n", tuple->inst1_addr);
-        // printf("Original inst2_addr: %llu\n", tuple->inst2_addr);
-
-        char *curr_as_string = (char *)malloc(128 * sizeof(char));
-        char *prev_as_string = (char *)malloc(128 * sizeof(char));
-
-        // convert the addresses into string and print
-        sprintf(prev_as_string, "%016llX", tuple->inst1_addr);
-        sprintf(curr_as_string, "%016llX", tuple->inst2_addr); // populated with inst2 (current address)
-
-        // printf("Converted inst1_addr: %s\n", prev_as_string);
-        // printf("Converted inst2_addr: %s\n", curr_as_string);
-
-        printf("idx: %d, inst key: %s, prev: %s, curr: %s\n", count_test, inst_tuple_key_value_pairs[i].key, prev_as_string, curr_as_string);
-
-      count_test++;
-
-      // Check if the address space pointers are valid before printing
-      // if (tuple != NULL) {
-      //     if (tuple->inst1_addr_space && tuple->inst2_addr_space) {
-      //         printf("address space of inst 1: %s, address space of inst 2: %s\n", tuple->inst1_addr_space, tuple->inst2_addr_space);
-      //     } else {
-      //         printf("address space of inst 1 or inst 2 is NULL\n");
-      //     }
-      // } else {
-      //     printf("tuple is NULL\n");
-      // }
-  }
-
-  return 0;
+ 
 }
