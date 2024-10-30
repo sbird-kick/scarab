@@ -439,8 +439,8 @@ void update_exec_stage(Stage_Data* src_sd) {
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
 
         // Convert string addresses to hex 
-        unsigned long long this_addr_hex = strtoull(address_as_string, NULL, 16);
-        unsigned long long prev_addr_hex = strtoull(prev_address_as_string, NULL, 16);
+        // unsigned long long this_addr_hex = strtoull(address_as_string, NULL, 16);
+        // unsigned long long prev_addr_hex = strtoull(prev_address_as_string, NULL, 16);
 
         unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
         unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
@@ -454,8 +454,8 @@ void update_exec_stage(Stage_Data* src_sd) {
           // (2) Only one of the addresses is in kernel space
 
 
-        bool prev_in_kernel = (prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END);
-        bool this_in_kernel = (this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END);
+        bool prev_in_kernel = (starlab_prev_address >= KERNEL_SPACE_START && starlab_prev_address <= KERNEL_SPACE_END);
+        bool this_in_kernel = (op->inst_info->addr >= KERNEL_SPACE_START && op->inst_info->addr <= KERNEL_SPACE_END);
 
         // printf("prev addr: %llx, curr addr: %llx\n", prev_addr_hex, this_addr_hex);
 
