@@ -985,7 +985,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
           user_space = true;
         }
 
-         printf("user space: %d, kernel space: %d\n", user_space, kernel_space);
+        //  printf("user space: %d, kernel space: %d\n", user_space, kernel_space);
 
         // printf("[icache] Adding %lu\n", cc_to_add);
 
@@ -1019,13 +1019,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
             {
               if(kernel_space == 1)
               {
-                  printf("EEin kernel\n");
+                // printf("in kernel\n");
                  starlab_insert(voided_kernel_space_types_ht, tuple_string, &cc_to_add);
               }
 
               else if(user_space == 1)
               {
-                  printf("in user\n");
+                // printf("in user\n");
                  starlab_insert(voided_user_space_types_ht, tuple_string, &cc_to_add);
               }
 

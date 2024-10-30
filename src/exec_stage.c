@@ -457,7 +457,7 @@ void update_exec_stage(Stage_Data* src_sd) {
         bool prev_in_kernel = (prev_addr_hex >= KERNEL_SPACE_START && prev_addr_hex <= KERNEL_SPACE_END);
         bool this_in_kernel = (this_addr_hex >= KERNEL_SPACE_START && this_addr_hex <= KERNEL_SPACE_END);
 
-        printf("prev addr: %llx, curr addr: %llx\n", prev_addr_hex, this_addr_hex);
+        // printf("prev addr: %llx, curr addr: %llx\n", prev_addr_hex, this_addr_hex);
 
         if(prev_in_kernel && this_in_kernel)
         {
