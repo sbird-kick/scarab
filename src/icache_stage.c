@@ -969,7 +969,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
             temp1 = starlab_prev_address;
             temp2 = op->inst_info->addr;
 
-            printf("Before: %llx\n", starlab_prev_address);
+            // printf("Before: %llx\n", starlab_prev_address);
             char* temp = (char*) malloc(128);
             sprintf(temp, "%llx", temp1);
             if(temp[0] == '3')
@@ -980,9 +980,9 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
               temp[1] = 'f';
               temp1 = strtoull(temp, NULL, 16);
             }
-            printf("modified: %llx\n", temp1);
+            // printf("modified: %llx\n", temp1);
 
-            printf("Before: %llx\n", op->inst_info->addr);
+            // printf("Before: %llx\n", op->inst_info->addr);
             sprintf(temp, "%llx", temp2);
             if(temp[0] == '3')
             {
@@ -992,7 +992,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
               temp[1] = 'f';
               temp2 = strtoull(temp, NULL, 16);
             }
-            printf("modified: %llx\n", temp2);
+            // printf("modified: %llx\n", temp2);
             free(temp);
 
          

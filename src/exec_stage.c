@@ -453,9 +453,40 @@ void update_exec_stage(Stage_Data* src_sd) {
           // (1) Both addresses are in kernel space, or
           // (2) Only one of the addresses is in kernel space
 
+ unsigned long long temp1, temp2; 
+            temp1 = starlab_prev_address;
+            temp2 = op->inst_info->addr;
 
-        bool prev_in_kernel = (starlab_prev_address >= KERNEL_SPACE_START && starlab_prev_address <= KERNEL_SPACE_END);
-        bool this_in_kernel = (op->inst_info->addr >= KERNEL_SPACE_START && op->inst_info->addr <= KERNEL_SPACE_END);
+            // printf("Before: %llx\n", starlab_prev_address);
+            char* temp = (char*) malloc(128);
+            sprintf(temp, "%llx", temp1);
+            if(temp[0] == '3')
+            {
+              // Shift the string to the right by one position to make space for the second 'f'
+              memmove(temp + 1, temp, strlen(temp) + 1);
+              temp[0] = 'f';
+              temp[1] = 'f';
+              temp1 = strtoull(temp, NULL, 16);
+            }
+            // printf("modified: %llx\n", temp1);
+
+            // printf("Before: %llx\n", op->inst_info->addr);
+            sprintf(temp, "%llx", temp2);
+            if(temp[0] == '3')
+            {
+              // Shift the string to the right by one position to make space for the second 'f'
+              memmove(temp + 1, temp, strlen(temp) + 1);
+              temp[0] = 'f';
+              temp[1] = 'f';
+              temp2 = strtoull(temp, NULL, 16);
+            }
+            // printf("modified: %llx\n", temp2);
+            free(temp);
+
+         
+        // in the below snippet, starlab_prev_address if it ever starts with "3" replace 3 with "ff", it is unsigned long long dont give the entire program just the snippet
+        bool prev_in_kernel = (temp1 >= KERNEL_SPACE_START && temp1 <= KERNEL_SPACE_END);
+        bool this_in_kernel = (temp2 >= KERNEL_SPACE_START && temp2 <= KERNEL_SPACE_END);
 
         // printf("prev addr: %llx, curr addr: %llx\n", prev_addr_hex, this_addr_hex);
 
