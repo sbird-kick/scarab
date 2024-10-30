@@ -951,7 +951,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
         unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
 
-        printf("prev addr: %llx, curr addr: %llx\n", starlab_prev_address, op->inst_info->addr );
+        // printf("prev addr: %llx, curr addr: %llx\n", starlab_prev_address, op->inst_info->addr );
 
         
 
@@ -1004,14 +1004,14 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
         if(prev_in_kernel && this_in_kernel)
         {
-         
+        //  printf("both in kernel\n");
           kernel_space = true;
   
         }
 
         else if(prev_in_kernel && !this_in_kernel) // prev instr in kernel and this in user
         {
-         
+        //  printf("prev in kernel\n");
           kernel_space = true;
        
 
@@ -1019,6 +1019,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
         else if(!prev_in_kernel && this_in_kernel) // prev instr in user and this in kernel
         {
+          // printf("this in kernel\n");
           kernel_space = true;
         }
 
