@@ -165,6 +165,9 @@ Stage_Data* get_current_stage_data() {
   } else {
     // two stage data cannot be used at once
     ASSERT(ic->proc_id, ic->sd.op_count == 0 || ic->uopc_sd.op_count == 0);
+
+    // printf("deepanjalifetch addr: %llx\n", ic->fetch_addr);
+
     return ic->uopc_sd.op_count? &ic->uopc_sd : &ic->sd;
   }
 }
@@ -303,6 +306,7 @@ Inst_Info** lookup_cache() {
     data = l1_cache ? (L1_Data*)cache_access(l1_cache, ic->fetch_addr,
                                               &dummy_line_addr, TRUE) :
                       NULL;
+
     if(data) {  // second level cache hit
       STAT_EVENT(ic->proc_id, L2_IDEAL_FILL_ICACHE);
       // actually bring it into the L1 icache
@@ -762,6 +766,9 @@ void update_icache_stage() {
   // fetches of this cycle has all been completed.
   // start processing the ops.
   Stage_Data* cur_data = get_current_stage_data();
+
+  // printf("address: %llx\n", ic->fetch_addr);
+
   icache_process_ops(cur_data);
 
   INC_STAT_EVENT(ic->proc_id, INST_LOST_TOTAL, cur_data->max_op_count);
@@ -818,6 +825,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     ASSERTM(ic->proc_id, ic->off_path == op->off_path,
             "Inconsistent off-path op PC: %llx ic:%i op:%i\n", op->inst_info->addr, ic->off_path, op->off_path);
 
+    // printf("Before modifications: %llx\n",op->inst_info->addr);
+
     if (!op->off_path) {
       STAT_EVENT(ic->proc_id, UOPS_SERVED_BY_ICACHE_ON_PATH + op->fetched_from_uop_cache);
     } else {
@@ -868,9 +877,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     {
       address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
-
-
-
+    
     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
 
     char address_as_string[128] = {0};
@@ -944,74 +951,33 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
 
-        // Convert string addresses to hex 
-        // unsigned long long this_addr_hex = strtoull(address_as_string, NULL, 16);
-        // unsigned long long prev_addr_hex = strtoull(prev_address_as_string, NULL, 16);
+        // Original Value
+        // unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+        // unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
 
-        unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
-        unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+        unsigned long long KERNEL_SPACE_START = 0x3ff800000000000ull;
+        unsigned long long KERNEL_SPACE_END = 0x3ffffffffffffffull;
 
-        // printf("prev addr: %llx, curr addr: %llx\n", starlab_prev_address, op->inst_info->addr );
 
-        
+        // printf("address: %s\n", address_as_string);
 
-        // Identify whether the instruction sequence fits in user/kernel space 
         bool user_space = false;
         bool kernel_space = false;
+        
+        bool prev_in_kernel = (starlab_prev_address >= KERNEL_SPACE_START && starlab_prev_address <= KERNEL_SPACE_END);
+        bool this_in_kernel = (op->inst_info->addr >= KERNEL_SPACE_START && op->inst_info->addr <= KERNEL_SPACE_END);
 
-        // Condition holds true if:
-          // (1) Both addresses are in kernel space, or
-          // (2) Only one of the addresses is in kernel space
-
-        // if an address (starlab_prev_address or op->inst_info->addr) starts with "3" replace 3 with "ff"
-     
-            unsigned long long temp1, temp2; 
-            temp1 = starlab_prev_address;
-            temp2 = op->inst_info->addr;
-
-            // printf("Before: %llx\n", starlab_prev_address);
-            char* temp = (char*) malloc(128);
-            sprintf(temp, "%llx", temp1);
-            if(temp[0] == '3')
-            {
-              // Shift the string to the right by one position to make space for the second 'f'
-              memmove(temp + 1, temp, strlen(temp) + 1);
-              temp[0] = 'f';
-              temp[1] = 'f';
-              temp1 = strtoull(temp, NULL, 16);
-            }
-            // printf("modified: %llx\n", temp1);
-
-            // printf("Before: %llx\n", op->inst_info->addr);
-            sprintf(temp, "%llx", temp2);
-            if(temp[0] == '3')
-            {
-              // Shift the string to the right by one position to make space for the second 'f'
-              memmove(temp + 1, temp, strlen(temp) + 1);
-              temp[0] = 'f';
-              temp[1] = 'f';
-              temp2 = strtoull(temp, NULL, 16);
-            }
-            // printf("modified: %llx\n", temp2);
-            free(temp);
-
-         
-        // in the below snippet, starlab_prev_address if it ever starts with "3" replace 3 with "ff", it is unsigned long long dont give the entire program just the snippet
-        bool prev_in_kernel = (temp1 >= KERNEL_SPACE_START && temp1 <= KERNEL_SPACE_END);
-        bool this_in_kernel = (temp2 >= KERNEL_SPACE_START && temp2 <= KERNEL_SPACE_END);
-
-        // printf("prev in kernel:%d, this in kernel: %d, prev addr: %llx, this addr: %llx\n",prev_in_kernel,this_in_kernel, prev_addr_hex, this_addr_hex);
 
         if(prev_in_kernel && this_in_kernel)
         {
-        //  printf("both in kernel\n");
+         
           kernel_space = true;
   
         }
 
         else if(prev_in_kernel && !this_in_kernel) // prev instr in kernel and this in user
         {
-        //  printf("prev in kernel\n");
+   
           kernel_space = true;
        
 
@@ -1019,18 +985,16 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
         else if(!prev_in_kernel && this_in_kernel) // prev instr in user and this in kernel
         {
-          // printf("this in kernel\n");
+      
           kernel_space = true;
         }
 
         else // both instructions are in user space
         {
+       
           user_space = true;
         }
 
-        //  printf("user space: %d, kernel space: %d\n", user_space, kernel_space);
-
-        // printf("[icache] Adding %lu\n", cc_to_add);
 
         if(prev_tuple_ptr->prev_fetch_cycle == -1)
         {
@@ -1055,20 +1019,21 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
             voided_kernel_space_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, KERNEL_SPACE_HT_SIZE);
           }
 
-          if (!starlab_search(voided_user_space_types_ht, tuple_string) && 
-                  !starlab_search(voided_kernel_space_types_ht, tuple_string)) 
+          if((!starlab_search(voided_kernel_space_types_ht, tuple_string)) || (!starlab_search(voided_user_space_types_ht, tuple_string)) )
           {
+
+        
             if(op->eom)
             {
               if(kernel_space == 1)
               {
-                printf("in kernel\n");
+                // printf("inserting kernel\n");
                  starlab_insert(voided_kernel_space_types_ht, tuple_string, &cc_to_add);
               }
 
               else if(user_space == 1)
               {
-                // printf("in user\n");
+                // printf("inserting user\n");
                  starlab_insert(voided_user_space_types_ht, tuple_string, &cc_to_add);
               }
 

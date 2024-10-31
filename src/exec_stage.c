@@ -442,81 +442,66 @@ void update_exec_stage(Stage_Data* src_sd) {
         // unsigned long long this_addr_hex = strtoull(address_as_string, NULL, 16);
         // unsigned long long prev_addr_hex = strtoull(prev_address_as_string, NULL, 16);
 
-        unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
-        unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+        unsigned long long KERNEL_SPACE_START = 0x3ff800000000000ull;
+        unsigned long long KERNEL_SPACE_END = 0x3ffffffffffffffull;
+        
+        // print the addresses
+        printf("prev addr: %llx, curr addr: %llx\n", starlab_prev_address, op->inst_info->addr);
+        // print their iclasses
+        printf("prev iclass: %s, this iclass: %s\n", prev_iclass, this_iclass);
+
+        prev_iclass = "MOV";
+        this_iclass = "MOV";
 
         // Identify whether the instruction sequence fits in user/kernel space 
         bool user_space = false;
         bool kernel_space = false;
 
-         // Condition holds true if:
-          // (1) Both addresses are in kernel space, or
-          // (2) Only one of the addresses is in kernel space
-
- unsigned long long temp1, temp2; 
-            temp1 = starlab_prev_address;
-            temp2 = op->inst_info->addr;
-
-            // printf("Before: %llx\n", starlab_prev_address);
-            char* temp = (char*) malloc(128);
-            sprintf(temp, "%llx", temp1);
-            if(temp[0] == '3')
-            {
-              // Shift the string to the right by one position to make space for the second 'f'
-              memmove(temp + 1, temp, strlen(temp) + 1);
-              temp[0] = 'f';
-              temp[1] = 'f';
-              temp1 = strtoull(temp, NULL, 16);
-            }
-            // printf("modified: %llx\n", temp1);
-
-            // printf("Before: %llx\n", op->inst_info->addr);
-            sprintf(temp, "%llx", temp2);
-            if(temp[0] == '3')
-            {
-              // Shift the string to the right by one position to make space for the second 'f'
-              memmove(temp + 1, temp, strlen(temp) + 1);
-              temp[0] = 'f';
-              temp[1] = 'f';
-              temp2 = strtoull(temp, NULL, 16);
-            }
-            // printf("modified: %llx\n", temp2);
-            free(temp);
-
-         
         // in the below snippet, starlab_prev_address if it ever starts with "3" replace 3 with "ff", it is unsigned long long dont give the entire program just the snippet
-        bool prev_in_kernel = (temp1 >= KERNEL_SPACE_START && temp1 <= KERNEL_SPACE_END);
-        bool this_in_kernel = (temp2 >= KERNEL_SPACE_START && temp2 <= KERNEL_SPACE_END);
+        bool prev_in_kernel = (starlab_prev_address >= KERNEL_SPACE_START && starlab_prev_address <= KERNEL_SPACE_END);
+        bool this_in_kernel = (op->inst_info->addr >= KERNEL_SPACE_START && op->inst_info->addr <= KERNEL_SPACE_END);
 
         // printf("prev addr: %llx, curr addr: %llx\n", prev_addr_hex, this_addr_hex);
 
+        printf("prev in kernel: %d, this in kernel: %d\n", prev_in_kernel, this_in_kernel);
+
         if(prev_in_kernel && this_in_kernel)
         {
+          printf("both in kernel\n");
           kernel_space = true;
+         
         }
 
         else if(prev_in_kernel && !this_in_kernel) // prev instr in kernel and this in user
         {
+          printf("prev in kernel\n");
           kernel_space = true;
-
+         
         }
 
         else if(!prev_in_kernel && this_in_kernel) // prev instr in user and this in kernel
         {
+          printf("this in kernel\n");
           kernel_space = true;
+       
         }
 
         else // both instructions are in user space
         {
+          printf("both in user\n");
           user_space = true;
         }
 
-        // printf("user space: %d, kernel space: %d\n", user_space, kernel_space);
+        // printf("before if user space: %d, kernel space: %d\n", user_space, kernel_space);
+
+
 
         if(prev_iclass != NULL && this_iclass != NULL)
         {
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, this_iclass);
+
+          //  printf("before in if user space: %d, kernel space: %d\n", user_space, kernel_space);
 
           if(voided_user_space_types_ht == NULL) // This means this hashtable doesn't exist
           {
@@ -530,18 +515,19 @@ void update_exec_stage(Stage_Data* src_sd) {
             voided_kernel_space_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, KERNEL_SPACE_HT_SIZE);
           }
 
-          if ((!starlab_search(voided_user_space_types_ht, tuple_string)) && 
-                  (!starlab_search(voided_kernel_space_types_ht, tuple_string)))
+         
+          if ((!starlab_search(voided_kernel_space_types_ht, tuple_string)) || (!starlab_search(voided_user_space_types_ht, tuple_string)) )
           {
+                // printf("inside user space: %d, kernel space: %d\n", user_space, kernel_space);
             if(kernel_space == 1)
             {
-              
+              printf("inserting kernel\n");
               starlab_insert(voided_kernel_space_types_ht, tuple_string, &cc_to_add);
             }
 
             else if(user_space == 1)
             {
-             
+            //  printf("inserting user\n");
               starlab_insert(voided_user_space_types_ht, tuple_string, &cc_to_add);
             }
 

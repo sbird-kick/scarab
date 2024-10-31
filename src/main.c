@@ -233,8 +233,9 @@ char prev_instruction_class[128];
 char prev_address_as_string[128];
 unsigned long long starlab_prev_address = 0;
 
-unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
-unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+unsigned long long KERNEL_SPACE_START = 0x00000000000ull;
+unsigned long long KERNEL_SPACE_END = 0x00000000000ull;
+
 
 int main(int argc, char* argv[], char* envp[]) {
   char** simulated_argv;
@@ -317,116 +318,66 @@ if(opt2_in_use())
   printf("User space\n");
   
   char **keys, **new_keys;
-void **values_array, **new_values_array;
-KeyValuePair *key_value_pairs, *new_key_value_pairs;
+    void **values_array, **new_values_array;
+    KeyValuePair *key_value_pairs, *new_key_value_pairs;
 
-// User space hash table
-long count = get_count(voided_user_space_types_ht);
-key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
-starlab_return_key_value_arr(voided_user_space_types_ht, &keys, &values_array);
+    // User space hash table
+    long count = get_count(voided_user_space_types_ht);
+    key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
+    starlab_return_key_value_arr(voided_user_space_types_ht, &keys, &values_array);
 
-for (long i = 0; i < count; i++) {
-    key_value_pairs[i].key = keys[i];
-    key_value_pairs[i].value = values_array[i];
-}
-qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+    for (long i = 0; i < count; i++) {
+        key_value_pairs[i].key = keys[i];
+        key_value_pairs[i].value = values_array[i];
+    }
+    qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
-unsigned long total_cc_count = 0;
-for (long i = 0; i < count; i++) {
-    total_cc_count += *(unsigned long *)key_value_pairs[i].value;
-}
+    unsigned long total_cc_count = 0;
+    for (long i = 0; i < count; i++) {
+        total_cc_count += *(unsigned long *)key_value_pairs[i].value;
+    }
 
-// // Kernel space hash table
-// long kernel_count = get_count(voided_kernel_space_types_ht);
-// new_key_value_pairs = (KeyValuePair *)malloc(kernel_count * sizeof(KeyValuePair));
-// starlab_return_key_value_arr(voided_kernel_space_types_ht, &new_keys, &new_values_array);
+    // Kernel space hash table
+    long kernel_count = get_count(voided_kernel_space_types_ht);
+    new_key_value_pairs = (KeyValuePair *)malloc(kernel_count * sizeof(KeyValuePair));
+    starlab_return_key_value_arr(voided_kernel_space_types_ht, &new_keys, &new_values_array);
 
-// for (long i = 0; i < kernel_count; i++) {
-//     new_key_value_pairs[i].key = new_keys[i];
-//     new_key_value_pairs[i].value = new_values_array[i];
-// }
-// qsort(new_key_value_pairs, kernel_count, sizeof(KeyValuePair), compare_key_value_pairs);
+    for (long i = 0; i < kernel_count; i++) {
+        new_key_value_pairs[i].key = new_keys[i];
+        new_key_value_pairs[i].value = new_values_array[i];
+    }
+    qsort(new_key_value_pairs, kernel_count, sizeof(KeyValuePair), compare_key_value_pairs);
 
-// for (long i = 0; i < kernel_count; i++) {
-//     total_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
-// }
+    for (long i = 0; i < kernel_count; i++) {
+        total_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
+    }
 
-// // Process and print cumulative clock cycles for user space
-// unsigned long running_cc_count = 0;
-// for (long i = 0; i < count; i++) {
-//     printf("inst tuple (User): %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key,
-//            ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
-//     running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-//     if (running_cc_count > ((total_cc_count * 99) / 100))
-//         break;
-// }
+    // Process and print cumulative clock cycles for user space
+    unsigned long running_cc_count = 0;
+    for (long i = 0; i < count; i++) {
+        printf("inst tuple (User): %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key,
+              ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
+        running_cc_count += *(unsigned long *)key_value_pairs[i].value;
+        if (running_cc_count > ((total_cc_count * 99) / 100))
+            break;
+    }
 
-// // Process and print cumulative clock cycles for kernel space
-// for (long i = 0; i < kernel_count; i++) {
-//     printf("inst tuple (Kernel): %s, cumulative CCs: %.2f%%\n", new_key_value_pairs[i].key,
-//            ((double)*(unsigned long *)new_key_value_pairs[i].value / (double)total_cc_count) * 100);
-//     running_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
-//     if (running_cc_count > ((total_cc_count * 99) / 100))
-//         break;
-// }
+    // Process and print cumulative clock cycles for kernel space
+    for (long i = 0; i < kernel_count; i++) {
+        printf("inst tuple (Kernel): %s, cumulative CCs: %.2f%%\n", new_key_value_pairs[i].key,
+              ((double)*(unsigned long *)new_key_value_pairs[i].value / (double)total_cc_count) * 100);
+        running_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
+        if (running_cc_count > ((total_cc_count * 99) / 100))
+            break;
+    }
 
-// // Cleanup
-// free(keys);
-// free(values_array);
-// free(key_value_pairs);
-// free(new_keys);
-// free(new_values_array);
-// free(new_key_value_pairs);
-
-// Kernel space hash table
-long kernel_count = get_count(voided_kernel_space_types_ht);
-new_key_value_pairs = (KeyValuePair *)malloc(kernel_count * sizeof(KeyValuePair));
-starlab_return_key_value_arr(voided_kernel_space_types_ht, &new_keys, &new_values_array);
-
-for (long i = 0; i < kernel_count; i++) {
-    new_key_value_pairs[i].key = new_keys[i];
-    new_key_value_pairs[i].value = new_values_array[i];
-}
-qsort(new_key_value_pairs, kernel_count, sizeof(KeyValuePair), compare_key_value_pairs);
-
-// Print kernel hash table contents
-printf("Kernel Space Hash Table Contents:\n");
-for (long i = 0; i < kernel_count; i++) {
-    printf("Key: %s, Value: %lu\n", new_key_value_pairs[i].key, *(unsigned long *)new_key_value_pairs[i].value);
-}
-
-for (long i = 0; i < kernel_count; i++) {
-    total_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
-}
-
-printf("User Space Hash Table Contents:\n");
-// Process and print cumulative clock cycles for user space
-unsigned long running_cc_count = 0;
-for (long i = 0; i < count; i++) {
-    printf("inst tuple (User): %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key,
-           ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
-    running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-    if (running_cc_count > ((total_cc_count * 99) / 100))
-        break;
-}
-
-// Process and print cumulative clock cycles for kernel space
-for (long i = 0; i < kernel_count; i++) {
-    printf("inst tuple (Kernel): %s, cumulative CCs: %.2f%%\n", new_key_value_pairs[i].key,
-           ((double)*(unsigned long *)new_key_value_pairs[i].value / (double)total_cc_count) * 100);
-    running_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
-    if (running_cc_count > ((total_cc_count * 99) / 100))
-        break;
-}
-
-// Cleanup
-free(keys);
-free(values_array);
-free(key_value_pairs);
-free(new_keys);
-free(new_values_array);
-free(new_key_value_pairs);
-
+    // Cleanup
+    free(keys);
+    free(values_array);
+    free(key_value_pairs);
+    free(new_keys);
+    free(new_values_array);
+    free(new_key_value_pairs);
 
 
   return 0;

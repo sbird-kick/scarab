@@ -207,6 +207,7 @@ void cmp_istreams(void) {
         ASSERT(proc_id, proc_id == bp_recovery_info->redirect_op->proc_id);
         ASSERT_PROC_ID_IN_ADDR(
           proc_id, bp_recovery_info->redirect_op->oracle_info.pred_npc);
+
         cmp_redirect();
       }
     }

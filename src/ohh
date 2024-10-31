@@ -1,0 +1,104 @@
+Scarab gitrev: b5ea966
+Scarab started at Wed Oct 30 17:05:21 2024
+
+Initialized Ramulator. 
+Inserting ALU at 00007F91A7E11BF9
+Inserting JUMP at 00007F91A7E11BFF
+Inserting MOV at 00007F91A7E11C01
+Inserting MOV at 00007F91A7E11C04
+Inserting CALL at 00007F91A7E11C08
+inserting user
+both in user
+before if user space: 1, kernel space: 0
+before in if user space: 1, kernel space: 0
+inside user space: 1, kernel space: 0
+inserting user
+inserting user
+inserting user
+Inserting JUMP at 00007F91A7E2D740
+both in user
+before if user space: 1, kernel space: 0
+before in if user space: 1, kernel space: 0
+inside user space: 1, kernel space: 0
+inserting user
+both in user
+before if user space: 1, kernel space: 0
+before in if user space: 1, kernel space: 0
+inside user space: 1, kernel space: 0
+inserting user
+both in user
+before if user space: 1, kernel space: 0
+before in if user space: 1, kernel space: 0
+inside user space: 1, kernel space: 0
+inserting user
+both in user
+before if user space: 1, kernel space: 0
+before in if user space: 1, kernel space: 0
+inside user space: 1, kernel space: 0
+inserting user
+both in user
+before if user space: 1, kernel space: 0
+before in if user space: 1, kernel space: 0
+inside user space: 1, kernel space: 0
+inserting user
+Inserting ALU at FFFFFFFFC08F8034
+Inserting JUMP at FFFFFFFFC08F8037
+Inserting MOV at FFFFFFFFC08F8039
+Inserting MOV at FFFFFFFFC08F8040
+Inserting JUMP at FFFFFFFFC08F8045
+both in user
+before if user space: 1, kernel space: 0
+both in kernel
+before if user space: 0, kernel space: 1
+prev iclass: (null), this iclass: (null)
+both in kernel
+before if user space: 0, kernel space: 1
+prev iclass: (null), this iclass: (null)
+both in kernel
+before if user space: 0, kernel space: 1
+prev iclass: (null), this iclass: (null)
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+both in kernel
+before if user space: 0, kernel space: 1
+prev iclass: (null), this iclass: (null)
+both in kernel
+before if user space: 0, kernel space: 1
+prev iclass: (null), this iclass: (null)
+Warning could not fetch inst from frontend
+both in kernel
+before if user space: 0, kernel space: 1
+prev iclass: (null), this iclass: (null)
+both in kernel
+before if user space: 0, kernel space: 1
+prev iclass: (null), this iclass: (null)
+Warning could not fetch inst from frontend
+both in kernel
+before if user space: 0, kernel space: 1
+prev iclass: (null), this iclass: (null)
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+both in kernel
+before if user space: 0, kernel space: 1
+prev iclass: (null), this iclass: (null)
+Warning could not fetch inst from frontend
+Warning could not fetch inst from frontend
+** Core 0 Finished:    insts:15          cycles:990         time:309375000           -- 0.02 IPC (0.02 IPC) --  N/A  KIPS (inf KIPS)
+Scarab finished at Wed Oct 30 17:05:21 2024
+
+User space
+Kernel Space Hash Table Contents:
+User Space Hash Table Contents:
+inst tuple (User): <JUMP,MOV>, cumulative CCs: 56.16%
+inst tuple (User): <ALU,JUMP>, cumulative CCs: 21.92%
+inst tuple (User): <MOV,MOV>, cumulative CCs: 20.55%
+inst tuple (User): <MOV,CALL>, cumulative CCs: 1.37%

@@ -225,7 +225,6 @@ Uop_Cache_Data* uop_cache_lookup_line(Addr line_start, FT_Info ft_info, Flag upd
   if (!UOP_CACHE_ENABLE) {
     return NULL;
   }
-
   Uop_Cache_Data* uoc_data = per_core_uop_cache[uop_cache_proc_id]->access({line_start, ft_info.static_info}, update_repl == TRUE);
   return uoc_data;
 }
