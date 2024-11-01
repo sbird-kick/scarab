@@ -371,8 +371,19 @@ void update_exec_stage(Stage_Data* src_sd) {
     }
     op->exec_cycle = cycle_count + MAX2(latency, -latency);
 
+     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
+    // Convert addresses to unsigned long long to allow proper manipulation
+      unsigned long long address = op->inst_info->addr;
+
+      // Check and modify address if it starts with '03'
+      if ((address >> 56) == 0x03) {
+          // printf("Before modification - address: 0x%016llx\n", address);
+          address = (0xFF00000000000000ULL) | (address & 0x00FFFFFFFFFFFFFFULL);
+          // printf("After modification  - address: 0x%016llx\n", address);
+      }
+
     char address_as_string[128] = {0};
-    sprintf(address_as_string, "%016llX", op->inst_info->addr);
+    sprintf(address_as_string, "%016llX", address);
 
     bool first_time_exec = false;
     unsigned long extra_exec_cycles = 0;
@@ -442,16 +453,15 @@ void update_exec_stage(Stage_Data* src_sd) {
         // unsigned long long this_addr_hex = strtoull(address_as_string, NULL, 16);
         // unsigned long long prev_addr_hex = strtoull(prev_address_as_string, NULL, 16);
 
-        unsigned long long KERNEL_SPACE_START = 0x3ff800000000000ull;
-        unsigned long long KERNEL_SPACE_END = 0x3ffffffffffffffull;
+
+
+        unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+        unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
         
         // print the addresses
-        printf("prev addr: %llx, curr addr: %llx\n", starlab_prev_address, op->inst_info->addr);
-        // print their iclasses
-        printf("prev iclass: %s, this iclass: %s\n", prev_iclass, this_iclass);
-
-        prev_iclass = "MOV";
-        this_iclass = "MOV";
+        // printf("prev addr: %llx, curr addr: %llx\n", starlab_prev_address, op->inst_info->addr);
+        // // print their iclasses
+        // printf("prev iclass: %s, this iclass: %s\n", prev_iclass, this_iclass);
 
         // Identify whether the instruction sequence fits in user/kernel space 
         bool user_space = false;
@@ -459,36 +469,36 @@ void update_exec_stage(Stage_Data* src_sd) {
 
         // in the below snippet, starlab_prev_address if it ever starts with "3" replace 3 with "ff", it is unsigned long long dont give the entire program just the snippet
         bool prev_in_kernel = (starlab_prev_address >= KERNEL_SPACE_START && starlab_prev_address <= KERNEL_SPACE_END);
-        bool this_in_kernel = (op->inst_info->addr >= KERNEL_SPACE_START && op->inst_info->addr <= KERNEL_SPACE_END);
+        bool this_in_kernel = (address >= KERNEL_SPACE_START && address <= KERNEL_SPACE_END);
 
         // printf("prev addr: %llx, curr addr: %llx\n", prev_addr_hex, this_addr_hex);
 
-        printf("prev in kernel: %d, this in kernel: %d\n", prev_in_kernel, this_in_kernel);
+        // printf("prev in kernel: %d, this in kernel: %d\n", prev_in_kernel, this_in_kernel);
 
         if(prev_in_kernel && this_in_kernel)
         {
-          printf("both in kernel\n");
+          // printf("both in kernel\n");
           kernel_space = true;
          
         }
 
         else if(prev_in_kernel && !this_in_kernel) // prev instr in kernel and this in user
         {
-          printf("prev in kernel\n");
+          // printf("prev in kernel\n");
           kernel_space = true;
          
         }
 
         else if(!prev_in_kernel && this_in_kernel) // prev instr in user and this in kernel
         {
-          printf("this in kernel\n");
+          // printf("this in kernel\n");
           kernel_space = true;
        
         }
 
         else // both instructions are in user space
         {
-          printf("both in user\n");
+          // printf("both in user\n");
           user_space = true;
         }
 
@@ -521,7 +531,7 @@ void update_exec_stage(Stage_Data* src_sd) {
                 // printf("inside user space: %d, kernel space: %d\n", user_space, kernel_space);
             if(kernel_space == 1)
             {
-              printf("inserting kernel\n");
+              // printf("inserting kernel\n");
               starlab_insert(voided_kernel_space_types_ht, tuple_string, &cc_to_add);
             }
 

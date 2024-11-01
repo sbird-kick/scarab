@@ -225,6 +225,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
         // printf("Inserting %s at %s\n", insert_string, address_as_string);
 
         // printf("Address in frontend: %lx\n", starlab_pi->instruction_addr);
+        // printf("Address in frontend: %s, Iclass: %s\n", address_as_string, insert_string);
 
         starlab_insert(address_to_type_ptr, address_as_string, insert_string);
       }

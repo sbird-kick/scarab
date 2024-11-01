@@ -879,18 +879,49 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
     
     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
+    // Convert addresses to unsigned long long to allow proper manipulation
+      unsigned long long address = op->inst_info->addr;
+      unsigned long long prev_address = starlab_prev_address;
+
+      // Debug: Print input values
+      // printf("Original address: 0x%016llx\n", address);
+      // printf("Original prev_address: 0x%016llx\n", prev_address);
+
+      // // Debug: Print top 8 bits
+      // printf("address top 8 bits: 0x%02llx\n", (address >> 56));
+      // printf("prev_address top 8 bits: 0x%02llx\n", (prev_address >> 56));
+
+      // Check and modify address if it starts with '03'
+      if ((address >> 56) == 0x03) {
+          // printf("Before modification - address: 0x%016llx\n", address);
+          address = (0xFF00000000000000ULL) | (address & 0x00FFFFFFFFFFFFFFULL);
+          // printf("After modification  - address: 0x%016llx\n", address);
+      }
+
+      // Check and modify prev_address if it starts with '03'
+      if ((prev_address >> 56) == 0x03) {
+          // printf("Before modification - prev_address: 0x%016llx\n", prev_address);
+          prev_address = (0xFF00000000000000ULL) | (prev_address & 0x00FFFFFFFFFFFFFFULL);
+          // printf("After modification  - prev_address: 0x%016llx\n", prev_address);
+      }
+
+      // Final debug output
+      // printf("Final address: 0x%016llx\n", address);
+      // printf("Final prev_address: 0x%016llx\n", prev_address);
 
     char address_as_string[128] = {0};
     char prev_address_as_string[128] = {0};
-    sprintf(address_as_string, "%016llX", op->inst_info->addr);
-    sprintf(prev_address_as_string, "%016llX", starlab_prev_address);
+
+
+    sprintf(address_as_string, "%016llX", address);
+    sprintf(prev_address_as_string, "%016llX", prev_address);
     
     if(!starlab_search(address_to_prev_address, address_as_string))
     {
-        starlab_insert(address_to_prev_address, address_as_string, &starlab_prev_address);
+        starlab_insert(address_to_prev_address, address_as_string, &prev_address);
     }
-    if(op->inst_info->addr != starlab_prev_address) // track changes only
-      starlab_prev_address = op->inst_info->addr;
+    if(address != prev_address) // track changes only
+      prev_address =address;
 
     voided_address_to_prev_address = (void *) address_to_prev_address;
 
@@ -951,13 +982,12 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
 
-        // Original Value
-        // unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
-        // unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+        // print address and their iclass types
+        printf("prev: %s %s\n", prev_address_as_string, prev_iclass);
+        printf("this: %s %s\n", address_as_string, this_iclass);
 
-        unsigned long long KERNEL_SPACE_START = 0x3ff800000000000ull;
-        unsigned long long KERNEL_SPACE_END = 0x3ffffffffffffffull;
-
+        unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+        unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
 
         // printf("address: %s\n", address_as_string);
 
