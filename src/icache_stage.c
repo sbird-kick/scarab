@@ -912,10 +912,14 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     sprintf(address_as_string, "%016llX", address);
     sprintf(prev_address_as_string, "%016llX", prev_address);
 
-    // printf("printing the string: %s\n", address_as_string);
+    printf("address_as_string: %s\n", address_as_string);
+    printf("prev_address_as_string: %s\n", prev_address_as_string);
     
     if(!starlab_search(address_to_prev_address, address_as_string))
     {
+        // print previous address 
+        printf("prev address: %llx\n", prev_address);
+        printf("meh prev address: %llx\n", starlab_prev_address);
         starlab_insert(address_to_prev_address, address_as_string, &prev_address);
     }
     if(address != prev_address) // track changes only
@@ -951,6 +955,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       }
       else
         temp_tuple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle;
+
       temp_tuple_to_insert.exec_cycle = -1; // should be -1
       if(op->eom)
       {
@@ -963,6 +968,9 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     // calculate values
     inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
     inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
+
+    // printf("prev_tuple: %s %lu %lu\n", prev_address_as_string, prev_tuple_ptr->fetch_cycle, prev_tuple_ptr->prev_fetch_cycle);
+    // printf("this_tuple: %s %lu %lu\n", address_as_string, this_tuple_ptr->fetch_cycle, this_tuple_ptr->prev_fetch_cycle);
 
     if(prev_tuple_ptr == NULL)
     {

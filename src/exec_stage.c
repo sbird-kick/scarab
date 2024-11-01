@@ -445,8 +445,10 @@ void update_exec_stage(Stage_Data* src_sd) {
  
       inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
       inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
+
       if(prev_tuple_ptr == NULL || this_tuple_ptr == NULL)
       {
+        // printf("In prev_tuple_ptr == NULL\n");
         // do nothing
       }
       else
@@ -458,6 +460,8 @@ void update_exec_stage(Stage_Data* src_sd) {
         }
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
+
+        printf("prev iclass: %s, this iclass: %s\n", prev_iclass, this_iclass);
 
         unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
         unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
