@@ -886,8 +886,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     sprintf(address_as_string, "%016llX", this_address);
     sprintf(prev_address_as_string, "%016llX", starlab_prev_address);
 
-    printf("this_address: %s\n", address_as_string);
-    printf("prev_address: %s\n", prev_address_as_string);
+    // printf("this_address: %s\n", address_as_string);
+    // printf("prev_address: %s\n", prev_address_as_string);
     
     if(!starlab_search(address_to_prev_address, address_as_string))
     {
@@ -954,6 +954,9 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         unsigned long cc_to_add = this_tuple_ptr->fetch_cycle - prev_tuple_ptr->prev_fetch_cycle;
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
+
+        // printf("prev iclass: %s, address: %s\n", prev_iclass, prev_address_as_string);
+        // printf("this iclass: %s, address: %s\n", this_iclass, address_as_string);
 
         // printf("[icache] Adding %lu\n", cc_to_add);
 
