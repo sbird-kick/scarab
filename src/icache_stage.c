@@ -165,9 +165,6 @@ Stage_Data* get_current_stage_data() {
   } else {
     // two stage data cannot be used at once
     ASSERT(ic->proc_id, ic->sd.op_count == 0 || ic->uopc_sd.op_count == 0);
-
-    // printf("deepanjalifetch addr: %llx\n", ic->fetch_addr);
-
     return ic->uopc_sd.op_count? &ic->uopc_sd : &ic->sd;
   }
 }
@@ -306,7 +303,6 @@ Inst_Info** lookup_cache() {
     data = l1_cache ? (L1_Data*)cache_access(l1_cache, ic->fetch_addr,
                                               &dummy_line_addr, TRUE) :
                       NULL;
-
     if(data) {  // second level cache hit
       STAT_EVENT(ic->proc_id, L2_IDEAL_FILL_ICACHE);
       // actually bring it into the L1 icache
@@ -766,9 +762,6 @@ void update_icache_stage() {
   // fetches of this cycle has all been completed.
   // start processing the ops.
   Stage_Data* cur_data = get_current_stage_data();
-
-  // printf("address: %llx\n", ic->fetch_addr);
-
   icache_process_ops(cur_data);
 
   INC_STAT_EVENT(ic->proc_id, INST_LOST_TOTAL, cur_data->max_op_count);
@@ -825,8 +818,6 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     ASSERTM(ic->proc_id, ic->off_path == op->off_path,
             "Inconsistent off-path op PC: %llx ic:%i op:%i\n", op->inst_info->addr, ic->off_path, op->off_path);
 
-    // printf("Before modifications: %llx\n",op->inst_info->addr);
-
     if (!op->off_path) {
       STAT_EVENT(ic->proc_id, UOPS_SERVED_BY_ICACHE_ON_PATH + op->fetched_from_uop_cache);
     } else {
@@ -877,53 +868,33 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     {
       address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
-    
+
     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
-    unsigned long long address = op->inst_info->addr;
-    unsigned long long prev_address = starlab_prev_address;
-
-    // printf("Original address: 0x%016llx\n", address);
-    // printf("Original prev_address: 0x%016llx\n", prev_address);
-
-    // Debug: Print top 8 bits
-    // printf("address top 8 bits: 0x%02llx\n", (address >> 56));
-    // printf("prev_address top 8 bits: 0x%02llx\n", (prev_address >> 56));
-
-    // Check and modify address if it starts with '03'
-    if ((address >> 56) == 0x03) {
-          // printf("Before modification - address: 0x%016llx\n", address);
-          address = (0xFF00000000000000ULL) | (address & 0x00FFFFFFFFFFFFFFULL);
-          // printf("After modification  - address: 0x%016llx\n", address);
-    }
-
-    // Check and modify prev_address if it starts with '03'
-    if ((prev_address >> 56) == 0x03) {
-          // printf("Before modification - prev_address: 0x%016llx\n", prev_address);
-          prev_address = (0xFF00000000000000ULL) | (prev_address & 0x00FFFFFFFFFFFFFFULL);
-          // printf("After modification  - prev_address: 0x%016llx\n", prev_address);
-    }
-
-    // printf("Final address: 0x%016llx\n", address);
-    // printf("Final prev_address: 0x%016llx\n", prev_address);
 
     char address_as_string[128] = {0};
     char prev_address_as_string[128] = {0};
 
-    sprintf(address_as_string, "%016llX", address);
-    sprintf(prev_address_as_string, "%016llX", prev_address);
+    // Modify the address
+    unsigned long long this_address = op->inst_info->addr;
 
-    printf("address_as_string: %s\n", address_as_string);
-    printf("prev_address_as_string: %s\n", prev_address_as_string);
+    if ((this_address >> 56) == 0x03) {
+          // printf("Before modification - address: 0x%016llx\n", address);
+          this_address = (0xFF00000000000000ULL) | (this_address & 0x00FFFFFFFFFFFFFFULL);
+          // printf("After modification  - address: 0x%016llx\n", address);
+    }
+
+    sprintf(address_as_string, "%016llX", this_address);
+    sprintf(prev_address_as_string, "%016llX", starlab_prev_address);
+
+    printf("this_address: %s\n", address_as_string);
+    printf("prev_address: %s\n", prev_address_as_string);
     
     if(!starlab_search(address_to_prev_address, address_as_string))
     {
-        // print previous address 
-        printf("prev address: %llx\n", prev_address);
-        printf("meh prev address: %llx\n", starlab_prev_address);
-        starlab_insert(address_to_prev_address, address_as_string, &prev_address);
+        starlab_insert(address_to_prev_address, address_as_string, &starlab_prev_address);
     }
-    if(address != prev_address) // track changes only
-      prev_address =address;
+    if(this_address != starlab_prev_address) // track changes only
+      starlab_prev_address = this_address;
 
     voided_address_to_prev_address = (void *) address_to_prev_address;
 
@@ -955,7 +926,6 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       }
       else
         temp_tuple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle;
-
       temp_tuple_to_insert.exec_cycle = -1; // should be -1
       if(op->eom)
       {
@@ -968,9 +938,6 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     // calculate values
     inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
     inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
-
-    // printf("prev_tuple: %s %lu %lu\n", prev_address_as_string, prev_tuple_ptr->fetch_cycle, prev_tuple_ptr->prev_fetch_cycle);
-    // printf("this_tuple: %s %lu %lu\n", address_as_string, this_tuple_ptr->fetch_cycle, this_tuple_ptr->prev_fetch_cycle);
 
     if(prev_tuple_ptr == NULL)
     {
@@ -988,44 +955,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
 
-        // print address and their iclass types
-        printf("prev: %s %s\n", prev_address_as_string, prev_iclass);
-        printf("this: %s %s\n", address_as_string, this_iclass);
-
-        unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
-        unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
-
-        bool user_space = false;
-        bool kernel_space = false;
-        
-        bool prev_in_kernel = (prev_address >= KERNEL_SPACE_START && prev_address <= KERNEL_SPACE_END);
-        bool this_in_kernel = (address >= KERNEL_SPACE_START && address <= KERNEL_SPACE_END);
-
-        if(prev_in_kernel && this_in_kernel)
-        {
-         
-          kernel_space = true;
-  
-        }
-
-        else if(prev_in_kernel && !this_in_kernel) // prev instr in kernel and this in user
-        {
-          kernel_space = true;
-       
-        }
-
-        else if(!prev_in_kernel && this_in_kernel) // prev instr in user and this in kernel
-        {
-      
-          kernel_space = true;
-        }
-
-        else // both instructions are in user space
-        {
-       
-          user_space = true;
-        }
-
+        // printf("[icache] Adding %lu\n", cc_to_add);
 
         if(prev_tuple_ptr->prev_fetch_cycle == -1)
         {
@@ -1036,62 +966,18 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, this_iclass);
 
-          // Setup hashtables for address space segregation
-
-          if(voided_user_space_types_ht == NULL) // This means this hashtable doesn't exist
+          if(voided_global_starlab_types_ht == NULL)
           {
-            // Therefore, create one
-            voided_user_space_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
-
+            voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
           }
-
-          if(voided_kernel_space_types_ht == NULL) 
+          if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
           {
-            voided_kernel_space_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, KERNEL_SPACE_HT_SIZE);
-          }
-
-          if((!starlab_search(voided_kernel_space_types_ht, tuple_string)) || (!starlab_search(voided_user_space_types_ht, tuple_string)) )
-          {
-
-        
             if(op->eom)
-            {
-              if(kernel_space == 1)
-              {
-                // printf("inserting kernel\n");
-                 starlab_insert(voided_kernel_space_types_ht, tuple_string, &cc_to_add);
-              }
-
-              else if(user_space == 1)
-              {
-                // printf("inserting user\n");
-                 starlab_insert(voided_user_space_types_ht, tuple_string, &cc_to_add);
-              }
-
-              else 
-              {
-                // do nothing
-              }
-            }
-
+              starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
           }
           else
           {
-
-            unsigned long* cc_ptr = NULL;
-
-            if (starlab_search(voided_user_space_types_ht, tuple_string)) 
-            {
-                cc_ptr = (unsigned long*)starlab_search(voided_user_space_types_ht, tuple_string);
-            } 
-            else if (starlab_search(voided_kernel_space_types_ht, tuple_string)) 
-            {
-                cc_ptr = (unsigned long*)starlab_search(voided_kernel_space_types_ht, tuple_string);
-            }
-            else
-            {
-                // do nothing
-            }
+            unsigned long* cc_ptr = (unsigned long*) starlab_search(voided_global_starlab_types_ht, tuple_string);
             if(op->eom)
             {
               *cc_ptr+= cc_to_add;
@@ -1104,6 +990,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     voided_inst_tuple_ptr = (void *) inst_tuple_ptr;
+
 
     op_count[ic->proc_id]++;          /* increment instruction counters */
     unique_count_per_core[ic->proc_id]++;
