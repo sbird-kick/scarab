@@ -879,42 +879,40 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
     
     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
-    // Convert addresses to unsigned long long to allow proper manipulation
-      unsigned long long address = op->inst_info->addr;
-      unsigned long long prev_address = starlab_prev_address;
+    unsigned long long address = op->inst_info->addr;
+    unsigned long long prev_address = starlab_prev_address;
 
-      // Debug: Print input values
-      // printf("Original address: 0x%016llx\n", address);
-      // printf("Original prev_address: 0x%016llx\n", prev_address);
+    // printf("Original address: 0x%016llx\n", address);
+    // printf("Original prev_address: 0x%016llx\n", prev_address);
 
-      // // Debug: Print top 8 bits
-      // printf("address top 8 bits: 0x%02llx\n", (address >> 56));
-      // printf("prev_address top 8 bits: 0x%02llx\n", (prev_address >> 56));
+    // Debug: Print top 8 bits
+    // printf("address top 8 bits: 0x%02llx\n", (address >> 56));
+    // printf("prev_address top 8 bits: 0x%02llx\n", (prev_address >> 56));
 
-      // Check and modify address if it starts with '03'
-      if ((address >> 56) == 0x03) {
+    // Check and modify address if it starts with '03'
+    if ((address >> 56) == 0x03) {
           // printf("Before modification - address: 0x%016llx\n", address);
           address = (0xFF00000000000000ULL) | (address & 0x00FFFFFFFFFFFFFFULL);
           // printf("After modification  - address: 0x%016llx\n", address);
-      }
+    }
 
-      // Check and modify prev_address if it starts with '03'
-      if ((prev_address >> 56) == 0x03) {
+    // Check and modify prev_address if it starts with '03'
+    if ((prev_address >> 56) == 0x03) {
           // printf("Before modification - prev_address: 0x%016llx\n", prev_address);
           prev_address = (0xFF00000000000000ULL) | (prev_address & 0x00FFFFFFFFFFFFFFULL);
           // printf("After modification  - prev_address: 0x%016llx\n", prev_address);
-      }
+    }
 
-      // Final debug output
-      // printf("Final address: 0x%016llx\n", address);
-      // printf("Final prev_address: 0x%016llx\n", prev_address);
+    // printf("Final address: 0x%016llx\n", address);
+    // printf("Final prev_address: 0x%016llx\n", prev_address);
 
     char address_as_string[128] = {0};
     char prev_address_as_string[128] = {0};
 
-
     sprintf(address_as_string, "%016llX", address);
     sprintf(prev_address_as_string, "%016llX", prev_address);
+
+    // printf("printing the string: %s\n", address_as_string);
     
     if(!starlab_search(address_to_prev_address, address_as_string))
     {
@@ -989,14 +987,11 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
         unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
 
-        // printf("address: %s\n", address_as_string);
-
         bool user_space = false;
         bool kernel_space = false;
         
-        bool prev_in_kernel = (starlab_prev_address >= KERNEL_SPACE_START && starlab_prev_address <= KERNEL_SPACE_END);
-        bool this_in_kernel = (op->inst_info->addr >= KERNEL_SPACE_START && op->inst_info->addr <= KERNEL_SPACE_END);
-
+        bool prev_in_kernel = (prev_address >= KERNEL_SPACE_START && prev_address <= KERNEL_SPACE_END);
+        bool this_in_kernel = (address >= KERNEL_SPACE_START && address <= KERNEL_SPACE_END);
 
         if(prev_in_kernel && this_in_kernel)
         {
@@ -1007,10 +1002,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
         else if(prev_in_kernel && !this_in_kernel) // prev instr in kernel and this in user
         {
-   
           kernel_space = true;
        
-
         }
 
         else if(!prev_in_kernel && this_in_kernel) // prev instr in user and this in kernel
@@ -1103,7 +1096,6 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     voided_inst_tuple_ptr = (void *) inst_tuple_ptr;
-
 
     op_count[ic->proc_id]++;          /* increment instruction counters */
     unique_count_per_core[ic->proc_id]++;

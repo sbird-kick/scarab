@@ -423,16 +423,26 @@ void update_exec_stage(Stage_Data* src_sd) {
 
     char prev_address_as_string[128] = {0};
     
+  
     unsigned long long* starlab_prev_address_for_exec_stage_ptr = (unsigned long long*) starlab_search(voided_address_to_prev_address, address_as_string);
-    
+
+  
     if(starlab_prev_address_for_exec_stage_ptr == NULL)
     {
       // do nothing
     }
     else
     {
-      sprintf(prev_address_as_string, "%016llX", *starlab_prev_address_for_exec_stage_ptr);
 
+      unsigned long long prev_address = *starlab_prev_address_for_exec_stage_ptr;
+      if ((prev_address >> 56) == 0x03) {
+                prev_address = (0xFF00000000000000ULL) | (prev_address & 0x00FFFFFFFFFFFFFFULL);
+            }
+
+      // sprintf(prev_address_as_string, "%016llX", *starlab_prev_address_for_exec_stage_ptr);
+      sprintf(prev_address_as_string, "%016llX", prev_address);
+      printf("prev address: %s\n", prev_address_as_string);
+ 
       inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
       inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
       if(prev_tuple_ptr == NULL || this_tuple_ptr == NULL)
@@ -449,26 +459,16 @@ void update_exec_stage(Stage_Data* src_sd) {
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
 
-        // Convert string addresses to hex 
-        // unsigned long long this_addr_hex = strtoull(address_as_string, NULL, 16);
-        // unsigned long long prev_addr_hex = strtoull(prev_address_as_string, NULL, 16);
-
-
-
         unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
         unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
         
-        // print the addresses
-        // printf("prev addr: %llx, curr addr: %llx\n", starlab_prev_address, op->inst_info->addr);
-        // // print their iclasses
         // printf("prev iclass: %s, this iclass: %s\n", prev_iclass, this_iclass);
-
-        // Identify whether the instruction sequence fits in user/kernel space 
+        
         bool user_space = false;
         bool kernel_space = false;
 
         // in the below snippet, starlab_prev_address if it ever starts with "3" replace 3 with "ff", it is unsigned long long dont give the entire program just the snippet
-        bool prev_in_kernel = (starlab_prev_address >= KERNEL_SPACE_START && starlab_prev_address <= KERNEL_SPACE_END);
+        bool prev_in_kernel = (prev_address >= KERNEL_SPACE_START && prev_address <= KERNEL_SPACE_END);
         bool this_in_kernel = (address >= KERNEL_SPACE_START && address <= KERNEL_SPACE_END);
 
         // printf("prev addr: %llx, curr addr: %llx\n", prev_addr_hex, this_addr_hex);
@@ -573,64 +573,6 @@ void update_exec_stage(Stage_Data* src_sd) {
       }
     }
     voided_inst_tuple_ptr = (void *) inst_tuple_ptr;
-
-    // starlab_hash_table* global_starlab_ht_ptr = (starlab_hash_table*) voided_global_starlab_ht_ptr;
-
-    // if(global_starlab_ht_ptr == NULL)
-    // {
-    //   global_starlab_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(starlab_table_value));
-    // }
-    // starlab_hash_table* starlab_types_table_ptr = (starlab_hash_table*) voided_global_starlab_types_ht;
-    // if(starlab_types_table_ptr == NULL)
-    // {
-    //   starlab_types_table_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
-    // }
-
-    // char address_as_string[128] = {0};
-    // sprintf(address_as_string, "%016llX%s",  op->inst_info->addr, starlab_get_opcode_string(op->table_info->op_type));
-    // if(!starlab_search(global_starlab_ht_ptr,address_as_string))
-    // {
-    //   printf("[exec] Address ret %s not found [%016llX]\n", address_as_string, op->inst_info->addr);
-    //   starlab_table_value temp_val_to_insert = {op->fetch_cycle, op->fetch_cycle};
-    //   starlab_insert(global_starlab_ht_ptr, address_as_string, &temp_val_to_insert);
-    //   strncpy(prev_address_as_string, address_as_string, 128);
-    // }
-    // else
-    // {
-    //   unsigned long prev_inst_prev_fetch;
-    //   if(starlab_search(global_starlab_ht_ptr, prev_address_as_string) == NULL)
-    //   {
-    //     prev_inst_prev_fetch = prev_instruction_time;
-    //   }
-    //   else
-    //     prev_inst_prev_fetch = ((starlab_table_value *) starlab_search(global_starlab_ht_ptr, prev_address_as_string))->prev_fetch;
-
-    //   // unsigned long this_fetch_cc = op->fetch_cycle;
-    //   unsigned long cc_taken_by_tuple = op->exec_cycle - prev_inst_prev_fetch;      
-    //   printf("[exec] Address %s, %s FOUND ret! [%ld, %lld, %ld] -> <%s,%s>\n", prev_address_as_string, address_as_string, prev_inst_prev_fetch, op->exec_cycle, cc_taken_by_tuple, prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type));
-    //   starlab_delete_key(global_starlab_ht_ptr, address_as_string);
-
-    //   char tuple_of_types[256] = {0};
-    //   sprintf(tuple_of_types, "<%s,%s>", prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type));
-
-    //   if(!starlab_search(starlab_types_table_ptr, tuple_of_types))
-    //   {
-    //     unsigned long insert_val = cc_taken_by_tuple;
-    //     starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-    //   }
-    //   else
-    //   {
-    //     unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
-    //     starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-    //   }
-    //   prev_instruction_time = op->fetch_cycle;
-    //   strncpy(prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type), 100);
-    //   strncpy(prev_address_as_string, address_as_string, 128);
-    // }
-
-    // voided_global_starlab_ht_ptr = (void *) global_starlab_ht_ptr;
-    // voided_global_starlab_types_ht = (void *) starlab_types_table_ptr;
-
 
     op->exec_count++;
 
