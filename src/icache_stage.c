@@ -866,21 +866,21 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     starlab_hash_table* address_to_prev_address = (starlab_hash_table*) voided_address_to_prev_address;
     if(address_to_prev_address == NULL)
     {
-      printf("Icache stage: creating address_to_prev_address hashtable\n");
+      // printf("Icache stage: creating address_to_prev_address hashtable\n");
       address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
 
     starlab_hash_table* voided_user_space_types_ht_ptr = (starlab_hash_table*) voided_user_space_types_ht;
     if(voided_user_space_types_ht_ptr == NULL)
     {
-      printf("Icache stage: creating user_space_types hashtable\n");
+      // printf("Icache stage: creating user_space_types hashtable\n");
       voided_user_space_types_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
     }
 
     starlab_hash_table* voided_kernel_space_types_ht_ptr = (starlab_hash_table*) voided_kernel_space_types_ht;
     if(voided_kernel_space_types_ht_ptr == NULL)
     {
-      printf("Icache stage: creating kernel_space_types hashtable\n");
+      // printf("Icache stage: creating kernel_space_types hashtable\n");
       voided_kernel_space_types_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(KERNEL_SPACE_HT_SIZE));
     }
 
@@ -888,7 +888,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     starlab_hash_table* user_space_inst_ptr = (starlab_hash_table*) voided_frontend_user_space_instructions;
     if(user_space_inst_ptr == NULL)
     {
-      printf("Icache stage: creating user_space_inst_ptr hashtable\n");
+      // printf("Icache stage: creating user_space_inst_ptr hashtable\n");
       // this should not happen since the hashtable is created in the frontend
       user_space_inst_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
     }
@@ -896,7 +896,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     starlab_hash_table* kernel_space_inst_ptr = (starlab_hash_table*) voided_frontend_kernel_space_instructions;
     if(kernel_space_inst_ptr == NULL)
     {
-      printf("Icache stage: creating kernel_space_inst_ptr hashtable\n");
+      // printf("Icache stage: creating kernel_space_inst_ptr hashtable\n");
       // this should not happen since the hashtable is created in the frontend
       kernel_space_inst_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
     }
@@ -1011,8 +1011,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, modified_prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, this_address_as_string);
 
-        printf("prev iclass: %s, address: %s\n", prev_iclass, modified_prev_address_as_string);
-        printf("this iclass: %s, address: %s\n", this_iclass, this_address_as_string);
+        // printf("prev iclass: %s, address: %s\n", prev_iclass, modified_prev_address_as_string);
+        // printf("this iclass: %s, address: %s\n", this_iclass, this_address_as_string);
 
         // printf("[icache] Adding %lu\n", cc_to_add);
 
@@ -1035,15 +1035,15 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
             {
               if(kernel_space == 1)
               {
-                printf("Address %s is in kernel space\n", address_as_string);
-                printf("Inserting into kernel table %s %lu\n", tuple_string, cc_to_add);
+                // printf("Address %s is in kernel space\n", address_as_string);
+                // printf("Inserting into kernel table %s %lu\n", tuple_string, cc_to_add);
                 starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
               }
 
               else if(user_space == 1)
               {
-                printf("Address %s is in user space\n", address_as_string);
-                printf("Inserting into user table %s %lu\n", tuple_string, cc_to_add);
+                // printf("Address %s is in user space\n", address_as_string);
+                // printf("Inserting into user table %s %lu\n", tuple_string, cc_to_add);
                 starlab_insert(voided_user_space_types_ht_ptr, tuple_string, &cc_to_add);
               }
               else

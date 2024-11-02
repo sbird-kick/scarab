@@ -252,14 +252,14 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
           if(addr_in_kernel == 1)
           {
             // Address lies in kernel space: insert address into kernel hashtable
-            printf("Frontend: Inserting %s into kernel space\n", address_as_string);
+            // printf("Frontend: Inserting %s into kernel space\n", address_as_string);
             starlab_insert(kernel_space_inst_ptr, address_as_string, insert_string); 
           }
 
           else 
           {
             // Address lies in user space: insert address into user hashtable
-            printf("Frontend: Inserting %s into user space\n", address_as_string);
+            // printf("Frontend: Inserting %s into user space\n", address_as_string);
             starlab_insert(user_space_inst_ptr, address_as_string, insert_string);
           }
       }
