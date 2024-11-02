@@ -866,9 +866,41 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     starlab_hash_table* address_to_prev_address = (starlab_hash_table*) voided_address_to_prev_address;
     if(address_to_prev_address == NULL)
     {
+      printf("Icache stage: creating address_to_prev_address hashtable\n");
       address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
 
+    starlab_hash_table* voided_user_space_types_ht_ptr = (starlab_hash_table*) voided_user_space_types_ht;
+    if(voided_user_space_types_ht_ptr == NULL)
+    {
+      printf("Icache stage: creating user_space_types hashtable\n");
+      voided_user_space_types_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+    }
+
+    starlab_hash_table* voided_kernel_space_types_ht_ptr = (starlab_hash_table*) voided_kernel_space_types_ht;
+    if(voided_kernel_space_types_ht_ptr == NULL)
+    {
+      printf("Icache stage: creating kernel_space_types hashtable\n");
+      voided_kernel_space_types_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(KERNEL_SPACE_HT_SIZE));
+    }
+
+    
+    starlab_hash_table* user_space_inst_ptr = (starlab_hash_table*) voided_frontend_user_space_instructions;
+    if(user_space_inst_ptr == NULL)
+    {
+      printf("Icache stage: creating user_space_inst_ptr hashtable\n");
+      // this should not happen since the hashtable is created in the frontend
+      user_space_inst_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+    }
+
+    starlab_hash_table* kernel_space_inst_ptr = (starlab_hash_table*) voided_frontend_kernel_space_instructions;
+    if(kernel_space_inst_ptr == NULL)
+    {
+      printf("Icache stage: creating kernel_space_inst_ptr hashtable\n");
+      // this should not happen since the hashtable is created in the frontend
+      kernel_space_inst_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+    }
+   
     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
 
     char address_as_string[128] = {0};
@@ -883,7 +915,27 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
           // printf("After modification  - address: 0x%016llx\n", address);
     }
 
-    sprintf(address_as_string, "%016llX", this_address);
+    // Look for this address in voided_frontend_user_space_instructions and voided_frontend_kernel_space_instructions
+    // and set a boolean value based on which space it belongs to
+    
+    bool user_space = false;
+    bool kernel_space = false;
+
+    // Convert this address to a string
+
+    sprintf(this_address_as_string, "%016llX", this_address);
+
+    if(starlab_search(user_space_inst_ptr, this_address_as_string))
+    {
+      user_space = true;
+    }
+
+    if(starlab_search(kernel_space_inst_ptr, this_address_as_string))
+    {
+      kernel_space = true;
+    }
+
+    sprintf(address_as_string, "%016llX", op->inst_info->addr);
     sprintf(prev_address_as_string, "%016llX", starlab_prev_address);
 
     // printf("this_address: %s\n", address_as_string);
@@ -893,8 +945,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     {
         starlab_insert(address_to_prev_address, address_as_string, &starlab_prev_address);
     }
-    if(this_address != starlab_prev_address) // track changes only
-      starlab_prev_address = this_address;
+    if(op->inst_info->addr != starlab_prev_address) // track changes only
+      starlab_prev_address = op->inst_info->addr;
 
     voided_address_to_prev_address = (void *) address_to_prev_address;
 
@@ -955,8 +1007,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
 
-        // printf("prev iclass: %s, address: %s\n", prev_iclass, prev_address_as_string);
-        // printf("this iclass: %s, address: %s\n", this_iclass, address_as_string);
+        printf("prev iclass: %s, address: %s\n", prev_iclass, prev_address_as_string);
+        printf("this iclass: %s, address: %s\n", this_iclass, address_as_string);
 
         // printf("[icache] Adding %lu\n", cc_to_add);
 
@@ -976,7 +1028,26 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
           if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
           {
             if(op->eom)
-              starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
+            {
+              if(kernel_space == 1)
+              {
+                printf("Inserting %s %lu\n", tuple_string, cc_to_add);
+                starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
+              }
+
+              else if(user_space == 1)
+              {
+                printf("Inserting %s %lu\n", tuple_string, cc_to_add);
+                starlab_insert(voided_user_space_types_ht_ptr, tuple_string, &cc_to_add);
+              }
+              else
+              {
+                // it should never insert here since instruction addresses can only be in user or kernel space
+                starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
+              }
+
+            }
+              
           }
           else
           {
@@ -993,6 +1064,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     voided_inst_tuple_ptr = (void *) inst_tuple_ptr;
+    voided_user_space_types_ht = (void *) voided_user_space_types_ht_ptr;
+    voided_kernel_space_types_ht = (void *) voided_kernel_space_types_ht_ptr;
 
 
     op_count[ic->proc_id]++;          /* increment instruction counters */

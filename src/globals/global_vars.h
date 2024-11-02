@@ -99,6 +99,11 @@ extern unsigned long long KERNEL_SPACE_END;
 
 extern void* voided_user_space_types_ht;
 extern void* voided_kernel_space_types_ht;
+
+extern void* voided_frontend_user_space_instructions;
+extern void* voided_frontend_kernel_space_instructions; 
+
+extern char this_address_as_string[128];
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */

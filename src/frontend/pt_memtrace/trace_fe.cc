@@ -160,13 +160,47 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
     address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
   }
 
+  starlab_hash_table* user_space_inst_ptr = (starlab_hash_table*) voided_frontend_user_space_instructions;
+  if(user_space_inst_ptr == NULL)
+  {
+    user_space_inst_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+  }
+
+  starlab_hash_table* kernel_space_inst_ptr = (starlab_hash_table*) voided_frontend_kernel_space_instructions;
+  if(kernel_space_inst_ptr == NULL)
+  {
+    kernel_space_inst_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+  }
+  
+  unsigned long long KERNEL_SPACE_START = 0xffff800000000000ull;
+  unsigned long long KERNEL_SPACE_END = 0xffffffffffffffffull;
+        
   static int prev_was_move = 0;
   if(uop_generator_get_bom(proc_id)) {
     if (!off_path_mode[proc_id]) {
       ctype_pin_inst* starlab_pi = &next_onpath_pi[proc_id];
 
+      unsigned long long space_address = starlab_pi->instruction_addr; 
+
+      bool addr_in_kernel = (space_address >= KERNEL_SPACE_START && space_address <= KERNEL_SPACE_END);
+      printf("Address: %016llX, in kernel: %d\n", space_address, addr_in_kernel);
+
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);
+
+      if(addr_in_kernel == 1)
+      {
+        // Address lies in kernel space: insert address into kernel hashtable
+        printf("Frontend: Inserting %s into kernel space\n", address_as_string);
+        starlab_insert(kernel_space_inst_ptr, address_as_string, (void*)space_address); 
+      }
+
+      else 
+      {
+        // Address lies in user space: insert address into user hashtable
+        printf("Frontend: Inserting %s into user space\n", address_as_string);
+        starlab_insert(user_space_inst_ptr, address_as_string, (void*)space_address);
+      }
 
       if(!starlab_search(address_to_type_ptr, address_as_string))
       {
@@ -259,6 +293,8 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
   
 
   voided_address_to_type_ptr = (void *) address_to_type_ptr;
+  voided_frontend_user_space_instructions = (void *) user_space_inst_ptr;
+  voided_frontend_kernel_space_instructions = (void *) kernel_space_inst_ptr;
 
   if(uop_generator_get_eom(proc_id)) {
     if (!off_path_mode[proc_id]) {

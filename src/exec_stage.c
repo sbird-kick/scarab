@@ -381,7 +381,7 @@ void update_exec_stage(Stage_Data* src_sd) {
           // printf("After modification  - address: 0x%016llx\n", address);
     }
 
-    sprintf(address_as_string, "%016llX", this_address);
+    sprintf(address_as_string, "%016llX", op->inst_info->addr);
 
     bool first_time_exec = false;
     unsigned long extra_exec_cycles = 0;
@@ -391,6 +391,47 @@ void update_exec_stage(Stage_Data* src_sd) {
     {
       inst_tuple_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_fetch_exec_tuple));
     }
+
+    starlab_hash_table* voided_user_space_types_ht_ptr = (starlab_hash_table*) voided_user_space_types_ht;
+    if(voided_user_space_types_ht_ptr == NULL)
+    {
+      voided_user_space_types_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+    }
+
+    starlab_hash_table* voided_kernel_space_types_ht_ptr = (starlab_hash_table*) voided_kernel_space_types_ht;
+    if(voided_kernel_space_types_ht_ptr == NULL)
+    {
+      voided_kernel_space_types_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(KERNEL_SPACE_HT_SIZE));
+    }
+
+    starlab_hash_table* user_space_inst_ptr = (starlab_hash_table*) voided_frontend_user_space_instructions;
+    if(user_space_inst_ptr == NULL)
+    {
+      user_space_inst_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+    }
+
+    starlab_hash_table* kernel_space_inst_ptr = (starlab_hash_table*) voided_frontend_kernel_space_instructions;
+    if(kernel_space_inst_ptr == NULL)
+    {
+      kernel_space_inst_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+    }
+
+    bool user_space = false;
+    bool kernel_space = false;
+
+    sprintf(this_address_as_string, "%016llX", this_address);
+
+    if(starlab_search(user_space_inst_ptr, this_address_as_string))
+    {
+      user_space = true;
+    }
+
+    if(starlab_search(kernel_space_inst_ptr, this_address_as_string))
+    {
+      kernel_space = true;
+    }
+
+
     // is this already present? 
     if(!starlab_search(inst_tuple_ptr, address_as_string))
     {
@@ -458,7 +499,21 @@ void update_exec_stage(Stage_Data* src_sd) {
           }
           if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
           {
-            starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
+
+            if(kernel_space == 1)
+            {
+              starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
+            }
+
+            else if(user_space == 1)
+            {
+              starlab_insert(voided_user_space_types_ht_ptr, tuple_string, &cc_to_add);
+            }
+            else
+            {
+              // it should never insert here since instruction addresses can only be in user or kernel space
+              starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
+           }
           }
           else
           {
@@ -472,6 +527,8 @@ void update_exec_stage(Stage_Data* src_sd) {
       }
     }
     voided_inst_tuple_ptr = (void *) inst_tuple_ptr;
+    voided_user_space_types_ht = (void *) voided_user_space_types_ht_ptr;
+    voided_kernel_space_types_ht = (void *) voided_kernel_space_types_ht_ptr;
 
     // starlab_hash_table* global_starlab_ht_ptr = (starlab_hash_table*) voided_global_starlab_ht_ptr;
 
