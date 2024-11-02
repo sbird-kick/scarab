@@ -188,20 +188,6 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);
 
-      if(addr_in_kernel == 1)
-      {
-        // Address lies in kernel space: insert address into kernel hashtable
-        printf("Frontend: Inserting %s into kernel space\n", address_as_string);
-        starlab_insert(kernel_space_inst_ptr, address_as_string, (void*)space_address); 
-      }
-
-      else 
-      {
-        // Address lies in user space: insert address into user hashtable
-        printf("Frontend: Inserting %s into user space\n", address_as_string);
-        starlab_insert(user_space_inst_ptr, address_as_string, (void*)space_address);
-      }
-
       if(!starlab_search(address_to_type_ptr, address_as_string))
       {
         char insert_string[128] = {0};
@@ -262,6 +248,20 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
         // printf("Address in frontend: %s, Iclass: %s\n", address_as_string, insert_string);
 
         starlab_insert(address_to_type_ptr, address_as_string, insert_string);
+
+          if(addr_in_kernel == 1)
+          {
+            // Address lies in kernel space: insert address into kernel hashtable
+            printf("Frontend: Inserting %s into kernel space\n", address_as_string);
+            starlab_insert(kernel_space_inst_ptr, address_as_string, insert_string); 
+          }
+
+          else 
+          {
+            // Address lies in user space: insert address into user hashtable
+            printf("Frontend: Inserting %s into user space\n", address_as_string);
+            starlab_insert(user_space_inst_ptr, address_as_string, insert_string);
+          }
       }
 
       if(starlab_pi->is_move && (prev_was_move == 0))

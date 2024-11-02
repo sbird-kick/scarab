@@ -862,7 +862,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     thread_map_mem_dep(op);
     op->fetch_cycle = cycle_count;
 
-    
+    printf("hi we are in icache_process_ops\n");
     starlab_hash_table* address_to_prev_address = (starlab_hash_table*) voided_address_to_prev_address;
     if(address_to_prev_address == NULL)
     {
