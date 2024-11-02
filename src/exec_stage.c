@@ -502,11 +502,13 @@ void update_exec_stage(Stage_Data* src_sd) {
 
             if(kernel_space == 1)
             {
+              printf("Execution stage: Inserting into kernel table %s %lu\n", tuple_string, cc_to_add);
               starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
             }
 
             else if(user_space == 1)
             {
+              printf("Execution stage: Inserting into user table %s %lu\n", tuple_string, cc_to_add);
               starlab_insert(voided_user_space_types_ht_ptr, tuple_string, &cc_to_add);
             }
             else

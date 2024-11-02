@@ -183,7 +183,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
       unsigned long long space_address = starlab_pi->instruction_addr; 
 
       bool addr_in_kernel = (space_address >= KERNEL_SPACE_START && space_address <= KERNEL_SPACE_END);
-      printf("Address: %016llX, in kernel: %d\n", space_address, addr_in_kernel);
+      // printf("Address: %016llX, in kernel: %d\n", space_address, addr_in_kernel);
 
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);

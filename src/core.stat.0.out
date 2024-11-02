@@ -2,19 +2,19 @@
 ####################################################################################################
 Core 0
 ####################################################################################################
-Cumulative:        Cycles: 990                   Instructions: 15                    IPC: 0.01515
+Cumulative:        Cycles: 343                   Instructions: 9                     IPC: 0.02624
 
-Periodic:          Cycles: 990                   Instructions: 15                    IPC: 0.01515
+Periodic:          Cycles: 343                   Instructions: 9                     IPC: 0.02624
 
-EXECUTION_TIME                               309375000                      309375000              
+EXECUTION_TIME                               107187500                      107187500              
 
-NODE_CYCLE                                         990                            990              
+NODE_CYCLE                                         343                            343              
 
-NODE_INST_COUNT                                     15                             15              
+NODE_INST_COUNT                                      9                              9              
 
 NODE_INST_COUNT_FETCHED                              0                              0              
 
-NODE_UOP_COUNT                                      17                             17              
+NODE_UOP_COUNT                                       9                              9              
 
 FULL_WINDOW_STALL                                    0        0.000%                0        0.000%
 
@@ -24,21 +24,21 @@ FULL_WINDOW_OTHER_OP                                 0         -nan%            
                                                      0         -nan%                0         -nan%
                                                   -nan         -nan              -nan         -nan
 
-RET_BLOCKED_DC_MISS                                195       19.697%              195       19.697%
+RET_BLOCKED_DC_MISS                                174       50.729%              174       50.729%
 
-RET_BLOCKED_L1_MISS                                143       14.444%              143       14.444%
+RET_BLOCKED_L1_MISS                                122       35.569%              122       35.569%
 
 RET_BLOCKED_L1_MISS_BW_PREF                          0        0.000%                0        0.000%
 
-RET_BLOCKED_L1_ACCESS                               52        5.253%               52        5.253%
+RET_BLOCKED_L1_ACCESS                               52       15.160%               52       15.160%
 
-RET_BLOCKED_MEM_STALL                              143       14.444%              143       14.444%
+RET_BLOCKED_MEM_STALL                              122       35.569%              122       35.569%
 
 RET_BLOCKED_OFFCHIP_DEMAND                           0        0.000%                0        0.000%
 
-OP_ISSUED                                           17                             17              
+OP_ISSUED                                            9                              9              
 
-OP_RETIRED                                          17                             17              
+OP_RETIRED                                           9                              9              
 
 REPLAY_SIGNALED                                      0                              0              
 
@@ -62,71 +62,71 @@ LD_EXEC_CYCLES_4                                     0         -nan%            
                                                      0         -nan%                0         -nan%
                                                   -nan         -nan              -nan         -nan
 
-ICACHE_STAGE_STARVED                              1906       99.791%             1906       99.791%
-ICACHE_STAGE_NOT_STARVED                             4        0.209%                4        0.209%
-                                                  1910      100.000%             1910      100.000%
-                                                  0.00         0.05              0.00         0.05
-
-ICACHE_STAGE_STALLED                                 0        0.000%                0        0.000%
-ICACHE_STAGE_NOT_STALLED                           966       97.576%              966       97.576%
-ICACHE_STAGE_OFF_PATH                               24        2.424%               24        2.424%
-                                                   990      100.000%              990      100.000%
-                                                  1.02         0.22              1.02         0.22
-
-DECODE_STAGE_STARVED                               966       99.281%              966       99.281%
-DECODE_STAGE_NOT_STARVED                             7        0.719%                7        0.719%
-                                                   973      100.000%              973      100.000%
+ICACHE_STAGE_STARVED                               498       99.401%              498       99.401%
+ICACHE_STAGE_NOT_STARVED                             3        0.599%                3        0.599%
+                                                   501      100.000%              501      100.000%
                                                   0.01         0.08              0.01         0.08
 
+ICACHE_STAGE_STALLED                                 0        0.000%                0        0.000%
+ICACHE_STAGE_NOT_STALLED                           335       97.668%              335       97.668%
+ICACHE_STAGE_OFF_PATH                                8        2.332%                8        2.332%
+                                                   343      100.000%              343      100.000%
+                                                  1.02         0.22              1.02         0.22
+
+DECODE_STAGE_STARVED                               334       99.110%              334       99.110%
+DECODE_STAGE_NOT_STARVED                             3        0.890%                3        0.890%
+                                                   337      100.000%              337      100.000%
+                                                  0.01         0.09              0.01         0.09
+
 DECODE_STAGE_STALLED                                 0        0.000%                0        0.000%
-DECODE_STAGE_NOT_STALLED                           973       98.283%              973       98.283%
-DECODE_STAGE_OFF_PATH                               17        1.717%               17        1.717%
-                                                   990      100.000%              990      100.000%
+DECODE_STAGE_NOT_STALLED                           337       98.251%              337       98.251%
+DECODE_STAGE_OFF_PATH                                6        1.749%                6        1.749%
+                                                   343      100.000%              343      100.000%
                                                   1.02         0.19              1.02         0.19
 
-UOPQ_STAGE_STARVED                                 990      100.000%              990      100.000%
+UOPQ_STAGE_STARVED                                 343      100.000%              343      100.000%
 UOPQ_STAGE_NOT_STARVED                               0        0.000%                0        0.000%
-                                                   990      100.000%              990      100.000%
+                                                   343      100.000%              343      100.000%
                                                   0.00         0.00              0.00         0.00
 
 UOPQ_STAGE_STALLED                                   0        0.000%                0        0.000%
-UOPQ_STAGE_NOT_STALLED                             990      100.000%              990      100.000%
+UOPQ_STAGE_NOT_STALLED                             343      100.000%              343      100.000%
 UOPQ_STAGE_OFF_PATH                                  0        0.000%                0        0.000%
-                                                   990      100.000%              990      100.000%
+                                                   343      100.000%              343      100.000%
                                                   1.00         0.00              1.00         0.00
 
-MAP_STAGE_STARVED                                  983       99.293%              983       99.293%
-MAP_STAGE_NOT_STARVED                                7        0.707%                7        0.707%
-                                                   990      100.000%              990      100.000%
-                                                  0.01         0.08              0.01         0.08
+MAP_STAGE_STARVED                                  339       98.834%              339       98.834%
+MAP_STAGE_NOT_STARVED                                4        1.166%                4        1.166%
+                                                   343      100.000%              343      100.000%
+                                                  0.01         0.11              0.01         0.11
 
 MAP_STAGE_STALLED                                    0        0.000%                0        0.000%
-MAP_STAGE_NOT_STALLED                              990      100.000%              990      100.000%
+MAP_STAGE_NOT_STALLED                              343      100.000%              343      100.000%
 MAP_STAGE_OFF_PATH                                   0        0.000%                0        0.000%
-                                                   990      100.000%              990      100.000%
+                                                   343      100.000%              343      100.000%
                                                   1.00         0.00              1.00         0.00
 
-EXEC_STAGE_STARVED                                 990      100.000%              990      100.000%
+EXEC_STAGE_STARVED                                 343      100.000%              343      100.000%
 EXEC_STAGE_NOT_STARVED                               0        0.000%                0        0.000%
 EXEC_STAGE_OFF_PATH                                  0        0.000%                0        0.000%
-                                                   990      100.000%              990      100.000%
+                                                   343      100.000%              343      100.000%
                                                   0.00         0.00              0.00         0.00
 
-FU_BUSY_0                                           10                             10              
+FU_BUSY_0                                            6                              6              
 
-FU_BUSY_1                                            2                              2              
+FU_BUSY_1                                            1                              1              
 
 FU_BUSY_2                                            2                              2              
 
 FU_BUSY_3                                            0                              0              
 
-FU_BUSY_4                                            1                              1              
+FU_BUSY_4                                            0                              0              
 
 FU_BUSY_5                                            0                              0              
 
-FU_BUSY_6                                            1                              1              
+FU_BUSY_6                                            0                              0              
 
-FU_BUSY_7                                            1                              1              
+FU_BUSY_7                                            0                              0              
 
 FU_BUSY_8                                            0                              0              
 
@@ -237,9 +237,9 @@ FU_REJECTED_OP_NOTPIPELINED_VERY_SLOW_SIMD             0         -nan%          
                                                      0         -nan%                0         -nan%
                                                   -nan         -nan              -nan         -nan
 
-OP_WAIT_0                                            4                              4              
+OP_WAIT_0                                            2                              2              
 
-OP_WAIT_1                                           13                             13              
+OP_WAIT_1                                            7                              7              
 
 OP_WAIT_2                                            0                              0              
 
@@ -301,17 +301,17 @@ OP_WAIT_30                                           0                          
 
 OP_WAIT_31                                           0                              0              
 
-ROW_SIZE_0                                         211                            211              
+ROW_SIZE_0                                         174                            174              
 
-ROW_SIZE_1                                          11                             11              
+ROW_SIZE_1                                           2                              2              
 
-ROW_SIZE_2                                           3                              3              
+ROW_SIZE_2                                           1                              1              
 
 ROW_SIZE_3                                           0                              0              
 
 ROW_SIZE_4                                           0                              0              
 
-ROW_SIZE_5                                           0                              0              
+ROW_SIZE_5                                           1                              1              
 
 ROW_SIZE_6                                           0                              0              
 
@@ -366,7 +366,7 @@ ROW_SIZE_30                                          0                          
 ROW_SIZE_31                                          0                              0              
 
 RET_OP_EXEC_COUNT_0                                  0        0.000%                0        0.000%
-RET_OP_EXEC_COUNT_1                                 17      100.000%               17      100.000%
+RET_OP_EXEC_COUNT_1                                  9      100.000%                9      100.000%
 RET_OP_EXEC_COUNT_2                                  0        0.000%                0        0.000%
 RET_OP_EXEC_COUNT_3                                  0        0.000%                0        0.000%
 RET_OP_EXEC_COUNT_4                                  0        0.000%                0        0.000%
@@ -398,11 +398,11 @@ RET_OP_EXEC_COUNT_29                                 0        0.000%            
 RET_OP_EXEC_COUNT_30                                 0        0.000%                0        0.000%
 RET_OP_EXEC_COUNT_31                                 0        0.000%                0        0.000%
 RET_OP_EXEC_COUNT_32                                 0        0.000%                0        0.000%
-                                                    17      100.000%               17      100.000%
+                                                     9      100.000%                9      100.000%
                                                   1.00         0.00              1.00         0.00
 
-RET_STALL_LENGTH_0                                  16       94.118%               16       94.118%
-RET_STALL_LENGTH_100                                 1        5.882%                1        5.882%
+RET_STALL_LENGTH_0                                   8       88.889%                8       88.889%
+RET_STALL_LENGTH_100                                 1       11.111%                1       11.111%
 RET_STALL_LENGTH_200                                 0        0.000%                0        0.000%
 RET_STALL_LENGTH_300                                 0        0.000%                0        0.000%
 RET_STALL_LENGTH_400                                 0        0.000%                0        0.000%
@@ -452,8 +452,8 @@ RET_STALL_LENGTH_4700                                0        0.000%            
 RET_STALL_LENGTH_4800                                0        0.000%                0        0.000%
 RET_STALL_LENGTH_4900                                0        0.000%                0        0.000%
 RET_STALL_LENGTH_5000                                0        0.000%                0        0.000%
-                                                    17      100.000%               17      100.000%
-                                                  0.06         0.24              0.06         0.24
+                                                     9      100.000%                9      100.000%
+                                                  0.11         0.31              0.11         0.31
 
 MEM_BLOCK_LENGTH_0                                   0         -nan%                0         -nan%
 MEM_BLOCK_LENGTH_100                                 0         -nan%                0         -nan%
@@ -509,13 +509,13 @@ MEM_BLOCK_LENGTH_5000                                0         -nan%            
                                                      0         -nan%                0         -nan%
                                                   -nan         -nan              -nan         -nan
 
-FUS_BUSY_ON_PATH                                    17        0.0172               17        0.0172
+FUS_BUSY_ON_PATH                                     9        0.0262                9        0.0262
 
 FUS_BUSY_OFF_PATH                                    0        0.0000                0        0.0000
 
 FU_BUSY_MEM_STALL                                    0        0.0000                0        0.0000
 
-FUS_EMPTY                                         7903        7.9828             7903        7.9828
+FUS_EMPTY                                         2735        7.9738             2735        7.9738
 
 FU_UNAVAILABLE                                       0        0.0000                0        0.0000
 
@@ -523,7 +523,7 @@ FU_MEM_UNAVAILABLE                                   0        0.0000            
 
 FU_REPLAY                                            0        0.0000                0        0.0000
 
-FU_STARVED                                        7903        7.9828             7903        7.9828
+FU_STARVED                                        2735        7.9738             2735        7.9738
 
 CHIP_UTILIZATION                                     0        0.0000                0        0.0000
 
@@ -558,17 +558,17 @@ WRONG_IO_SCHED                                       0                          
 DVFS_CONFIG_SWITCH                                   0                              0              
 
 MAP_STAGE_RECEIVED_OPS_0                             0        0.000%                0        0.000%
-MAP_STAGE_RECEIVED_OPS_1                             2       28.571%                2       28.571%
-MAP_STAGE_RECEIVED_OPS_2                             2       28.571%                2       28.571%
-MAP_STAGE_RECEIVED_OPS_3                             2       28.571%                2       28.571%
+MAP_STAGE_RECEIVED_OPS_1                             1       25.000%                1       25.000%
+MAP_STAGE_RECEIVED_OPS_2                             1       25.000%                1       25.000%
+MAP_STAGE_RECEIVED_OPS_3                             2       50.000%                2       50.000%
 MAP_STAGE_RECEIVED_OPS_4                             0        0.000%                0        0.000%
-MAP_STAGE_RECEIVED_OPS_5                             1       14.286%                1       14.286%
+MAP_STAGE_RECEIVED_OPS_5                             0        0.000%                0        0.000%
 MAP_STAGE_RECEIVED_OPS_6                             0        0.000%                0        0.000%
 MAP_STAGE_RECEIVED_OPS_7                             0        0.000%                0        0.000%
 MAP_STAGE_RECEIVED_OPS_8                             0        0.000%                0        0.000%
 MAP_STAGE_RECEIVED_OPS_MAX                           0        0.000%                0        0.000%
-                                                     7      100.000%                7      100.000%
-                                                  2.43         1.40              2.43         1.40
+                                                     4      100.000%                4      100.000%
+                                                  2.25         0.96              2.25         0.96
 
 MAP_STAGE_WAIT_FOR_DECODE                            0         -nan%                0         -nan%
 MAP_STAGE_CONSUME_DECODE                             0         -nan%                0         -nan%
@@ -582,17 +582,17 @@ MAP_STAGE_CONSUME_DECODE2                            0         -nan%            
 
 FTQ_RECOVER_EXEC                                     0                              0              
 
-FTQ_RECOVER_DECODE                                   3                              3              
+FTQ_RECOVER_DECODE                                   1                              1              
 
-FTQ_OFFPATH_CYCLES                                 973                            973              
+FTQ_OFFPATH_CYCLES                                 176                            176              
 
-FTQ_CYCLES_OFFPATH                                 970                            970              
+FTQ_CYCLES_OFFPATH                                 175                            175              
 
-FTQ_CYCLES_ONPATH                                   20                             20              
+FTQ_CYCLES_ONPATH                                  168                            168              
 
-FTQ_FETCHED_INS_OFFPATH                           2170                           2170              
+FTQ_FETCHED_INS_OFFPATH                            723                            723              
 
-FTQ_FETCHED_INS_ONPATH                              14                             14              
+FTQ_FETCHED_INS_ONPATH                               8                              8              
 
 FTQ_BREAK_FULL_FT_ONPATH                             0         -nan%                0         -nan%
 FTQ_BREAK_MAX_CFS_TAKEN_ONPATH                       0         -nan%                0         -nan%
@@ -602,13 +602,13 @@ FTQ_BREAK_BAR_FETCH_ONPATH                           0         -nan%            
                                                      0         -nan%                0         -nan%
                                                   -nan         -nan              -nan         -nan
 
-FTQ_BREAK_FULL_FT_OFFPATH                          927       95.272%              927       95.272%
+FTQ_BREAK_FULL_FT_OFFPATH                          161       91.477%              161       91.477%
 FTQ_BREAK_MAX_CFS_TAKEN_OFFPATH                      0        0.000%                0        0.000%
-FTQ_BREAK_MAX_BYTES_OFFPATH                         46        4.728%               46        4.728%
+FTQ_BREAK_MAX_BYTES_OFFPATH                         15        8.523%               15        8.523%
 FTQ_BREAK_PRED_BR_OFFPATH                            0        0.000%                0        0.000%
 FTQ_BREAK_BAR_FETCH_OFFPATH                          0        0.000%                0        0.000%
-                                                   973      100.000%              973      100.000%
-                                                  0.09         0.41              0.09         0.41
+                                                   176      100.000%              176      100.000%
+                                                  0.17         0.54              0.17         0.54
 
 
 

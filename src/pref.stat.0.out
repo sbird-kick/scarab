@@ -2,9 +2,9 @@
 ####################################################################################################
 Core 0
 ####################################################################################################
-Cumulative:        Cycles: 990                   Instructions: 15                    IPC: 0.01515
+Cumulative:        Cycles: 343                   Instructions: 9                     IPC: 0.02624
 
-Periodic:          Cycles: 990                   Instructions: 15                    IPC: 0.01515
+Periodic:          Cycles: 343                   Instructions: 9                     IPC: 0.02624
 
 PREF_DL0REQ_QUEUE_HIT_BY_DEMAND                      0                              0              
 
@@ -206,13 +206,13 @@ PREF_ACC4_LT_LP                                      0         -nan%            
                                                      0         -nan%                0         -nan%
                                                   -nan         -nan              -nan         -nan
 
-FDIP_DECIDE_PREF_ONPATH                              7                              7              
+FDIP_DECIDE_PREF_ONPATH                              4                              4              
 
-FDIP_DECIDE_PREF_OFFPATH                            77                             77              
+FDIP_DECIDE_PREF_OFFPATH                            27                             27              
 
 FDIP_NEW_PREFETCHES_ONPATH                           2                              2              
 
-FDIP_NEW_PREFETCHES_OFFPATH                         74                             74              
+FDIP_NEW_PREFETCHES_OFFPATH                         27                             27              
 
 FDIP_PREF_ICACHE_PROBE_HIT_ONPATH                    2                              2              
 
@@ -222,13 +222,13 @@ FDIP_PREF_MSHR_PROBE_HIT_ONPATH                      0                          
 
 FDIP_PREF_MSHR_PROBE_HIT_OFFPATH                     0                              0              
 
-FDIP_PREF_FAILED_ONPATH                              3                              3              
+FDIP_PREF_FAILED_ONPATH                              0                              0              
 
-FDIP_PREF_FAILED_OFFPATH                             3                              3              
+FDIP_PREF_FAILED_OFFPATH                             0                              0              
 
-FDIP_ATTEMPTED_PREF_ONPATH                           7                              7              
+FDIP_ATTEMPTED_PREF_ONPATH                           4                              4              
 
-FDIP_ATTEMPTED_PREF_OFFPATH                        866                            866              
+FDIP_ATTEMPTED_PREF_OFFPATH                        189                            189              
 
 FDIP_ALT_PATH_PREFETCHES_IC_EMITTED                  0                              0              
 
@@ -241,28 +241,28 @@ FDIP_ALT_PATH_PREFETCHES_UOC_EMITTED_ON_PATH             0         -nan%        
 
 FDIP_ALT_PATH_PREFETCHES_UOC_TRIGGERED               0                              0              
 
-FDIP_BREAK_REACH_FTQ_END                           179       18.081%              179       18.081%
-FDIP_BREAK_FTQ_EMPTY                                15        1.515%               15        1.515%
-FDIP_BREAK_MAX_FTQ_ENTRY_CYC                         7        0.707%                7        0.707%
-FDIP_BREAK_FULL_MEM_REQ_BUF                        789       79.697%              789       79.697%
-                                                   990      100.000%              990      100.000%
-                                                  2.42         2.23              2.42         2.23
+FDIP_BREAK_REACH_FTQ_END                            12        3.499%               12        3.499%
+FDIP_BREAK_FTQ_EMPTY                               165       48.105%              165       48.105%
+FDIP_BREAK_MAX_FTQ_ENTRY_CYC                         4        1.166%                4        1.166%
+FDIP_BREAK_FULL_MEM_REQ_BUF                        162       47.230%              162       47.230%
+                                                   343      100.000%              343      100.000%
+                                                  1.92         1.65              1.92         1.65
 
 FDIP_CYCLE_COUNT                                     0                              0              
 
-ICACHE_USEFUL_FETCHES                                5                              5              
+ICACHE_USEFUL_FETCHES                                2                              2              
 
 USEFUL_CACHELINES_RETIRED                            0                              0              
 
 ICACHE_UNUSEFUL_FETCHES                              0                              0              
 
-UNIQUE_MISSED_LINES                                  5                              5              
+UNIQUE_MISSED_LINES                                  2                              2              
 
 UNIQUE_HIT_LINES                                     0                              0              
 
 UNIQUE_PREFETCHED_LINES                              0                              0              
 
-FDIP_BTB_MISS_NT_RESTEER_ONPATH                      3                              3              
+FDIP_BTB_MISS_NT_RESTEER_ONPATH                      1                              1              
 
 FDIP_BTB_MISS_NT_RESTEER_OFFPATH                     0                              0              
 
@@ -317,13 +317,13 @@ FDIP_BLOOM_4INSERT                                   0                          
 
 FDIP_BLOOM_NOSTREAM                                  0                              0              
 
-FDIP_AVG_FTQ_OCCUPANCY_OPS                         413                            413              
+FDIP_AVG_FTQ_OCCUPANCY_OPS                         283                            283              
 
-FDIP_AVG_FTQ_OCCUPANCY                               5                              5              
+FDIP_AVG_FTQ_OCCUPANCY                               0                              0              
 
-FDIP_FTQ_OCCUPANCY_OPS_ACCUMULATED              409215                         409215              
+FDIP_FTQ_OCCUPANCY_OPS_ACCUMULATED               97303                          97303              
 
-FDIP_FTQ_OCCUPANCY_BLOCKS_ACCUMULATED             5433                           5433              
+FDIP_FTQ_OCCUPANCY_BLOCKS_ACCUMULATED              104                            104              
 
 FDIP_TRAINING_SAMPLE                                 0                              0              
 
@@ -433,11 +433,11 @@ FDIP_BP_CONF_1_MISPRED                               0        0.000%            
 FDIP_BP_CONF_2_MISPRED                               0        0.000%                0        0.000%
 FDIP_BP_CONF_3_MISPRED                               0        0.000%                0        0.000%
 FDIP_BP_CONF_0_CORRECT                               0        0.000%                0        0.000%
-FDIP_BP_CONF_1_CORRECT                               2       66.667%                2       66.667%
+FDIP_BP_CONF_1_CORRECT                               1       50.000%                1       50.000%
 FDIP_BP_CONF_2_CORRECT                               0        0.000%                0        0.000%
-FDIP_BP_CONF_3_CORRECT                               1       33.333%                1       33.333%
-                                                     3      100.000%                3      100.000%
-                                                  5.67         4.17              5.67         4.17
+FDIP_BP_CONF_3_CORRECT                               1       50.000%                1       50.000%
+                                                     2      100.000%                2      100.000%
+                                                  6.00         6.16              6.00         6.16
 
 FDIP_ON_CONF_OFF_BTB_MISS_BP_TAKEN_CONF_0             0         -nan%                0         -nan%
 FDIP_ON_CONF_OFF_BTB_MISS_BP_TAKEN_CONF_1             0         -nan%                0         -nan%
@@ -479,12 +479,12 @@ ICACHE_FIRST_MISS_AFTER_WARMUP_TRAINED_USEFUL_DURING_WARMUP             0       
 
 FDIP_PREFETCH_EVICT_NO_HIT_ONLY_ONCE                 0                              0              
 
-FDIP_PREFETCH_HIT_ICACHE                             2        0.229%                2        0.229%
+FDIP_PREFETCH_HIT_ICACHE                             2        1.036%                2        1.036%
 FDIP_PREFETCH_HIT_MLC                                0        0.000%                0        0.000%
 FDIP_PREFETCH_HIT_L1                                 0        0.000%                0        0.000%
-FDIP_PREFETCH_HIT_DRAM                             871       99.771%              871       99.771%
-                                                   873      100.000%              873      100.000%
-                                                  2.99         2.99              2.99         2.99
+FDIP_PREFETCH_HIT_DRAM                             191       98.964%              191       98.964%
+                                                   193      100.000%              193      100.000%
+                                                  2.97         2.96              2.97         2.96
 
 FDIP_MEM_BUF_MISS                                    0         -nan%                0         -nan%
 FDIP_MEM_BUF_FOUND                                   0         -nan%                0         -nan%
