@@ -239,6 +239,8 @@ unsigned long long starlab_prev_address = 0;
 unsigned long long KERNEL_SPACE_START = 0x00000000000ull;
 unsigned long long KERNEL_SPACE_END = 0x00000000000ull;
 char this_address_as_string[128];
+char modified_prev_address_as_string[128];
+char modified_this_address_as_string[128];
 
 int main(int argc, char* argv[], char* envp[]) {
   char** simulated_argv;

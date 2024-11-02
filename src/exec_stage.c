@@ -472,8 +472,22 @@ void update_exec_stage(Stage_Data* src_sd) {
     {
       sprintf(prev_address_as_string, "%016llX", *starlab_prev_address_for_exec_stage_ptr);
 
-      inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
-      inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
+      unsigned long long prev_address_as_ull;
+      sscanf(prev_address_as_string, "%llX", &prev_address_as_ull);
+
+
+      // Modify the previous address
+
+      if ((prev_address_as_ull >> 56) == 0x03) {
+            // printf("Before modification - address: 0x%016llx\n", address);
+            prev_address_as_ull = (0xFF00000000000000ULL) | (prev_address_as_ull & 0x00FFFFFFFFFFFFFFULL);
+            // printf("After modification  - address: 0x%016llx\n", address);
+      }
+
+      sprintf(modified_prev_address_as_string, "%016llX", prev_address_as_ull);
+
+      inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, modified_prev_address_as_string));
+      inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, this_address_as_string));
       if(prev_tuple_ptr == NULL || this_tuple_ptr == NULL)
       {
         // do nothing
