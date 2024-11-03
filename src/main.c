@@ -318,24 +318,28 @@ int main(int argc, char* argv[], char* envp[]) {
     opt2_sim_complete();
 }
 if(opt2_in_use())
-    opt2_sim_complete();
+{opt2_sim_complete();}
+    
   
-  char **keys, **new_keys;
+    char **keys, **new_keys;
     void **values_array, **new_values_array;
-    KeyValuePair *key_value_pairs, *new_key_value_pairs;
+    KeyValuePair *key_value_pairs, *new_key_value_pairs; 
 
     // User space hash table
     long count = get_count(voided_user_space_types_ht);
     key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
+    // Get arrays of keys and values from the hashtable
     starlab_return_key_value_arr(voided_user_space_types_ht, &keys, &values_array);
 
+    // Combine keys and values into key-value pairs
     for (long i = 0; i < count; i++) {
         key_value_pairs[i].key = keys[i];
         key_value_pairs[i].value = values_array[i];
     }
-    qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+    // qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
     unsigned long total_cc_count = 0;
+    // Sum up all clock cycles counts from user space
     for (long i = 0; i < count; i++) {
         total_cc_count += *(unsigned long *)key_value_pairs[i].value;
     }
@@ -349,7 +353,7 @@ if(opt2_in_use())
         new_key_value_pairs[i].key = new_keys[i];
         new_key_value_pairs[i].value = new_values_array[i];
     }
-    qsort(new_key_value_pairs, kernel_count, sizeof(KeyValuePair), compare_key_value_pairs);
+    // qsort(new_key_value_pairs, kernel_count, sizeof(KeyValuePair), compare_key_value_pairs);
 
     for (long i = 0; i < kernel_count; i++) {
         total_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
@@ -358,9 +362,15 @@ if(opt2_in_use())
     // Process and print cumulative clock cycles for user space
     unsigned long running_cc_count = 0;
     for (long i = 0; i < count; i++) {
+        // Print percentage of total clocl cycles for each tuple
         printf("inst tuple (User): %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key,
               ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
+
+        // Keep running total
+
         running_cc_count += *(unsigned long *)key_value_pairs[i].value;
+
+        // Break if we have covered 99% of all clock cycles
         if (running_cc_count > ((total_cc_count * 99) / 100))
             break;
     }
