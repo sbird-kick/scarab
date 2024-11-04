@@ -547,14 +547,12 @@ void update_exec_stage(Stage_Data* src_sd) {
          prev_iclass = (char*) starlab_search(kernel_space_inst_ptr, modified_prev_address_as_string);
         }
 
-     
-
         if(prev_iclass != NULL && this_iclass != NULL)
         {
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, this_iclass);
 
-           if(!starlab_search(voided_user_space_types_ht_ptr, tuple_string) && !starlab_search(voided_kernel_space_types_ht_ptr, tuple_string))
+           if(!starlab_search(voided_user_space_types_ht_ptr, tuple_string) || !starlab_search(voided_kernel_space_types_ht_ptr, tuple_string))
           {
 
             if(kernel_space == 1)

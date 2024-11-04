@@ -1089,7 +1089,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
           // printf("Tuple string: %s\n", tuple_string);
 
           // if tuple_string is not found in user or kernel hashtable, insert it based on the space
-          if(!starlab_search(voided_user_space_types_ht_ptr, tuple_string) && !starlab_search(voided_kernel_space_types_ht_ptr, tuple_string))
+          if(!starlab_search(voided_user_space_types_ht_ptr, tuple_string) || !starlab_search(voided_kernel_space_types_ht_ptr, tuple_string))
           {
             if(kernel_space == 1)
             {
