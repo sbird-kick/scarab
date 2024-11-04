@@ -534,7 +534,6 @@ void update_exec_stage(Stage_Data* src_sd) {
           }
         }
 
-
         if(prev_user_space == true)
         {
           // printf("prev address is in user space, address: %s\n", modified_prev_address_as_string);
@@ -552,30 +551,69 @@ void update_exec_stage(Stage_Data* src_sd) {
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, this_iclass);
 
-           if(!starlab_search(voided_user_space_types_ht_ptr, tuple_string) || !starlab_search(voided_kernel_space_types_ht_ptr, tuple_string))
+          if(!starlab_search(voided_user_space_types_ht_ptr, tuple_string) || !starlab_search(voided_kernel_space_types_ht_ptr, tuple_string))
           {
-
-            if(kernel_space == 1)
+            // Here both instructions are in kernel space
+            if(kernel_space == 1 && prev_user_space == 0)
             {
-              // printf("Execution stage: Inserting into kernel table %s %lu\n", tuple_string, cc_to_add);
+              // printf("Address %s is in kernel space\n", address_as_string);
+              // printf("Inserting into kernel table %s %lu\n", tuple_string, cc_to_add);
               starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
             }
 
-            else if(user_space == 1)
+            // Here the previous instruction is in kernel space 
+            else if(user_space == 1 && prev_user_space == 0)
             {
-              // printf("Execution stage: Inserting into user table %s %lu\n", tuple_string, cc_to_add);
+              // printf("Address %s is in kernel space\n", address_as_string);
+              // printf("Inserting into kernel table %s %lu\n", tuple_string, cc_to_add);
+              starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
+            }
+
+            // Here the current instruction is in kernel space
+            else if(kernel_space == 1 && prev_user_space == 1)
+            {
+              // printf("Address %s is in user space\n", address_as_string);
+              // printf("Inserting into user table %s %lu\n", tuple_string, cc_to_add);
+              starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
+            }
+
+            // Here both instructions are in user space
+            else if(user_space == 1 && prev_user_space == 1)
+            {
+              // printf("Address %s is in user space\n", address_as_string);
+              // printf("Inserting into user table %s %lu\n", tuple_string, cc_to_add);
               starlab_insert(voided_user_space_types_ht_ptr, tuple_string, &cc_to_add);
             }
-          }
+            else
+            {
+              // do nothing
+              
+            }
+            }
+          
+
           else
           {
             unsigned long* cc_ptr = NULL;
             // based on the space, get the pointer to the hashtable
-            if(kernel_space == 1)
+            
+            // Both instructions are in kernel space
+            if(kernel_space == 1 && prev_user_space == 0)
             {
                 cc_ptr = (unsigned long*) starlab_search(voided_kernel_space_types_ht_ptr, tuple_string);
             }
-            else if(user_space == 1)
+            // The previous instruction is in kernel space
+            else if(user_space == 1 && prev_user_space == 0)
+            {
+                cc_ptr = (unsigned long*) starlab_search(voided_kernel_space_types_ht_ptr, tuple_string);
+            }
+            // The current instruction is in kernel space
+            else if(kernel_space == 1 && prev_user_space == 1)
+            {
+                cc_ptr = (unsigned long*) starlab_search(voided_kernel_space_types_ht_ptr, tuple_string);
+            }
+            // Both instructions are in user space
+            else if(user_space == 1 && prev_user_space == 1)
             {
                 cc_ptr = (unsigned long*) starlab_search(voided_user_space_types_ht_ptr, tuple_string);
             }

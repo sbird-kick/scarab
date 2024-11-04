@@ -1091,14 +1091,32 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
           // if tuple_string is not found in user or kernel hashtable, insert it based on the space
           if(!starlab_search(voided_user_space_types_ht_ptr, tuple_string) || !starlab_search(voided_kernel_space_types_ht_ptr, tuple_string))
           {
-            if(kernel_space == 1)
+            // Here both instructions are in kernel space
+            if(kernel_space == 1 && prev_addr_in_kernel_space == 1)
             {
               // printf("Address %s is in kernel space\n", address_as_string);
               // printf("Inserting into kernel table %s %lu\n", tuple_string, cc_to_add);
               starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
             }
 
-            else if(user_space == 1)
+            // Here the previous instruction is in kernel space 
+            else if(user_space == 1 && prev_addr_in_kernel_space == 1)
+            {
+              // printf("Address %s is in kernel space\n", address_as_string);
+              // printf("Inserting into kernel table %s %lu\n", tuple_string, cc_to_add);
+              starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
+            }
+
+            // Here the current instruction is in kernel space
+            else if(kernel_space == 1 && prev_addr_in_user_space == 1)
+            {
+              // printf("Address %s is in user space\n", address_as_string);
+              // printf("Inserting into user table %s %lu\n", tuple_string, cc_to_add);
+              starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
+            }
+
+            // Here both instructions are in user space
+            else if(user_space == 1 && prev_addr_in_user_space == 1)
             {
               // printf("Address %s is in user space\n", address_as_string);
               // printf("Inserting into user table %s %lu\n", tuple_string, cc_to_add);
@@ -1109,19 +1127,36 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
               // do nothing
               
             }
-          }
+            }
+          
           else
           {
             unsigned long* cc_ptr = NULL;
-            // based on the space, get the pointer to the hashtable
-            if(kernel_space == 1)
+            // based on the adddress space, get the pointer to the hashtable
+
+            // Both instructions are in kernel space
+            if(kernel_space == 1 && prev_addr_in_kernel_space == 1)
             {
                 cc_ptr = (unsigned long*) starlab_search(voided_kernel_space_types_ht_ptr, tuple_string);
             }
-            else if(user_space == 1)
+            // The previous instruction is in kernel space
+            else if(user_space == 1 && prev_addr_in_kernel_space == 1)
+            {
+                cc_ptr = (unsigned long*) starlab_search(voided_kernel_space_types_ht_ptr, tuple_string);
+            }
+            // The current instruction is in kernel space
+            else if(kernel_space == 1 && prev_addr_in_user_space == 1)
+            {
+                cc_ptr = (unsigned long*) starlab_search(voided_kernel_space_types_ht_ptr, tuple_string);
+            }
+            // Both instructions are in user space
+            else if(user_space == 1 && prev_addr_in_user_space == 1)
             {
                 cc_ptr = (unsigned long*) starlab_search(voided_user_space_types_ht_ptr, tuple_string);
             }
+
+
+
             if(op->eom)
             {
               *cc_ptr+= cc_to_add;

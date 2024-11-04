@@ -364,7 +364,8 @@ if(opt2_in_use())
     for (long i = 0; i < count; i++) {
         // Print percentage of total clocl cycles for each tuple
         printf("inst tuple (User): %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key,
-              ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
+              (((double)*(unsigned long *)key_value_pairs[i].value))); 
+              // / (double)total_cc_count) * 100);
 
         // Keep running total
 
@@ -378,7 +379,8 @@ if(opt2_in_use())
     // Process and print cumulative clock cycles for kernel space
     for (long i = 0; i < kernel_count; i++) {
         printf("inst tuple (Kernel): %s, cumulative CCs: %.2f%%\n", new_key_value_pairs[i].key,
-              ((double)*(unsigned long *)new_key_value_pairs[i].value / (double)total_cc_count) * 100);
+              (((double)*(unsigned long *)new_key_value_pairs[i].value)));
+              // / (double)total_cc_count) * 100);
         running_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
         if (running_cc_count > ((total_cc_count * 99) / 100))
             break;
