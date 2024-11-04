@@ -343,6 +343,7 @@ if(opt2_in_use())
     for (long i = 0; i < count; i++) {
         total_cc_count += *(unsigned long *)key_value_pairs[i].value;
     }
+    printf("Total count after user space: %lu\n", total_cc_count);
 
     // Kernel space hash table
     long kernel_count = get_count(voided_kernel_space_types_ht);
@@ -359,15 +360,14 @@ if(opt2_in_use())
         total_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
     }
 
+    printf("Total count after kernel space: %lu\n", total_cc_count);
+
     // Process and print cumulative clock cycles for user space
     unsigned long running_cc_count = 0;
     for (long i = 0; i < count; i++) {
-        // Print percentage of total clocl cycles for each tuple
+        // Print percentage of total clock cycles for each tuple
         printf("inst tuple (User): %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key,
-              (((double)*(unsigned long *)key_value_pairs[i].value))); 
-              // / (double)total_cc_count) * 100);
-
-        // Keep running total
+              (((double)*(unsigned long *)key_value_pairs[i].value) / (double)total_cc_count) * 100);
 
         running_cc_count += *(unsigned long *)key_value_pairs[i].value;
 
@@ -379,8 +379,7 @@ if(opt2_in_use())
     // Process and print cumulative clock cycles for kernel space
     for (long i = 0; i < kernel_count; i++) {
         printf("inst tuple (Kernel): %s, cumulative CCs: %.2f%%\n", new_key_value_pairs[i].key,
-              (((double)*(unsigned long *)new_key_value_pairs[i].value)));
-              // / (double)total_cc_count) * 100);
+              (((double)*(unsigned long *)new_key_value_pairs[i].value) / (double)total_cc_count) * 100);
         running_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
         if (running_cc_count > ((total_cc_count * 99) / 100))
             break;
