@@ -487,7 +487,7 @@ void update_exec_stage(Stage_Data* src_sd) {
 
       inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
       inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
-      
+
       if(prev_tuple_ptr == NULL || this_tuple_ptr == NULL)
       {
         // do nothing
@@ -554,7 +554,7 @@ void update_exec_stage(Stage_Data* src_sd) {
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, this_iclass);
 
-           if(!starlab_search(user_space_inst_ptr, tuple_string) && !starlab_search(kernel_space_inst_ptr, tuple_string))
+           if(!starlab_search(voided_user_space_types_ht_ptr, tuple_string) && !starlab_search(voided_kernel_space_types_ht_ptr, tuple_string))
           {
 
             if(kernel_space == 1)
