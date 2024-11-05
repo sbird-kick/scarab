@@ -566,7 +566,6 @@ void update_exec_stage(Stage_Data* src_sd) {
               printf("Exec: Updating in user space\n");
                 unsigned long* cc_ptr = (unsigned long*) starlab_search(user_space_cpu_cycles_table_ptr, tuple_string);
                 *cc_ptr+= cc_to_add;
-              printf("Exec: Updated in user space\n");
             }
           }
           else
