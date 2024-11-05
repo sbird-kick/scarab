@@ -371,17 +371,17 @@ void update_exec_stage(Stage_Data* src_sd) {
     }
     op->exec_cycle = cycle_count + MAX2(latency, -latency);
 
-    char address_as_string[128] = {0};
+    char current_address_as_string[128] = {0};
 
-    unsigned long long this_address = op->inst_info->addr;
+    unsigned long long current_address = op->inst_info->addr;
 
-    if ((this_address >> 56) == 0x03) {
+    if ((current_address >> 56) == 0x03) {
           // printf("Before modification - address: 0x%016llx\n", address);
-          this_address = (0xFF00000000000000ULL) | (this_address & 0x00FFFFFFFFFFFFFFULL);
+          current_address = (0xFF00000000000000ULL) | (current_address & 0x00FFFFFFFFFFFFFFULL);
           // printf("After modification  - address: 0x%016llx\n", address);
     }
 
-    sprintf(address_as_string, "%016llX", op->inst_info->addr);
+    sprintf(current_address_as_string, "%016llX", current_address);
 
     bool first_time_exec = false;
     unsigned long extra_exec_cycles = 0;
@@ -404,36 +404,34 @@ void update_exec_stage(Stage_Data* src_sd) {
       voided_kernel_space_types_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(KERNEL_SPACE_HT_SIZE));
     }
 
-    starlab_hash_table* user_space_inst_ptr = (starlab_hash_table*) voided_frontend_user_space_instructions;
-    if(user_space_inst_ptr == NULL)
+    starlab_hash_table* user_space_inst_iclass_ptr = (starlab_hash_table*) voided_frontend_user_space_instructions;
+    if(user_space_inst_iclass_ptr == NULL)
     {
-      user_space_inst_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+      user_space_inst_iclass_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
     }
 
-    starlab_hash_table* kernel_space_inst_ptr = (starlab_hash_table*) voided_frontend_kernel_space_instructions;
-    if(kernel_space_inst_ptr == NULL)
+    starlab_hash_table* kernel_space_inst_iclass_ptr = (starlab_hash_table*) voided_frontend_kernel_space_instructions;
+    if(kernel_space_inst_iclass_ptr == NULL)
     {
-      kernel_space_inst_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+      kernel_space_inst_iclass_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
     }
 
-    bool user_space = false;
-    bool kernel_space = false;
+    bool current_inst_in_user_space = false;
+    bool current_inst_in_kernel_space = false;
 
-    sprintf(this_address_as_string, "%016llX", this_address);
-
-    if(starlab_search(user_space_inst_ptr, this_address_as_string))
+    if(starlab_search(user_space_inst_iclass_ptr, current_address_as_string))
     {
-      user_space = true;
+      current_inst_in_user_space = true;
     }
 
-    if(starlab_search(kernel_space_inst_ptr, this_address_as_string))
+    else if(starlab_search(kernel_space_inst_iclass_ptr, current_address_as_string))
     {
-      kernel_space = true;
+      current_inst_in_kernel_space = true;
     }
 
 
     // is this already present? 
-    if(!starlab_search(inst_tuple_ptr, address_as_string))
+    if(!starlab_search(inst_tuple_ptr, current_address_as_string))
     {
       // should really ever ever never go here
       printf("went here\n");
@@ -441,28 +439,29 @@ void update_exec_stage(Stage_Data* src_sd) {
       temp_tuple_to_insert.exec_cycle = -1;
       temp_tuple_to_insert.fetch_cycle = op->fetch_cycle;
       temp_tuple_to_insert.prev_fetch_cycle = op->fetch_cycle;
-      starlab_insert(inst_tuple_ptr, address_as_string, &temp_tuple_to_insert);
+      starlab_insert(inst_tuple_ptr, current_address_as_string, &temp_tuple_to_insert);
     }
     else
     {
       // ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle = op->fetch_cycle;
-      if(((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle == -1)
+      if(((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, current_address_as_string))->exec_cycle == -1)
       {
         first_time_exec = true;
-        ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle = op->exec_cycle;
+        ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, current_address_as_string))->exec_cycle = op->exec_cycle;
       }
-      else if(op->exec_cycle > ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle)
+      else if(op->exec_cycle > ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, current_address_as_string))->exec_cycle)
       {
-        extra_exec_cycles = op->exec_cycle - ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle;
-        ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle = op->exec_cycle;
+        extra_exec_cycles = op->exec_cycle - ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, current_address_as_string))->exec_cycle;
+        ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, current_address_as_string))->exec_cycle = op->exec_cycle;
       }
-      ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->prev_fetch_cycle = -1;
+      ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, current_address_as_string))->prev_fetch_cycle = -1;
       // printf("[%016llu] set %lu whenin %llu\n", op->inst_info->addr, ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->exec_cycle, op->exec_cycle);
     }
 
     char prev_address_as_string[128] = {0};
+    char modified_prev_address_as_string[128] = {0};
     
-    unsigned long long* starlab_prev_address_for_exec_stage_ptr = (unsigned long long*) starlab_search(voided_address_to_prev_address, address_as_string);
+    unsigned long long* starlab_prev_address_for_exec_stage_ptr = (unsigned long long*) starlab_search(voided_address_to_prev_address, current_address_as_string);
     
     if(starlab_prev_address_for_exec_stage_ptr == NULL)
     {
@@ -485,8 +484,8 @@ void update_exec_stage(Stage_Data* src_sd) {
 
       sprintf(modified_prev_address_as_string, "%016llX", prev_address_as_ull);
 
-      inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, prev_address_as_string));
-      inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string));
+      inst_fetch_exec_tuple* prev_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, modified_prev_address_as_string));
+      inst_fetch_exec_tuple* this_tuple_ptr = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, current_address_as_string));
 
       if(prev_tuple_ptr == NULL || this_tuple_ptr == NULL)
       {
@@ -507,44 +506,30 @@ void update_exec_stage(Stage_Data* src_sd) {
 
         // look for iclasses in kernel_space_inst_ptr and 
         // for this iclass just look at kernel_space and user_space
-        if(kernel_space == 1)
+        if(current_inst_in_kernel_space == 1)
         {
-          this_iclass = (char*) starlab_search(kernel_space_inst_ptr, this_address_as_string);
+          this_iclass = (char*) starlab_search(kernel_space_inst_iclass_ptr, current_address_as_string);
         }
 
-        else if(user_space == 1)
+        else if(current_inst_in_user_space == 1)
         {
-         this_iclass = (char*) starlab_search(user_space_inst_ptr, this_address_as_string);
+         this_iclass = (char*) starlab_search(user_space_inst_iclass_ptr, current_address_as_string);
         }
-
+      
         // previous iclass check whether it is in kernel or user space
-        bool prev_user_space = false;
-        if(starlab_search(user_space_inst_ptr, modified_prev_address_as_string))
+        bool prev_addr_in_user_space = false;
+        bool prev_addr_in_kernel_space = false;
+
+        if(starlab_search(user_space_inst_iclass_ptr, modified_prev_address_as_string))
         {
-          // printf("found prev address: %s in user space\n", modified_prev_address_as_string);
-          prev_user_space = true;
+          prev_addr_in_user_space = true;
         }
 
-        else 
-        {
-          if(starlab_search(kernel_space_inst_ptr, modified_prev_address_as_string))
+        else if(starlab_search(kernel_space_inst_iclass_ptr, modified_prev_address_as_string))
           {
-            // printf("found prev address: %s in kernel space\n", modified_prev_address_as_string);
-            prev_user_space = false;
+            prev_addr_in_kernel_space = true;
           }
-        }
-
-        if(prev_user_space == true)
-        {
-          // printf("prev address is in user space, address: %s\n", modified_prev_address_as_string);
-          prev_iclass = (char*) starlab_search(user_space_inst_ptr, modified_prev_address_as_string);
-        }
-
-        else
-        {
-          // printf("prev address is in kernel space, address: %s\n", modified_prev_address_as_string);
-         prev_iclass = (char*) starlab_search(kernel_space_inst_ptr, modified_prev_address_as_string);
-        }
+        
 
         if(prev_iclass != NULL && this_iclass != NULL)
         {
@@ -554,23 +539,23 @@ void update_exec_stage(Stage_Data* src_sd) {
           if(!starlab_search(voided_user_space_types_ht_ptr, tuple_string) || !starlab_search(voided_kernel_space_types_ht_ptr, tuple_string))
           {
             // Here both instructions are in kernel space
-            if(kernel_space == 1 && prev_user_space == 0)
+            if(current_inst_in_kernel_space == 1 && prev_addr_in_kernel_space == 1)
             {
               // printf("Address %s is in kernel space\n", address_as_string);
               // printf("Inserting into kernel table %s %lu\n", tuple_string, cc_to_add);
               starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
             }
 
-            // Here the previous instruction is in kernel space 
-            else if(user_space == 1 && prev_user_space == 0)
+            // Here the previous instruction is in kernel space and the current instruction is in user space
+            else if (current_inst_in_user_space == 1 && prev_addr_in_kernel_space == 1)
             {
               // printf("Address %s is in kernel space\n", address_as_string);
               // printf("Inserting into kernel table %s %lu\n", tuple_string, cc_to_add);
               starlab_insert(voided_kernel_space_types_ht_ptr, tuple_string, &cc_to_add);
             }
 
-            // Here the current instruction is in kernel space
-            else if(kernel_space == 1 && prev_user_space == 1)
+            // Here the current instruction is in kernel space and the previous instruction is in user space
+            else if(current_inst_in_kernel_space == 1 && prev_addr_in_user_space == 1)
             {
               // printf("Address %s is in user space\n", address_as_string);
               // printf("Inserting into user table %s %lu\n", tuple_string, cc_to_add);
@@ -578,16 +563,11 @@ void update_exec_stage(Stage_Data* src_sd) {
             }
 
             // Here both instructions are in user space
-            else if(user_space == 1 && prev_user_space == 1)
+            else if(current_inst_in_user_space == 1 && prev_addr_in_user_space == 1)
             {
               // printf("Address %s is in user space\n", address_as_string);
               // printf("Inserting into user table %s %lu\n", tuple_string, cc_to_add);
               starlab_insert(voided_user_space_types_ht_ptr, tuple_string, &cc_to_add);
-            }
-            else
-            {
-              // do nothing
-              
             }
             }
           
@@ -596,27 +576,31 @@ void update_exec_stage(Stage_Data* src_sd) {
           {
             unsigned long* cc_ptr = NULL;
             // based on the space, get the pointer to the hashtable
-            
+
             // Both instructions are in kernel space
-            if(kernel_space == 1 && prev_user_space == 0)
+            if(current_inst_in_kernel_space == 1 && prev_addr_in_kernel_space == 1)
             {
                 cc_ptr = (unsigned long*) starlab_search(voided_kernel_space_types_ht_ptr, tuple_string);
             }
+
             // The previous instruction is in kernel space
-            else if(user_space == 1 && prev_user_space == 0)
+            else if(current_inst_in_user_space == 1 && prev_addr_in_kernel_space == 1)
             {
                 cc_ptr = (unsigned long*) starlab_search(voided_kernel_space_types_ht_ptr, tuple_string);
             }
+
             // The current instruction is in kernel space
-            else if(kernel_space == 1 && prev_user_space == 1)
+            else if(current_inst_in_kernel_space == 1 && prev_addr_in_user_space == 1)
             {
                 cc_ptr = (unsigned long*) starlab_search(voided_kernel_space_types_ht_ptr, tuple_string);
             }
+
             // Both instructions are in user space
-            else if(user_space == 1 && prev_user_space == 1)
+            else if(current_inst_in_user_space == 1 && prev_addr_in_user_space == 1)
             {
                 cc_ptr = (unsigned long*) starlab_search(voided_user_space_types_ht_ptr, tuple_string);
             }
+            
             // printf("[exec] succesfully added %lu %lu\n", *cc_ptr, cc_to_add);
             // printf("%lu %lu\n %lu %lu    %llu\n", this_tuple_ptr->exec_cycle, this_tuple_ptr->fetch_cycle,prev_tuple_ptr->exec_cycle, prev_tuple_ptr->fetch_cycle, op->exec_cycle );
             *cc_ptr+= cc_to_add;
