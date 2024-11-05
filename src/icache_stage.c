@@ -870,6 +870,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     // Store CPU cycles consumed by instruction tuples in user space 
+    // Both instructions in a tuple lie in user space
     starlab_hash_table* voided_user_space_types_ht_ptr = (starlab_hash_table*) voided_user_space_types_ht;
     if(voided_user_space_types_ht_ptr == NULL)
     {
@@ -878,6 +879,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     // Store CPU cycles consumed by instruction tuples in kernel space (user + kernel, kernel + kernel, kernel + user)
+    // Either both instructions in a tuple lie in kernel space or one lies in user space and the other in kernel space
     starlab_hash_table* voided_kernel_space_types_ht_ptr = (starlab_hash_table*) voided_kernel_space_types_ht;
     if(voided_kernel_space_types_ht_ptr == NULL)
     {
@@ -886,6 +888,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     // Contains the iclass types of individual instructions in user space (populated by the frontend)
+    // Can be used to check whether a given instruction lies in user space 
     starlab_hash_table* user_space_inst_iclass_ptr = (starlab_hash_table*) voided_frontend_user_space_instructions;
     if(user_space_inst_iclass_ptr == NULL)
     {
@@ -895,6 +898,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     // Contains the iclass types of individual instructions in kernel space (populated by the frontend)
+    // Can be used to check whether a given instruction lies in kernel space
     starlab_hash_table* kernel_space_inst_iclass_ptr = (starlab_hash_table*) voided_frontend_kernel_space_instructions;
     if(kernel_space_inst_iclass_ptr == NULL)
     {
@@ -905,7 +909,6 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
    
     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
 
-    char address_as_string[128] = {0};
     char prev_address_as_string[128] = {0};
     char current_address_as_string[128] = {0};
 
@@ -942,7 +945,6 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       // do nothing
     }
 
-    sprintf(address_as_string, "%016llX", op->inst_info->addr);
     sprintf(prev_address_as_string, "%016llX", starlab_prev_address);
 
     // Modify the previous address 
@@ -974,9 +976,9 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     // printf("this_address: %s\n", address_as_string);
     // printf("prev_address: %s\n", prev_address_as_string);
     
-    if(!starlab_search(address_to_prev_address, address_as_string))
+    if(!starlab_search(address_to_prev_address, current_address_as_string))
     {
-        starlab_insert(address_to_prev_address, address_as_string, &starlab_prev_address);
+        starlab_insert(address_to_prev_address, current_address_as_string, &starlab_prev_address);
     }
     if(op->inst_info->addr != starlab_prev_address) // track changes only
     {
