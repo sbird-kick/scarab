@@ -350,25 +350,39 @@ if(opt2_in_use())
     for (long i = 0; i < kernel_count; i++) {
         total_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
     }
+
+    // Check if total_cc_count is zero to prevent division errors
+    if (total_cc_count == 0) {
+        printf("Error: Total clock cycles count is zero.\n");
+        // Cleanup and exit if there are no cycles
+        free(keys);
+        free(values_array);
+        free(key_value_pairs);
+        free(new_keys);
+        free(new_values_array);
+        free(new_key_value_pairs);
+        exit(1);
+    }
+
     printf("Combined total clock cycles (User + Kernel): %lu\n", total_cc_count);
 
     // Process and print cumulative clock cycles for user space
-    unsigned long running_cc_count = 0;
+    unsigned long running_cc_count_user = 0;
     for (long i = 0; i < count; i++) {
         double percentage = ((double)(*(unsigned long *)key_value_pairs[i].value) / (double)total_cc_count) * 100.0;
         printf("inst tuple (User): %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, percentage);
-        running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-        if (running_cc_count > ((total_cc_count * 99) / 100))
+        running_cc_count_user += *(unsigned long *)key_value_pairs[i].value;
+        if (running_cc_count_user > ((total_cc_count * 99) / 100))
             break; // Stop if we've reached 99% of total cycles
     }
 
     // Process and print cumulative clock cycles for kernel space
-    running_cc_count = 0;
+    unsigned long running_cc_count_kernel = 0;
     for (long i = 0; i < kernel_count; i++) {
         double percentage = ((double)(*(unsigned long *)new_key_value_pairs[i].value) / (double)total_cc_count) * 100.0;
         printf("inst tuple (Kernel): %s, cumulative CCs: %.2f%%\n", new_key_value_pairs[i].key, percentage);
-        running_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
-        if (running_cc_count > ((total_cc_count * 99) / 100))
+        running_cc_count_kernel += *(unsigned long *)new_key_value_pairs[i].value;
+        if (running_cc_count_kernel > ((total_cc_count * 99) / 100))
             break;
     }
 
@@ -379,6 +393,7 @@ if(opt2_in_use())
     free(new_keys);
     free(new_values_array);
     free(new_key_value_pairs);
+
 
 
   return 0;
