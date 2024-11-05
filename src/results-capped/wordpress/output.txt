@@ -1,0 +1,70 @@
+Scarab gitrev: 7a39190
+Scarab started at Tue Nov  5 14:36:23 2024
+
+Initialized Ramulator. 
+generated 1000 Jmp instructions, possible memory leakgenerated 2000 Jmp instructions, possible memory leakgenerated 3000 Jmp instructions, possible memory leakgenerated 4000 Jmp instructions, possible memory leak** Heartbeat:   1% -- { 1000001 } -- 0.00 KIPS (52.63 KIPS)
+generated 5000 Jmp instructions, possible memory leakgenerated 6000 Jmp instructions, possible memory leakgenerated 7000 Jmp instructions, possible memory leakgenerated 8000 Jmp instructions, possible memory leakgenerated 9000 Jmp instructions, possible memory leak** Heartbeat:   2% -- { 2000005 } -- 45.45 KIPS (48.78 KIPS)
+generated 10000 Jmp instructions, possible memory leakgenerated 11000 Jmp instructions, possible memory leakgenerated 12000 Jmp instructions, possible memory leakgenerated 13000 Jmp instructions, possible memory leakgenerated 14000 Jmp instructions, possible memory leak** Heartbeat:   3% -- { 3000005 } -- 55.56 KIPS (50.85 KIPS)
+generated 15000 Jmp instructions, possible memory leakgenerated 16000 Jmp instructions, possible memory leakgenerated 17000 Jmp instructions, possible memory leakgenerated 18000 Jmp instructions, possible memory leakgenerated 19000 Jmp instructions, possible memory leakgenerated 20000 Jmp instructions, possible memory leakgenerated 21000 Jmp instructions, possible memory leak** Heartbeat:   4% -- { 4000007 } -- 58.82 KIPS (52.63 KIPS)
+generated 22000 Jmp instructions, possible memory leakgenerated 23000 Jmp instructions, possible memory leakgenerated 24000 Jmp instructions, possible memory leakgenerated 25000 Jmp instructions, possible memory leakgenerated 26000 Jmp instructions, possible memory leak** Heartbeat:   5% -- { 5000012 } -- 55.56 KIPS (53.19 KIPS)
+generated 27000 Jmp instructions, possible memory leakgenerated 28000 Jmp instructions, possible memory leakgenerated 29000 Jmp instructions, possible memory leakgenerated 30000 Jmp instructions, possible memory leakgenerated 31000 Jmp instructions, possible memory leakgenerated 32000 Jmp instructions, possible memory leakgenerated 33000 Jmp instructions, possible memory leak** Heartbeat:   6% -- { 6000014 } -- 58.82 KIPS (54.05 KIPS)
+generated 34000 Jmp instructions, possible memory leakgenerated 35000 Jmp instructions, possible memory leakgenerated 36000 Jmp instructions, possible memory leakgenerated 37000 Jmp instructions, possible memory leakgenerated 38000 Jmp instructions, possible memory leakgenerated 39000 Jmp instructions, possible memory leakgenerated 40000 Jmp instructions, possible memory leakgenerated 41000 Jmp instructions, possible memory leak** Heartbeat:   7% -- { 7000019 } -- 62.50 KIPS (55.12 KIPS)
+generated 42000 Jmp instructions, possible memory leakgenerated 43000 Jmp instructions, possible memory leakgenerated 44000 Jmp instructions, possible memory leakgenerated 45000 Jmp instructions, possible memory leak** Heartbeat:   8% -- { 8000019 } -- 62.50 KIPS (55.94 KIPS)
+generated 46000 Jmp instructions, possible memory leakgenerated 47000 Jmp instructions, possible memory leakgenerated 48000 Jmp instructions, possible memory leakgenerated 49000 Jmp instructions, possible memory leakgenerated 50000 Jmp instructions, possible memory leakgenerated 51000 Jmp instructions, possible memory leak** Heartbeat:   9% -- { 9000022 } -- 58.82 KIPS (56.25 KIPS)
+generated 52000 Jmp instructions, possible memory leakgenerated 53000 Jmp instructions, possible memory leakgenerated 54000 Jmp instructions, possible memory leakgenerated 55000 Jmp instructions, possible memory leakgenerated 56000 Jmp instructions, possible memory leakgenerated 57000 Jmp instructions, possible memory leakgenerated 58000 Jmp instructions, possible memory leakgenerated 59000 Jmp instructions, possible memory leak** Heartbeat:  10% -- { 10000022 } -- 58.82 KIPS (56.50 KIPS)
+generated 60000 Jmp instructions, possible memory leakgenerated 61000 Jmp instructions, possible memory leakgenerated 62000 Jmp instructions, possible memory leakgenerated 63000 Jmp instructions, possible memory leakgenerated 64000 Jmp instructions, possible memory leakgenerated 65000 Jmp instructions, possible memory leak** Heartbeat:  11% -- { 11000022 } -- 58.82 KIPS (56.70 KIPS)
+generated 66000 Jmp instructions, possible memory leakgenerated 67000 Jmp instructions, possible memory leakgenerated 68000 Jmp instructions, possible memory leakgenerated 69000 Jmp instructions, possible memory leakgenerated 70000 Jmp instructions, possible memory leak** Heartbeat:  12% -- { 12000024 } -- 58.82 KIPS (56.87 KIPS)
+generated 71000 Jmp instructions, possible memory leakgenerated 72000 Jmp instructions, possible memory leakgenerated 73000 Jmp instructions, possible memory leakgenerated 74000 Jmp instructions, possible memory leakgenerated 75000 Jmp instructions, possible memory leakgenerated 76000 Jmp instructions, possible memory leakgenerated 77000 Jmp instructions, possible memory leak** Heartbeat:  13% -- { 13000027 } -- 62.50 KIPS (57.27 KIPS)
+generated 78000 Jmp instructions, possible memory leakgenerated 79000 Jmp instructions, possible memory leakgenerated 80000 Jmp instructions, possible memory leakgenerated 81000 Jmp instructions, possible memory leakgenerated 82000 Jmp instructions, possible memory leakgenerated 83000 Jmp instructions, possible memory leakgenerated 84000 Jmp instructions, possible memory leak** Handler:  Caught SIGINT.  Exiting...
+** Core 0 Finished:    insts:13631842    cycles:6823684     time:2132401250000       -- 2.00 IPC (2.00 IPC) --  N/A  KIPS (57.28 KIPS)
+Scarab finished at Tue Nov  5 14:40:22 2024
+
+Total count after user space: 383768462780
+Total count after kernel space: 383768462780
+inst tuple (User): <MOV,JUMP>, cumulative CCs: 2.78%
+inst tuple (User): <ALU,PUSH>, cumulative CCs: 0.41%
+inst tuple (User): <PUSH,PUSH>, cumulative CCs: 4.79%
+inst tuple (User): <POP,JUMP>, cumulative CCs: 0.29%
+inst tuple (User): <MOV,MOV>, cumulative CCs: 14.83%
+inst tuple (User): <LOCK,LOCK>, cumulative CCs: 0.23%
+inst tuple (User): <JUMP,PUSH>, cumulative CCs: 0.19%
+inst tuple (User): <CALL,PUSH>, cumulative CCs: 0.16%
+inst tuple (User): <CALL,JUMP>, cumulative CCs: 0.14%
+inst tuple (User): <POP,PUSH>, cumulative CCs: 0.11%
+inst tuple (User): <JUMP,POP>, cumulative CCs: 0.11%
+inst tuple (User): <LOCK,JUMP>, cumulative CCs: 0.08%
+inst tuple (User): <LOCK,MOV>, cumulative CCs: 0.04%
+inst tuple (User): <LOCK,ALU>, cumulative CCs: 0.03%
+inst tuple (User): <ALU,CALL>, cumulative CCs: 0.02%
+inst tuple (User): <POP,CALL>, cumulative CCs: 0.01%
+inst tuple (User): <MOV,CALL>, cumulative CCs: 0.01%
+inst tuple (User): <ALU,POP>, cumulative CCs: 0.01%
+inst tuple (User): <PUSH,JUMP>, cumulative CCs: 0.01%
+inst tuple (User): <CALL,POP>, cumulative CCs: 0.01%
+inst tuple (User): <JUMP,LOCK>, cumulative CCs: 0.00%
+inst tuple (User): <PUSH,CALL>, cumulative CCs: 0.00%
+inst tuple (User): <PUSH,POP>, cumulative CCs: 0.00%
+inst tuple (User): <ALU,LOCK>, cumulative CCs: 0.00%
+inst tuple (User): <LOCK,CALL>, cumulative CCs: 0.00%
+inst tuple (User): <LOCK,POP>, cumulative CCs: 0.00%
+inst tuple (User): <CALL,LOCK>, cumulative CCs: 0.00%
+inst tuple (User): <PUSH,LOCK>, cumulative CCs: 0.00%
+inst tuple (User): <MOV,LOCK>, cumulative CCs: 4806737880.46%
+inst tuple (User): <MOV,POP>, cumulative CCs: 4806737880.46%
+inst tuple (User): <JUMP,CALL>, cumulative CCs: 4806737880.45%
+inst tuple (User): <JUMP,MOV>, cumulative CCs: 6.71%
+inst tuple (User): <JUMP,JUMP>, cumulative CCs: 0.99%
+inst tuple (User): <POP,POP>, cumulative CCs: 7.68%
+inst tuple (User): <MOV,PUSH>, cumulative CCs: 0.94%
+inst tuple (User): <PUSH,ALU>, cumulative CCs: 0.89%
+inst tuple (User): <CALL,ALU>, cumulative CCs: 0.81%
+inst tuple (User): <POP,MOV>, cumulative CCs: 0.80%
+inst tuple (User): <PUSH,MOV>, cumulative CCs: 1.80%
+inst tuple (User): <ALU,MOV>, cumulative CCs: 8.49%
+inst tuple (User): <POP,ALU>, cumulative CCs: 2.86%
+inst tuple (User): <JUMP,ALU>, cumulative CCs: 5.09%
+inst tuple (User): <ALU,ALU>, cumulative CCs: 12.74%
+inst tuple (User): <CALL,CALL>, cumulative CCs: 4.91%
+inst tuple (User): <ALU,JUMP>, cumulative CCs: 9.35%
+inst tuple (User): <MOV,ALU>, cumulative CCs: 10.39%
+inst tuple (User): <CALL,MOV>, cumulative CCs: 1.30%

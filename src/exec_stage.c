@@ -515,7 +515,7 @@ void update_exec_stage(Stage_Data* src_sd) {
         // If previous instruction lies in user space and current instruction lies in kernel space
         if(prev_inst_in_user_space && current_inst_in_kernel_space)
         {
-          printf("Exec: inst1 in user space, inst2 in kernel space\n");
+          // printf("Exec: inst1 in user space, inst2 in kernel space\n");
           prev_iclass = (char*) starlab_search(user_space_inst_iclass_ptr, prev_address_as_string);
           current_iclass = (char*) starlab_search(kernel_space_inst_iclass_ptr, current_address_as_string);
         }
@@ -523,7 +523,7 @@ void update_exec_stage(Stage_Data* src_sd) {
         // If previous instruction lies in kernel space and current instruction lies in user space
         else if(prev_inst_in_kernel_space && current_inst_in_user_space)
         {
-          printf("Exec: inst1 in kernel space, inst2 in user space\n");
+          // printf("Exec: inst1 in kernel space, inst2 in user space\n");
           prev_iclass = (char*) starlab_search(kernel_space_inst_iclass_ptr, prev_address_as_string);
           current_iclass = (char*) starlab_search(user_space_inst_iclass_ptr, current_address_as_string);
         }
@@ -531,7 +531,7 @@ void update_exec_stage(Stage_Data* src_sd) {
         // If both previous and current instructions lie in kernel space
         else if(prev_inst_in_kernel_space && current_inst_in_kernel_space)
         {
-          printf("Exec: inst1 in kernel space, inst2 in kernel space\n");
+          // printf("Exec: inst1 in kernel space, inst2 in kernel space\n");
           prev_iclass = (char*) starlab_search(kernel_space_inst_iclass_ptr, prev_address_as_string);
           current_iclass = (char*) starlab_search(kernel_space_inst_iclass_ptr, current_address_as_string);
         }
@@ -539,14 +539,14 @@ void update_exec_stage(Stage_Data* src_sd) {
         // If both previous and current instructions lie in user space
         else if(prev_inst_in_user_space && current_inst_in_user_space)
         {
-          printf("Exec: inst1 in user space, inst2 in user space\n");
+          // printf("Exec: inst1 in user space, inst2 in user space\n");
           prev_iclass = (char*) starlab_search(user_space_inst_iclass_ptr, prev_address_as_string);
           current_iclass = (char*) starlab_search(user_space_inst_iclass_ptr, current_address_as_string);
         }
 
         if(prev_iclass != NULL && current_iclass != NULL)
         {
-          printf("Exec: prev_iclass: %s, current_iclass: %s\n", prev_iclass, current_iclass);
+          // printf("Exec: prev_iclass: %s, current_iclass: %s\n", prev_iclass, current_iclass);
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, current_iclass);
 
@@ -557,13 +557,13 @@ void update_exec_stage(Stage_Data* src_sd) {
           {
             if(!starlab_search(user_space_cpu_cycles_table_ptr, tuple_string))
             {
-              printf("Exec: Inserting in user space\n");
+              // printf("Exec: Inserting in user space\n");
               unsigned long insert_val = cc_to_add;
               starlab_insert(user_space_cpu_cycles_table_ptr, tuple_string, &insert_val);
             }
             else
             {
-              printf("Exec: Updating in user space\n");
+              // printf("Exec: Updating in user space\n");
                 unsigned long* cc_ptr = (unsigned long*) starlab_search(user_space_cpu_cycles_table_ptr, tuple_string);
                 *cc_ptr+= cc_to_add;
             }
@@ -572,13 +572,13 @@ void update_exec_stage(Stage_Data* src_sd) {
           {  
             if(!starlab_search(kernel_space_cpu_cycles_table_ptr, tuple_string))
             {
-              printf("Exec: Inserting in kernel space\n");
+              // printf("Exec: Inserting in kernel space\n");
               unsigned long insert_val = cc_to_add;
               starlab_insert(kernel_space_cpu_cycles_table_ptr, tuple_string, &insert_val);
             }
             else
             {
-              printf("Exec: Updating in kernel space\n");
+              // printf("Exec: Updating in kernel space\n");
                 unsigned long* cc_ptr = (unsigned long*) starlab_search(kernel_space_cpu_cycles_table_ptr, tuple_string);
                 *cc_ptr+= cc_to_add;
             }
