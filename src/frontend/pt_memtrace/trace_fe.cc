@@ -192,6 +192,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
       if(!starlab_search(address_to_type_ptr, address_as_string))
       {
         char insert_string[128] = {0};
+        char mov_type_string[128] = {0};
         sprintf(insert_string, "%s", "NOP");
         if(starlab_pi->is_move)
         {
@@ -256,7 +257,8 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
           {
             // printf("Number of Source Registers: \033[34m%d\033[0m, Number of Destination Registers: \033[34m%d\033[0m\n", starlab_pi->num_src_regs, starlab_pi->num_dst_regs);
             // printf("This is a reg->reg move operation\n");
-            starlab_insert(curr_inst_reg_reg_mov_ptr, address_as_string, insert_string);
+            sprintf(mov_type_string, "%s", "REG->REG");
+            starlab_insert(curr_inst_reg_reg_mov_ptr, address_as_string, mov_type_string);
           }
 
           // If the number of source and destination registers are 0, it is a mem->mem move operation
@@ -265,7 +267,8 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
           {
             // printf("Number of Source Registers: \033[34m%d\033[0m, Number of Destination Registers: \033[34m%d\033[0m\n", starlab_pi->num_src_regs, starlab_pi->num_dst_regs);
             // printf("This is a \033[34mmem->mem\033[0m move operation\n");
-            starlab_insert(curr_inst_mem_mem_mov_ptr, address_as_string, insert_string);
+            sprintf(mov_type_string, "%s", "MEM->MEM");
+            starlab_insert(curr_inst_mem_mem_mov_ptr, address_as_string, mov_type_string);
           }
 
           // If the number of source registers are 0 and destination registers are greater than 0, it is a mem->reg move operation
@@ -285,7 +288,8 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
               // printf("This is a \033[33mreg->mem\033[0m move operation\n");
             }
 
-            starlab_insert(curr_inst_mem_reg_mov_ptr, address_as_string, insert_string);
+            sprintf(mov_type_string, "%s", "MEM<>REG");
+            starlab_insert(curr_inst_mem_reg_mov_ptr, address_as_string, mov_type_string);
           }
         }
 
