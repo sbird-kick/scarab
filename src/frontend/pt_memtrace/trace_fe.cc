@@ -273,7 +273,18 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
           else if((starlab_pi->num_src_regs == 0 && starlab_pi->num_dst_regs > 0) || (starlab_pi->num_src_regs > 0 && starlab_pi->num_dst_regs == 0))
           {
             printf("Number of Source Registers: \033[34m%d\033[0m, Number of Destination Registers: \033[34m%d\033[0m\n", starlab_pi->num_src_regs, starlab_pi->num_dst_regs);
-            printf("This is a \033[33mmem->reg\033[0m move operation\n");
+
+            // Based on source/dest, print whether it is reg->mem or mem->reg
+            if((starlab_pi->num_src_regs == 0 && starlab_pi->num_dst_regs > 0))
+            {
+              printf("This is a  \033[33mmem->reg\033[0m move operation\n");
+            }
+
+            else if((starlab_pi->num_src_regs > 0 && starlab_pi->num_dst_regs == 0))
+            {
+              printf("This is a \033[33mreg->mem\033[0m move operation\n");
+            }
+
             starlab_insert(curr_inst_mem_reg_mov_ptr, address_as_string, insert_string);
           }
         }
