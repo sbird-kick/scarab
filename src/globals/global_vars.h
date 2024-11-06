@@ -96,6 +96,23 @@ extern void* voided_curr_inst_reg_reg_mov_ptr;
 extern void* voided_curr_inst_mem_reg_mov_ptr;
 extern void* voided_curr_inst_mem_mem_mov_ptr;
 
+// Inst1:mem->mem and Inst2:mem->mem
+// Inst1:mem->mem and Inst2: reg->reg
+// Inst1: mem->mem and Inst2: reg->mem/mem->reg
+// Inst1: reg->reg and Inst2: reg->reg
+// Inst1: reg->reg and Inst2: reg->mem/mem->reg
+// Inst1: reg->reg and Inst2: mem->mem
+// Inst1: reg->mem/mem->reg and Inst2: reg->mem/mem->reg
+
+// Hashtables to store CPU cycles consumed by <MOV, MOV> instruction tuples 
+extern void* voided_prev_mem_mem_curr_reg_reg_ptr;
+extern void* voided_prev_mem_mem_curr_reg_mem_ptr;
+extern void* voided_prev_mem_mem_curr_mem_reg_ptr;
+extern void* voided_prev_reg_reg_curr_reg_reg_ptr;
+extern void* voided_prev_reg_reg_curr_reg_mem_ptr;
+extern void* voided_prev_reg_reg_curr_mem_mem_ptr;
+extern void* voided_prev_reg_mem_curr_reg_mem_ptr;
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */
