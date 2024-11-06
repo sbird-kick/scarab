@@ -225,11 +225,22 @@ void* voided_address_to_type_ptr = NULL;
 void* voided_address_to_prev_address = NULL;
 void* voided_inst_truple_ptr = NULL;
 
+void* voided_prev_rr_curr_mr_ptr= NULL;
+void* voided_prev_rr_curr_rr_ptr= NULL;
+void* voided_prev_rr_curr_mm_ptr= NULL;
+void* voided_prev_mm_curr_mm_ptr= NULL;
+void* voided_prev_mm_curr_rr_ptr= NULL;
+void* voided_prev_mm_curr_mr_ptr= NULL; 
+
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
 char prev_address_as_string[128];
 unsigned long long starlab_prev_address = 0;
 
+bool prev_inst_is_mov = false;
+bool curr_inst_is_mov = false;
+bool is_first_inst_in_trace = false; 
+unsigned long prev_inst_address = 0;
 
 int main(int argc, char* argv[], char* envp[]) {
   char** simulated_argv;

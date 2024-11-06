@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include "globals/global_types.h"
 #include "statistics.h"
+#include "stdbool.h"
 
 #include "libs/hash_lib.h"
 
@@ -90,6 +91,31 @@ extern char prev_instruction_class[128];
 
 extern char prev_address_as_string[128];
 extern unsigned long long starlab_prev_address;
+
+extern bool prev_inst_is_mov = false;
+extern bool curr_inst_is_mov = false;
+extern bool is_first_inst_in_trace; 
+extern unsigned long prev_inst_address;
+
+// reg->reg: mem->reg
+// reg->reg: reg->reg
+// reg->reg: mem->mem
+// mem->mem: mem->mem
+// mem->mem: reg->reg
+// mem->mem: mem->reg
+// Note: we count reg->mem and mem->reg as the same type of mov
+
+extern void* voided_prev_rr_curr_mr_ptr;
+extern void* voided_prev_rr_curr_rr_ptr;
+extern void* voided_prev_rr_curr_mm_ptr;
+extern void* voided_prev_mm_curr_mm_ptr;
+extern void* voided_prev_mm_curr_rr_ptr;
+extern void* voided_prev_mm_curr_mr_ptr; 
+
+
+
+
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */

@@ -160,10 +160,91 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
     address_to_type_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
   }
 
+  // Previous inst: reg->reg move and current inst: mem->reg move
+  starlab_hash_table* prev_rr_curr_mr_ptr = (starlab_hash_table*) voided_prev_rr_curr_mr_ptr;
+  if(prev_rr_curr_mr_ptr == NULL)
+  {
+    prev_rr_curr_mr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+  }
+
+  // Previous inst: reg->reg move and current inst: reg->reg move
+  starlab_hash_table* prev_rr_curr_rr_ptr = (starlab_hash_table*) voided_prev_rr_curr_rr_ptr;
+  if(prev_rr_curr_rr_ptr == NULL)
+  {
+    prev_rr_curr_rr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+  }
+
+  // Previous inst: reg->reg move and current inst: mem->mem move
+  starlab_hash_table* prev_rr_curr_mm_ptr = (starlab_hash_table*) voided_prev_rr_curr_mm_ptr;
+  if(prev_rr_curr_mm_ptr == NULL)
+  {
+    prev_rr_curr_mm_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+  }
+
+  // Previous inst: mem->mem move and current inst: mem->mem move
+  starlab_hash_table* prev_mm_curr_mm_ptr = (starlab_hash_table*) voided_prev_mm_curr_mm_ptr;
+  if(prev_mm_curr_mm_ptr == NULL)
+  {
+    prev_mm_curr_mm_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+  }
+
+  // Previous inst: mem->mem move and current inst: reg->reg move
+  starlab_hash_table* prev_mm_curr_rr_ptr = (starlab_hash_table*) voided_prev_mm_curr_rr_ptr;
+  if(prev_mm_curr_rr_ptr == NULL)
+  {
+    prev_mm_curr_rr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+  }
+
+  // Previous inst: mem->mem move and current inst: mem->reg move
+  starlab_hash_table* prev_mm_curr_mr_ptr = (starlab_hash_table*) voided_prev_mm_curr_mr_ptr;
+  if(prev_mm_curr_mr_ptr == NULL)
+  {
+    prev_mm_curr_mr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+  }
+
   static int prev_was_move = 0;
   if(uop_generator_get_bom(proc_id)) {
     if (!off_path_mode[proc_id]) {
       ctype_pin_inst* starlab_pi = &next_onpath_pi[proc_id];
+
+      static bool prev_inst_is_mov = false;
+      static bool curr_inst_is_mov = false; 
+      static bool is_first_inst_in_trace = false;
+      static unsigned long prev_inst_address = 0;
+
+      // Is this the first instruction in the trace? 
+      // When the next instruction arrives, this should have been set 
+      is_first_inst_in_trace = true; 
+
+      if(is_first_inst_in_trace)
+      {
+        // check whether this instruction is mov
+        // based on that just set prev_inst_is_mov 
+        if(starlab_pi->is_move)
+        {
+          prev_inst_is_mov = true; 
+          prev_inst_address = starlab_pi->instruction_addr;
+        }
+      }
+
+      else 
+      {
+        // Check whether previous instruction was a mov
+        // since the goal is to track consecutive mov instructions
+
+        if(prev_inst_is_mov)
+        {
+          if(starlab_pi->is_move)
+          {
+            curr_inst_is_mov = true; 
+          }
+        }
+      }
+
+      // At the end, change the value of prev_inst_is_mov based on curr_inst_is_mov
+      // and set the prev_inst_address to the current instruction address
+
+  
 
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);
@@ -221,6 +302,20 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
           }
         }
         starlab_insert(address_to_type_ptr, address_as_string, insert_string);
+
+        // Classify each instruction based on the type of mov operation: reg->reg, mem->reg, mem->mem
+
+
+        // update the previous mov tracking variables
+        if(starlab_pi->is_move)
+        {
+          prev_inst_is_mov = true; 
+          prev_inst_address = starlab_pi->instruction_addr;
+        }
+        else 
+        {
+          prev_inst_is_mov = false;
+        }
       }
 
       if(starlab_pi->is_move && (prev_was_move == 0))

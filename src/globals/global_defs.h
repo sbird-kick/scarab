@@ -65,6 +65,8 @@
 #undef UNUSED
 #define UNUSED(X) (void)(X)
 
+#define USER_SPACE_HT_SIZE sizeof(unsigned long)
+
 /**************************************************************************************/
 
 #ifndef NULL
