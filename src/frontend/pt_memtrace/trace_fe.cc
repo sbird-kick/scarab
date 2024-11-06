@@ -246,11 +246,16 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
         // If the current instruction is performing mov operation, based on the source and destination
         // registers, we can determine if it is a reg->reg move or mem->mem move or mem->reg move
         // and insert it into the corresponding hash table
+
+        printf("Instruction Address: %s, Instruction Type: %s\n", address_as_string, starlab_pi->pin_iclass);
+
         if(starlab_pi->is_move)
         {
           // If the number of source and destination registers are greater than 0, it is a reg->reg move operation
           if(starlab_pi->num_src_regs > 0 && starlab_pi->num_dst_regs > 0)
           {
+            printf("Number of Source Registers: \033[34m%d\033[0m, Number of Destination Registers: \033[34m%d\033[0m\n", starlab_pi->num_src_regs, starlab_pi->num_dst_regs);
+            printf("This is a reg->reg move operation\n");
             starlab_insert(curr_inst_reg_reg_mov_ptr, address_as_string, insert_string);
           }
 
@@ -258,6 +263,8 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
           // add additional conditions that check num_ld and num_st
           else if(starlab_pi->num_src_regs == 0 && starlab_pi->num_dst_regs == 0)
           {
+            printf("Number of Source Registers: \033[34m%d\033[0m, Number of Destination Registers: \033[34m%d\033[0m\n", starlab_pi->num_src_regs, starlab_pi->num_dst_regs);
+            printf("This is a \033[34mmem->mem\033[0m move operation\n");
             starlab_insert(curr_inst_mem_mem_mov_ptr, address_as_string, insert_string);
           }
 
@@ -265,6 +272,8 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
           // or vice versa where source registers are greater than 0 and destination registers are 0
           else if((starlab_pi->num_src_regs == 0 && starlab_pi->num_dst_regs > 0) || (starlab_pi->num_src_regs > 0 && starlab_pi->num_dst_regs == 0))
           {
+            printf("Number of Source Registers: \033[34m%d\033[0m, Number of Destination Registers: \033[34m%d\033[0m\n", starlab_pi->num_src_regs, starlab_pi->num_dst_regs);
+            printf("This is a \033[33mmem->reg\033[0m move operation\n");
             starlab_insert(curr_inst_mem_reg_mov_ptr, address_as_string, insert_string);
           }
         }

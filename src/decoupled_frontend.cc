@@ -215,7 +215,7 @@ void update_decoupled_fe() {
       break;
     }
     if (!frontend_can_fetch_op(set_proc_id)) {
-      std::cout << "Warning could not fetch inst from frontend" << std::endl;
+      // std::cout << "Warning could not fetch inst from frontend" << std::endl;
       break;
     }
 
