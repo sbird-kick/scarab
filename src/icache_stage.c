@@ -1202,6 +1202,16 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     voided_inst_truple_ptr = (void *) inst_truple_ptr;
+    voided_prev_mem_mem_curr_reg_reg_ptr = (void *) prev_mm_curr_rr_ptr;
+    voided_prev_mem_mem_curr_reg_mem_ptr = (void *) prev_mm_curr_mr_ptr;
+    voided_prev_mem_mem_curr_mem_mem_ptr = (void *) prev_mm_curr_mm_ptr;
+    voided_prev_reg_reg_curr_reg_reg_ptr = (void *) prev_rr_curr_rr_ptr;
+    voided_prev_reg_reg_curr_reg_mem_ptr = (void *) prev_rr_curr_mr_ptr;
+    voided_prev_reg_reg_curr_mem_mem_ptr = (void *) prev_rr_curr_mm_ptr;
+    voided_prev_reg_mem_curr_reg_mem_ptr = (void *) prev_rm_curr_rm_ptr;
+    voided_prev_reg_mem_curr_mem_mem_ptr = (void *) prev_rm_curr_mm_ptr;
+    voided_prev_reg_mem_curr_reg_reg_ptr = (void *) prev_rm_curr_rr_ptr;
+    
 
 
     op_count[ic->proc_id]++;          /* increment instruction counters */

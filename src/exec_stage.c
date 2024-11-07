@@ -660,6 +660,19 @@ void update_exec_stage(Stage_Data* src_sd) {
       }
     }
     voided_inst_truple_ptr = (void *) inst_truple_ptr;
+    voided_curr_inst_reg_reg_mov_ptr = (void *) inst_reg_reg_mov_ptr;
+    voided_curr_inst_mem_mem_mov_ptr = (void *) inst_mem_mem_mov_ptr;
+    voided_curr_inst_mem_reg_mov_ptr = (void *) inst_mem_reg_mov_ptr;
+    voided_prev_mem_mem_curr_reg_reg_ptr = (void *) prev_mm_curr_rr_ptr;
+    voided_prev_mem_mem_curr_reg_mem_ptr = (void *) prev_mm_curr_mr_ptr;
+    voided_prev_mem_mem_curr_mem_mem_ptr = (void *) prev_mm_curr_mm_ptr;
+    voided_prev_reg_reg_curr_reg_reg_ptr = (void *) prev_rr_curr_rr_ptr;
+    voided_prev_reg_reg_curr_reg_mem_ptr = (void *) prev_rr_curr_mr_ptr;
+    voided_prev_reg_reg_curr_mem_mem_ptr = (void *) prev_rr_curr_mm_ptr;
+    voided_prev_reg_mem_curr_reg_mem_ptr = (void *) prev_rm_curr_rm_ptr;
+    voided_prev_reg_mem_curr_mem_mem_ptr = (void *) prev_rm_curr_mm_ptr;
+    voided_prev_reg_mem_curr_reg_reg_ptr = (void *) prev_rm_curr_rr_ptr;
+    voided_address_to_prev_address = (void *) voided_address_to_prev_address;
 
     // starlab_hash_table* global_starlab_ht_ptr = (starlab_hash_table*) voided_global_starlab_ht_ptr;
 
