@@ -249,6 +249,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
         // and insert it into the corresponding hash table
 
         // printf("Instruction Address: %s, Instruction Type: %s\n", address_as_string, starlab_pi->pin_iclass);
+        printf("\033[0;32mInstruction Address: %s, Instruction Type: %s\033[0m\n", address_as_string, starlab_pi->pin_iclass);
 
         if(starlab_pi->is_move)
         {
@@ -259,6 +260,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             // printf("This is a reg->reg move operation\n");
             sprintf(mov_type_string, "%s", "REG->REG");
             starlab_insert(curr_inst_reg_reg_mov_ptr, address_as_string, mov_type_string);
+            printf("Inserted %s in reg->reg\n", address_as_string);
           }
 
           // If the number of source and destination registers are 0, it is a mem->mem move operation
@@ -269,6 +271,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             // printf("This is a \033[34mmem->mem\033[0m move operation\n");
             sprintf(mov_type_string, "%s", "MEM->MEM");
             starlab_insert(curr_inst_mem_mem_mov_ptr, address_as_string, mov_type_string);
+            printf("Inserted %s in mem->mem\n", address_as_string);
           }
 
           // If the number of source registers are 0 and destination registers are greater than 0, it is a mem->reg move operation
@@ -291,6 +294,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             sprintf(mov_type_string, "%s", "MEM<>REG");
             // printf("Address: %s, Type: %s\n", address_as_string, mov_type_string);
             starlab_insert(curr_inst_mem_reg_mov_ptr, address_as_string, mov_type_string);
+            printf("Inserted %s in mem->reg\n", address_as_string);
           }
         }
 
@@ -323,6 +327,9 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
   }
 
   voided_address_to_type_ptr = (void *) address_to_type_ptr;
+  voided_curr_inst_reg_reg_mov_ptr = (void *) curr_inst_reg_reg_mov_ptr;
+  voided_curr_inst_mem_mem_mov_ptr = (void *) curr_inst_mem_mem_mov_ptr;
+  voided_curr_inst_mem_reg_mov_ptr = (void *) curr_inst_mem_reg_mov_ptr;
 
   if(uop_generator_get_eom(proc_id)) {
     if (!off_path_mode[proc_id]) {
