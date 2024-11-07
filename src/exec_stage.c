@@ -553,7 +553,7 @@ void update_exec_stage(Stage_Data* src_sd) {
           {
             starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
 
-            printf("Exec: CC to add %lu\n", cc_to_add);
+            // printf("Exec: CC to add %lu\n", cc_to_add);
 
             if((strcmp(prev_iclass, "MOV") == 0) && strcmp(this_iclass, "MOV") == 0)
             {
@@ -562,88 +562,88 @@ void update_exec_stage(Stage_Data* src_sd) {
 
                   if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
                   {
-                    printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
+                    // printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
                     starlab_insert(prev_mm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
                   }
 
                 }
 
                 // prev: mem->mem, curr: reg->mem/mem->reg
-                if(starlab_search(inst_mem_mem_mov_ptr, prev_address_as_string))
+                else if(starlab_search(inst_mem_mem_mov_ptr, prev_address_as_string))
                 {
                   if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
                   {
-                    printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
+                    // printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
                     starlab_insert(prev_mm_curr_mr_ptr, prev_address_as_string, &cc_to_add);
                   }
                 }
 
                 // prev: mem->mem, curr: mem->mem
-                if(starlab_search(inst_mem_mem_mov_ptr, prev_address_as_string))
+                else if(starlab_search(inst_mem_mem_mov_ptr, prev_address_as_string))
                 {
                   if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
                   {
-                    printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
+                    // printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
                     starlab_insert(prev_mm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
                   }
                 }
 
                 // prev: reg->reg, curr: reg->reg
-                if(starlab_search(inst_reg_reg_mov_ptr, prev_address_as_string))
+                else if(starlab_search(inst_reg_reg_mov_ptr, prev_address_as_string))
                 {
                   if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
                   {
-                    printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
+                    // printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
                     starlab_insert(prev_rr_curr_rr_ptr, prev_address_as_string, &cc_to_add);
                   }
                 }
 
                 // prev: reg->reg, curr: reg->mem/mem->reg
-                if(starlab_search(inst_reg_reg_mov_ptr, prev_address_as_string))
+                else if(starlab_search(inst_reg_reg_mov_ptr, prev_address_as_string))
                 {
                   if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
                   {
-                    printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
+                    // printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
                     starlab_insert(prev_rr_curr_mr_ptr, prev_address_as_string, &cc_to_add);
                   }
                 }
 
                 // prev: reg->reg, curr: mem->mem
-                if(starlab_search(inst_reg_reg_mov_ptr, prev_address_as_string))
+                else if(starlab_search(inst_reg_reg_mov_ptr, prev_address_as_string))
                 {
                   if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
                   {
-                    printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
+                    // printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
                     starlab_insert(prev_rr_curr_mm_ptr, prev_address_as_string, &cc_to_add);
                   }
                 }
 
                 // prev: reg->mem, curr: reg->mem
-                if(starlab_search(inst_mem_reg_mov_ptr, prev_address_as_string))
+                else if(starlab_search(inst_mem_reg_mov_ptr, prev_address_as_string))
                 {
                   if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
                   {
-                    printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
+                    // printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
                     starlab_insert(prev_rm_curr_rm_ptr, prev_address_as_string, &cc_to_add);
                   }
                 }
 
                 // prev: reg->mem, curr: mem->mem
-                if(starlab_search(inst_mem_reg_mov_ptr, prev_address_as_string))
+                else if(starlab_search(inst_mem_reg_mov_ptr, prev_address_as_string))
                 {
                   if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
                   {
-                    printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
+                    // printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
                     starlab_insert(prev_rm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
                   }
                 }
 
                 // prev: reg->mem, curr: reg->reg
-                if(starlab_search(inst_mem_reg_mov_ptr, prev_address_as_string))
+                else if(starlab_search(inst_mem_reg_mov_ptr, prev_address_as_string))
                 {
                   if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
                   {
-                    printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
+                    // printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
                     starlab_insert(prev_rm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
                   }
                 }
@@ -657,10 +657,9 @@ void update_exec_stage(Stage_Data* src_sd) {
             // printf("[exec] succesfully added %lu %lu\n", *cc_ptr, cc_to_add);
             // printf("%lu %lu\n %lu %lu    %llu\n", this_truple_ptr->exec_cycle, this_truple_ptr->fetch_cycle,prev_truple_ptr->exec_cycle, prev_truple_ptr->fetch_cycle, op->exec_cycle );
             *cc_ptr+= cc_to_add;
-            printf("Exec: updated CC to add %lu for address %s\n", cc_to_add, address_as_string);
+            // printf("Exec: updated CC to add %lu for address %s\n", cc_to_add, address_as_string);
 
-            printf("Exec: \033[0;33mprev_iclass: %s\033[0m, \033[0;33mcurr_iclass: %s\033[0m\n", prev_iclass, this_iclass);
-
+            // printf("Exec: \033[0;33mprev_iclass: %s\033[0m, \033[0;33mcurr_iclass: %s\033[0m\n", prev_iclass, this_iclass);
 
           }
         }

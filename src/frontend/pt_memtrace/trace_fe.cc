@@ -189,6 +189,8 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
       char address_as_string[128] = {0};
       sprintf(address_as_string, "%016lX", starlab_pi->instruction_addr);
 
+      printf("\033[0;33mAddress: %s, iClass: %s\033[0m\n", address_as_string, starlab_pi->pin_iclass);
+
       if(!starlab_search(address_to_type_ptr, address_as_string))
       {
         char insert_string[128] = {0};
@@ -249,10 +251,14 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
         // and insert it into the corresponding hash table
 
         // printf("Instruction Address: %s, Instruction Type: %s\n", address_as_string, starlab_pi->pin_iclass);
-        printf("\033[0;32mInstruction Address: %s, Instruction Type: %s\033[0m\n", address_as_string, starlab_pi->pin_iclass);
+        // printf("\033[0;32mInstruction Address: %s, Instruction Type: %s\033[0m\n", address_as_string, starlab_pi->pin_iclass);
+
+        // printf("Frontend: Instruction Address: %s, Instruction Type: %s\n", address_as_string, starlab_pi->pin_iclass);
+
 
         if(starlab_pi->is_move)
         {
+           
           // If the number of source and destination registers are greater than 0, it is a reg->reg move operation
           if(starlab_pi->num_src_regs > 0 && starlab_pi->num_dst_regs > 0)
           {
@@ -260,7 +266,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             // printf("This is a reg->reg move operation\n");
             sprintf(mov_type_string, "%s", "REG->REG");
             starlab_insert(curr_inst_reg_reg_mov_ptr, address_as_string, mov_type_string);
-            printf("Inserted %s in reg->reg\n", address_as_string);
+            // printf("Inserted %s in reg->reg\n", address_as_string);
           }
 
           // If the number of source and destination registers are 0, it is a mem->mem move operation
@@ -271,7 +277,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             // printf("This is a \033[34mmem->mem\033[0m move operation\n");
             sprintf(mov_type_string, "%s", "MEM->MEM");
             starlab_insert(curr_inst_mem_mem_mov_ptr, address_as_string, mov_type_string);
-            printf("Inserted %s in mem->mem\n", address_as_string);
+            // printf("Inserted %s in mem->mem\n", address_as_string);
           }
 
           // If the number of source registers are 0 and destination registers are greater than 0, it is a mem->reg move operation
@@ -294,7 +300,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             sprintf(mov_type_string, "%s", "MEM<>REG");
             // printf("Address: %s, Type: %s\n", address_as_string, mov_type_string);
             starlab_insert(curr_inst_mem_reg_mov_ptr, address_as_string, mov_type_string);
-            printf("Inserted %s in mem->reg\n", address_as_string);
+            // printf("Inserted %s in mem->reg\n", address_as_string);
           }
         }
 
