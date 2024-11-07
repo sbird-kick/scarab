@@ -1,10 +1,10 @@
 Core, 0
-Cumulative Cycles, 338                 
-Cumulative Instructions, 3                   
-Cumulative IPC, 0.00888
-Periodic Cycles, 338                 
-Periodic Instructions, 3                   
-Periodic IPC, 0.00888
+Cumulative Cycles, 348                 
+Cumulative Instructions, 5                   
+Cumulative IPC, 0.01437
+Periodic Cycles, 348                 
+Periodic Instructions, 5                   
+Periodic IPC, 0.01437
 
 MISS_WAIT_TIME_count,           322
 MISS_WAIT_TIME_total_count,           322
@@ -12,42 +12,42 @@ MISS_WAIT_TIME_total_count,           322
 ICACHE_STAGE_MISS_count,             2
 ICACHE_STAGE_MISS_total_count,             2
 
-ICACHE_CYCLE_count,           338
-ICACHE_CYCLE_total_count,           338
+ICACHE_CYCLE_count,           348
+ICACHE_CYCLE_total_count,           348
 
 TCACHE_CYCLE_count,             0
 TCACHE_CYCLE_total_count,             0
 
-ICACHE_CYCLE_ONPATH_count,           338
+ICACHE_CYCLE_ONPATH_count,           348
 ICACHE_CYCLE_ONPATH_pct,      100.000
-ICACHE_CYCLE_ONPATH_total_count,           338
+ICACHE_CYCLE_ONPATH_total_count,           348
 ICACHE_CYCLE_ONPATH_total_pct,      100.000
 
 ICACHE_CYCLE_OFFPATH_count,             0
 ICACHE_CYCLE_OFFPATH_pct,        0.000
 ICACHE_CYCLE_OFFPATH_total_count,             0
 ICACHE_CYCLE_OFFPATH_total_pct,        0.000
-ICACHE_CYCLE_OFFPATH_sum_count,           338
+ICACHE_CYCLE_OFFPATH_sum_count,           348
 ICACHE_CYCLE_OFFPATH_sum_pct,      100.000
-ICACHE_CYCLE_OFFPATH_sum_total_count,           338
+ICACHE_CYCLE_OFFPATH_sum_total_count,           348
 ICACHE_CYCLE_OFFPATH_sum_total_pct,      100.000
 ICACHE_CYCLE_OFFPATH_mean,         0.00
 ICACHE_CYCLE_OFFPATH_stddev,         0.00
 ICACHE_CYCLE_OFFPATH_total_mean,         0.00
 ICACHE_CYCLE_OFFPATH_total_stddev,         0.00
 
-FETCH_ON_PATH_count,           338
+FETCH_ON_PATH_count,           348
 FETCH_ON_PATH_pct,      100.000
-FETCH_ON_PATH_total_count,           338
+FETCH_ON_PATH_total_count,           348
 FETCH_ON_PATH_total_pct,      100.000
 
 FETCH_OFF_PATH_count,             0
 FETCH_OFF_PATH_pct,        0.000
 FETCH_OFF_PATH_total_count,             0
 FETCH_OFF_PATH_total_pct,        0.000
-FETCH_OFF_PATH_sum_count,           338
+FETCH_OFF_PATH_sum_count,           348
 FETCH_OFF_PATH_sum_pct,      100.000
-FETCH_OFF_PATH_sum_total_count,           338
+FETCH_OFF_PATH_sum_total_count,           348
 FETCH_OFF_PATH_sum_total_pct,      100.000
 FETCH_OFF_PATH_mean,         0.00
 FETCH_OFF_PATH_stddev,         0.00
@@ -72,10 +72,10 @@ FETCHED_OPS_OFF_PATH_stddev,         -nan
 FETCHED_OPS_OFF_PATH_total_mean,         -nan
 FETCHED_OPS_OFF_PATH_total_stddev,         -nan
 
-INST_LOST_FETCH_count,             3
-INST_LOST_FETCH_pct,        0.178
-INST_LOST_FETCH_total_count,             3
-INST_LOST_FETCH_total_pct,        0.178
+INST_LOST_FETCH_count,             5
+INST_LOST_FETCH_pct,        0.287
+INST_LOST_FETCH_total_count,             5
+INST_LOST_FETCH_total_pct,        0.287
 
 INST_LOST_OFF_PATH_count,             0
 INST_LOST_OFF_PATH_pct,        0.000
@@ -142,10 +142,10 @@ INST_LOST_BREAK_RENAME_pct,        0.000
 INST_LOST_BREAK_RENAME_total_count,             0
 INST_LOST_BREAK_RENAME_total_pct,        0.000
 
-INST_LOST_BREAK_FT_UNAVAILABLE_count,           845
-INST_LOST_BREAK_FT_UNAVAILABLE_pct,       50.000
-INST_LOST_BREAK_FT_UNAVAILABLE_total_count,           845
-INST_LOST_BREAK_FT_UNAVAILABLE_total_pct,       50.000
+INST_LOST_BREAK_FT_UNAVAILABLE_count,           895
+INST_LOST_BREAK_FT_UNAVAILABLE_pct,       51.437
+INST_LOST_BREAK_FT_UNAVAILABLE_total_count,           895
+INST_LOST_BREAK_FT_UNAVAILABLE_total_pct,       51.437
 
 INST_LOST_BREAK_ICACHE_TO_UOP_CACHE_SWITCH_count,             0
 INST_LOST_BREAK_ICACHE_TO_UOP_CACHE_SWITCH_pct,        0.000
@@ -153,9 +153,9 @@ INST_LOST_BREAK_ICACHE_TO_UOP_CACHE_SWITCH_total_count,             0
 INST_LOST_BREAK_ICACHE_TO_UOP_CACHE_SWITCH_total_pct,        0.000
 
 INST_LOST_BREAK_ICACHE_MISS_REQ_SUCCESS_count,             8
-INST_LOST_BREAK_ICACHE_MISS_REQ_SUCCESS_pct,        0.473
+INST_LOST_BREAK_ICACHE_MISS_REQ_SUCCESS_pct,        0.460
 INST_LOST_BREAK_ICACHE_MISS_REQ_SUCCESS_total_count,             8
-INST_LOST_BREAK_ICACHE_MISS_REQ_SUCCESS_total_pct,        0.473
+INST_LOST_BREAK_ICACHE_MISS_REQ_SUCCESS_total_pct,        0.460
 
 INST_LOST_BREAK_ICACHE_MISS_REQ_FAILURE_count,             0
 INST_LOST_BREAK_ICACHE_MISS_REQ_FAILURE_pct,        0.000
@@ -163,9 +163,9 @@ INST_LOST_BREAK_ICACHE_MISS_REQ_FAILURE_total_count,             0
 INST_LOST_BREAK_ICACHE_MISS_REQ_FAILURE_total_pct,        0.000
 
 INST_LOST_BREAK_WAIT_FOR_MISS_count,           830
-INST_LOST_BREAK_WAIT_FOR_MISS_pct,       49.112
+INST_LOST_BREAK_WAIT_FOR_MISS_pct,       47.701
 INST_LOST_BREAK_WAIT_FOR_MISS_total_count,           830
-INST_LOST_BREAK_WAIT_FOR_MISS_total_pct,       49.112
+INST_LOST_BREAK_WAIT_FOR_MISS_total_pct,       47.701
 
 INST_LOST_BREAK_UOP_CACHE_READ_LIMIT_count,             0
 INST_LOST_BREAK_UOP_CACHE_READ_LIMIT_pct,        0.000
@@ -202,26 +202,26 @@ INST_LOST_BREAK_WAIT_FOR_EMPTY_ROB_pct,        0.000
 INST_LOST_BREAK_WAIT_FOR_EMPTY_ROB_total_count,             0
 INST_LOST_BREAK_WAIT_FOR_EMPTY_ROB_total_pct,        0.000
 
-INST_LOST_BREAK_APP_EXIT_count,             4
-INST_LOST_BREAK_APP_EXIT_pct,        0.237
-INST_LOST_BREAK_APP_EXIT_total_count,             4
-INST_LOST_BREAK_APP_EXIT_total_pct,        0.237
+INST_LOST_BREAK_APP_EXIT_count,             2
+INST_LOST_BREAK_APP_EXIT_pct,        0.115
+INST_LOST_BREAK_APP_EXIT_total_count,             2
+INST_LOST_BREAK_APP_EXIT_total_pct,        0.115
 
 INST_LOST_BREAK_STALL_count,             0
 INST_LOST_BREAK_STALL_pct,        0.000
 INST_LOST_BREAK_STALL_total_count,             0
 INST_LOST_BREAK_STALL_total_pct,        0.000
-INST_LOST_BREAK_STALL_sum_count,          1690
+INST_LOST_BREAK_STALL_sum_count,          1740
 INST_LOST_BREAK_STALL_sum_pct,      100.000
-INST_LOST_BREAK_STALL_sum_total_count,          1690
+INST_LOST_BREAK_STALL_sum_total_count,          1740
 INST_LOST_BREAK_STALL_sum_total_pct,      100.000
-INST_LOST_BREAK_STALL_mean,        15.98
-INST_LOST_BREAK_STALL_stddev,         2.05
-INST_LOST_BREAK_STALL_total_mean,        15.98
-INST_LOST_BREAK_STALL_total_stddev,         2.05
+INST_LOST_BREAK_STALL_mean,        15.89
+INST_LOST_BREAK_STALL_stddev,         2.02
+INST_LOST_BREAK_STALL_total_mean,        15.89
+INST_LOST_BREAK_STALL_total_stddev,         2.02
 
-INST_LOST_TOTAL_count,          1690
-INST_LOST_TOTAL_total_count,          1690
+INST_LOST_TOTAL_count,          1740
+INST_LOST_TOTAL_total_count,          1740
 
 INST_LOST_WAIT_FOR_ICACHE_MISS_NOT_PREFETCHED_count,             0
 INST_LOST_WAIT_FOR_ICACHE_MISS_NOT_PREFETCHED_pct,        0.000
@@ -256,25 +256,25 @@ INST_LOST_WAIT_FOR_ICACHE_MISS_MSHR_HIT_PREF_ONPATH_stddev,         4.00
 INST_LOST_WAIT_FOR_ICACHE_MISS_MSHR_HIT_PREF_ONPATH_total_mean,         4.00
 INST_LOST_WAIT_FOR_ICACHE_MISS_MSHR_HIT_PREF_ONPATH_total_stddev,         4.00
 
-FETCH_0_OPS_count,           504
-FETCH_0_OPS_pct,       99.605
-FETCH_0_OPS_total_count,           504
-FETCH_0_OPS_total_pct,       99.605
+FETCH_0_OPS_count,           514
+FETCH_0_OPS_pct,       99.612
+FETCH_0_OPS_total_count,           514
+FETCH_0_OPS_total_pct,       99.612
 
-FETCH_1_OPS_count,             1
-FETCH_1_OPS_pct,        0.198
-FETCH_1_OPS_total_count,             1
-FETCH_1_OPS_total_pct,        0.198
+FETCH_1_OPS_count,             0
+FETCH_1_OPS_pct,        0.000
+FETCH_1_OPS_total_count,             0
+FETCH_1_OPS_total_pct,        0.000
 
 FETCH_2_OPS_count,             1
-FETCH_2_OPS_pct,        0.198
+FETCH_2_OPS_pct,        0.194
 FETCH_2_OPS_total_count,             1
-FETCH_2_OPS_total_pct,        0.198
+FETCH_2_OPS_total_pct,        0.194
 
-FETCH_3_OPS_count,             0
-FETCH_3_OPS_pct,        0.000
-FETCH_3_OPS_total_count,             0
-FETCH_3_OPS_total_pct,        0.000
+FETCH_3_OPS_count,             1
+FETCH_3_OPS_pct,        0.194
+FETCH_3_OPS_total_count,             1
+FETCH_3_OPS_total_pct,        0.194
 
 FETCH_4_OPS_count,             0
 FETCH_4_OPS_pct,        0.000
@@ -340,14 +340,14 @@ FETCH_16_OPS_count,             0
 FETCH_16_OPS_pct,        0.000
 FETCH_16_OPS_total_count,             0
 FETCH_16_OPS_total_pct,        0.000
-FETCH_16_OPS_sum_count,           506
+FETCH_16_OPS_sum_count,           516
 FETCH_16_OPS_sum_pct,      100.000
-FETCH_16_OPS_sum_total_count,           506
+FETCH_16_OPS_sum_total_count,           516
 FETCH_16_OPS_sum_total_pct,      100.000
 FETCH_16_OPS_mean,         0.01
-FETCH_16_OPS_stddev,         0.10
+FETCH_16_OPS_stddev,         0.16
 FETCH_16_OPS_total_mean,         0.01
-FETCH_16_OPS_total_stddev,         0.10
+FETCH_16_OPS_total_stddev,         0.16
 
 ST_BREAK_DONT_count,             0
 ST_BREAK_DONT_pct,        0.000
@@ -359,10 +359,10 @@ ST_BREAK_RENAME_pct,        0.000
 ST_BREAK_RENAME_total_count,             0
 ST_BREAK_RENAME_total_pct,        0.000
 
-ST_BREAK_FT_UNAVAILABLE_count,           169
-ST_BREAK_FT_UNAVAILABLE_pct,       50.000
-ST_BREAK_FT_UNAVAILABLE_total_count,           169
-ST_BREAK_FT_UNAVAILABLE_total_pct,       50.000
+ST_BREAK_FT_UNAVAILABLE_count,           179
+ST_BREAK_FT_UNAVAILABLE_pct,       51.437
+ST_BREAK_FT_UNAVAILABLE_total_count,           179
+ST_BREAK_FT_UNAVAILABLE_total_pct,       51.437
 
 ST_BREAK_ICACHE_TO_UOP_CACHE_SWITCH_count,             0
 ST_BREAK_ICACHE_TO_UOP_CACHE_SWITCH_pct,        0.000
@@ -370,9 +370,9 @@ ST_BREAK_ICACHE_TO_UOP_CACHE_SWITCH_total_count,             0
 ST_BREAK_ICACHE_TO_UOP_CACHE_SWITCH_total_pct,        0.000
 
 ST_BREAK_ICACHE_MISS_REQ_SUCCESS_count,             2
-ST_BREAK_ICACHE_MISS_REQ_SUCCESS_pct,        0.592
+ST_BREAK_ICACHE_MISS_REQ_SUCCESS_pct,        0.575
 ST_BREAK_ICACHE_MISS_REQ_SUCCESS_total_count,             2
-ST_BREAK_ICACHE_MISS_REQ_SUCCESS_total_pct,        0.592
+ST_BREAK_ICACHE_MISS_REQ_SUCCESS_total_pct,        0.575
 
 ST_BREAK_ICACHE_MISS_REQ_FAILURE_count,             0
 ST_BREAK_ICACHE_MISS_REQ_FAILURE_pct,        0.000
@@ -380,9 +380,9 @@ ST_BREAK_ICACHE_MISS_REQ_FAILURE_total_count,             0
 ST_BREAK_ICACHE_MISS_REQ_FAILURE_total_pct,        0.000
 
 ST_BREAK_WAIT_FOR_MISS_count,           166
-ST_BREAK_WAIT_FOR_MISS_pct,       49.112
+ST_BREAK_WAIT_FOR_MISS_pct,       47.701
 ST_BREAK_WAIT_FOR_MISS_total_count,           166
-ST_BREAK_WAIT_FOR_MISS_total_pct,       49.112
+ST_BREAK_WAIT_FOR_MISS_total_pct,       47.701
 
 ST_BREAK_UOP_CACHE_READ_LIMIT_count,             0
 ST_BREAK_UOP_CACHE_READ_LIMIT_pct,        0.000
@@ -420,44 +420,44 @@ ST_BREAK_WAIT_FOR_EMPTY_ROB_total_count,             0
 ST_BREAK_WAIT_FOR_EMPTY_ROB_total_pct,        0.000
 
 ST_BREAK_APP_EXIT_count,             1
-ST_BREAK_APP_EXIT_pct,        0.296
+ST_BREAK_APP_EXIT_pct,        0.287
 ST_BREAK_APP_EXIT_total_count,             1
-ST_BREAK_APP_EXIT_total_pct,        0.296
+ST_BREAK_APP_EXIT_total_pct,        0.287
 
 ST_BREAK_STALL_count,             0
 ST_BREAK_STALL_pct,        0.000
 ST_BREAK_STALL_total_count,             0
 ST_BREAK_STALL_total_pct,        0.000
-ST_BREAK_STALL_sum_count,           338
+ST_BREAK_STALL_sum_count,           348
 ST_BREAK_STALL_sum_pct,      100.000
-ST_BREAK_STALL_sum_total_count,           338
+ST_BREAK_STALL_sum_total_count,           348
 ST_BREAK_STALL_sum_total_pct,      100.000
-ST_BREAK_STALL_mean,         4.01
-ST_BREAK_STALL_stddev,         2.07
-ST_BREAK_STALL_total_mean,         4.01
-ST_BREAK_STALL_total_stddev,         2.07
+ST_BREAK_STALL_mean,         3.95
+ST_BREAK_STALL_stddev,         2.06
+ST_BREAK_STALL_total_mean,         3.95
+ST_BREAK_STALL_total_stddev,         2.06
 
-ORACLE_ON_PATH_INST_count,             3
+ORACLE_ON_PATH_INST_count,             5
 ORACLE_ON_PATH_INST_pct,      100.000
-ORACLE_ON_PATH_INST_total_count,             3
+ORACLE_ON_PATH_INST_total_count,             5
 ORACLE_ON_PATH_INST_total_pct,      100.000
 
 ORACLE_OFF_PATH_INST_count,             0
 ORACLE_OFF_PATH_INST_pct,        0.000
 ORACLE_OFF_PATH_INST_total_count,             0
 ORACLE_OFF_PATH_INST_total_pct,        0.000
-ORACLE_OFF_PATH_INST_sum_count,             3
+ORACLE_OFF_PATH_INST_sum_count,             5
 ORACLE_OFF_PATH_INST_sum_pct,      100.000
-ORACLE_OFF_PATH_INST_sum_total_count,             3
+ORACLE_OFF_PATH_INST_sum_total_count,             5
 ORACLE_OFF_PATH_INST_sum_total_pct,      100.000
 ORACLE_OFF_PATH_INST_mean,         0.00
 ORACLE_OFF_PATH_INST_stddev,         0.00
 ORACLE_OFF_PATH_INST_total_mean,         0.00
 ORACLE_OFF_PATH_INST_total_stddev,         0.00
 
-ORACLE_ON_PATH_INST_MEM_count,             3
+ORACLE_ON_PATH_INST_MEM_count,             5
 ORACLE_ON_PATH_INST_MEM_pct,      100.000
-ORACLE_ON_PATH_INST_MEM_total_count,             3
+ORACLE_ON_PATH_INST_MEM_total_count,             5
 ORACLE_ON_PATH_INST_MEM_total_pct,      100.000
 
 ORACLE_ON_PATH_INST_NOTMEM_count,             0
@@ -474,9 +474,9 @@ ORACLE_OFF_PATH_INST_NOTMEM_count,             0
 ORACLE_OFF_PATH_INST_NOTMEM_pct,        0.000
 ORACLE_OFF_PATH_INST_NOTMEM_total_count,             0
 ORACLE_OFF_PATH_INST_NOTMEM_total_pct,        0.000
-ORACLE_OFF_PATH_INST_NOTMEM_sum_count,             3
+ORACLE_OFF_PATH_INST_NOTMEM_sum_count,             5
 ORACLE_OFF_PATH_INST_NOTMEM_sum_pct,      100.000
-ORACLE_OFF_PATH_INST_NOTMEM_sum_total_count,             3
+ORACLE_OFF_PATH_INST_NOTMEM_sum_total_count,             5
 ORACLE_OFF_PATH_INST_NOTMEM_sum_total_pct,      100.000
 ORACLE_OFF_PATH_INST_NOTMEM_mean,         0.00
 ORACLE_OFF_PATH_INST_NOTMEM_stddev,         0.00
@@ -552,36 +552,36 @@ INACCURATE_OFFPATH_CYCLES_pct,        0.000
 INACCURATE_OFFPATH_CYCLES_total_count,             0
 INACCURATE_OFFPATH_CYCLES_total_pct,        0.000
 
-FETCH_ALL_INST_count,             3
-FETCH_ALL_INST_total_count,             3
+FETCH_ALL_INST_count,             5
+FETCH_ALL_INST_total_count,             5
 
-EXEC_ALL_INST_count,             3
-EXEC_ALL_INST_total_count,             3
+EXEC_ALL_INST_count,             5
+EXEC_ALL_INST_total_count,             5
 
-RET_ALL_INST_count,             3
-RET_ALL_INST_total_count,             3
+RET_ALL_INST_count,             5
+RET_ALL_INST_total_count,             5
 
-EXEC_ON_PATH_INST_count,             3
+EXEC_ON_PATH_INST_count,             5
 EXEC_ON_PATH_INST_pct,      100.000
-EXEC_ON_PATH_INST_total_count,             3
+EXEC_ON_PATH_INST_total_count,             5
 EXEC_ON_PATH_INST_total_pct,      100.000
 
 EXEC_OFF_PATH_INST_count,             0
 EXEC_OFF_PATH_INST_pct,        0.000
 EXEC_OFF_PATH_INST_total_count,             0
 EXEC_OFF_PATH_INST_total_pct,        0.000
-EXEC_OFF_PATH_INST_sum_count,             3
+EXEC_OFF_PATH_INST_sum_count,             5
 EXEC_OFF_PATH_INST_sum_pct,      100.000
-EXEC_OFF_PATH_INST_sum_total_count,             3
+EXEC_OFF_PATH_INST_sum_total_count,             5
 EXEC_OFF_PATH_INST_sum_total_pct,      100.000
 EXEC_OFF_PATH_INST_mean,         0.00
 EXEC_OFF_PATH_INST_stddev,         0.00
 EXEC_OFF_PATH_INST_total_mean,         0.00
 EXEC_OFF_PATH_INST_total_stddev,         0.00
 
-EXEC_ON_PATH_INST_MEM_count,             3
+EXEC_ON_PATH_INST_MEM_count,             5
 EXEC_ON_PATH_INST_MEM_pct,      100.000
-EXEC_ON_PATH_INST_MEM_total_count,             3
+EXEC_ON_PATH_INST_MEM_total_count,             5
 EXEC_ON_PATH_INST_MEM_total_pct,      100.000
 
 EXEC_ON_PATH_INST_NOTMEM_count,             0
@@ -598,9 +598,9 @@ EXEC_OFF_PATH_INST_NOTMEM_count,             0
 EXEC_OFF_PATH_INST_NOTMEM_pct,        0.000
 EXEC_OFF_PATH_INST_NOTMEM_total_count,             0
 EXEC_OFF_PATH_INST_NOTMEM_total_pct,        0.000
-EXEC_OFF_PATH_INST_NOTMEM_sum_count,             3
+EXEC_OFF_PATH_INST_NOTMEM_sum_count,             5
 EXEC_OFF_PATH_INST_NOTMEM_sum_pct,      100.000
-EXEC_OFF_PATH_INST_NOTMEM_sum_total_count,             3
+EXEC_OFF_PATH_INST_NOTMEM_sum_total_count,             5
 EXEC_OFF_PATH_INST_NOTMEM_sum_total_pct,      100.000
 EXEC_OFF_PATH_INST_NOTMEM_mean,         0.00
 EXEC_OFF_PATH_INST_NOTMEM_stddev,         0.00

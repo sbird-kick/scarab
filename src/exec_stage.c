@@ -657,9 +657,15 @@ void update_exec_stage(Stage_Data* src_sd) {
             // printf("[exec] succesfully added %lu %lu\n", *cc_ptr, cc_to_add);
             // printf("%lu %lu\n %lu %lu    %llu\n", this_truple_ptr->exec_cycle, this_truple_ptr->fetch_cycle,prev_truple_ptr->exec_cycle, prev_truple_ptr->fetch_cycle, op->exec_cycle );
             *cc_ptr+= cc_to_add;
+            printf("Exec: updated CC to add %lu for address %s\n", cc_to_add, address_as_string);
+
+            printf("Exec: \033[0;33mprev_iclass: %s\033[0m, \033[0;33mcurr_iclass: %s\033[0m\n", prev_iclass, this_iclass);
+
+
           }
         }
       }
+      
     }
     voided_inst_truple_ptr = (void *) inst_truple_ptr;
     voided_curr_inst_reg_reg_mov_ptr = (void *) inst_reg_reg_mov_ptr;
@@ -675,63 +681,6 @@ void update_exec_stage(Stage_Data* src_sd) {
     voided_prev_reg_mem_curr_mem_mem_ptr = (void *) prev_rm_curr_mm_ptr;
     voided_prev_reg_mem_curr_reg_reg_ptr = (void *) prev_rm_curr_rr_ptr;
     voided_address_to_prev_address = (void *) voided_address_to_prev_address;
-
-    // starlab_hash_table* global_starlab_ht_ptr = (starlab_hash_table*) voided_global_starlab_ht_ptr;
-
-    // if(global_starlab_ht_ptr == NULL)
-    // {
-    //   global_starlab_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(starlab_table_value));
-    // }
-    // starlab_hash_table* starlab_types_table_ptr = (starlab_hash_table*) voided_global_starlab_types_ht;
-    // if(starlab_types_table_ptr == NULL)
-    // {
-    //   starlab_types_table_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
-    // }
-
-    // char address_as_string[128] = {0};
-    // sprintf(address_as_string, "%016llX%s",  op->inst_info->addr, starlab_get_opcode_string(op->table_info->op_type));
-    // if(!starlab_search(global_starlab_ht_ptr,address_as_string))
-    // {
-    //   printf("[exec] Address ret %s not found [%016llX]\n", address_as_string, op->inst_info->addr);
-    //   starlab_table_value temp_val_to_insert = {op->fetch_cycle, op->fetch_cycle};
-    //   starlab_insert(global_starlab_ht_ptr, address_as_string, &temp_val_to_insert);
-    //   strncpy(prev_address_as_string, address_as_string, 128);
-    // }
-    // else
-    // {
-    //   unsigned long prev_inst_prev_fetch;
-    //   if(starlab_search(global_starlab_ht_ptr, prev_address_as_string) == NULL)
-    //   {
-    //     prev_inst_prev_fetch = prev_instruction_time;
-    //   }
-    //   else
-    //     prev_inst_prev_fetch = ((starlab_table_value *) starlab_search(global_starlab_ht_ptr, prev_address_as_string))->prev_fetch;
-
-    //   // unsigned long this_fetch_cc = op->fetch_cycle;
-    //   unsigned long cc_taken_by_tuple = op->exec_cycle - prev_inst_prev_fetch;      
-    //   printf("[exec] Address %s, %s FOUND ret! [%ld, %lld, %ld] -> <%s,%s>\n", prev_address_as_string, address_as_string, prev_inst_prev_fetch, op->exec_cycle, cc_taken_by_tuple, prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type));
-    //   starlab_delete_key(global_starlab_ht_ptr, address_as_string);
-
-    //   char tuple_of_types[256] = {0};
-    //   sprintf(tuple_of_types, "<%s,%s>", prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type));
-
-    //   if(!starlab_search(starlab_types_table_ptr, tuple_of_types))
-    //   {
-    //     unsigned long insert_val = cc_taken_by_tuple;
-    //     starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-    //   }
-    //   else
-    //   {
-    //     unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
-    //     starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-    //   }
-    //   prev_instruction_time = op->fetch_cycle;
-    //   strncpy(prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type), 100);
-    //   strncpy(prev_address_as_string, address_as_string, 128);
-    // }
-
-    // voided_global_starlab_ht_ptr = (void *) global_starlab_ht_ptr;
-    // voided_global_starlab_types_ht = (void *) starlab_types_table_ptr;
 
 
     op->exec_count++;

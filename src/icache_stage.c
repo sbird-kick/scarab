@@ -1064,7 +1064,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
             {
               starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
 
-              printf("CC before <MOV MOV> %lu\n", cc_to_add);
+              printf("ICache: CC before <MOV MOV> %lu\n", cc_to_add);
 
               // Identify whether both instructions in a tuple are MOV instructions
               if((strcmp(prev_iclass, "MOV") == 0) && strcmp(this_iclass, "MOV") == 0)
@@ -1196,6 +1196,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
             if(op->eom)
             {
               *cc_ptr+= cc_to_add;
+              printf("ICache: updated CC %lu for address %s\n", *cc_ptr, address_as_string);
               // printf("[%016llX] Successfully added %lu %lu!\n", op->inst_info->addr, *cc_ptr, cc_to_add);
               // printf("%lu %lu\n %lu %lu\n", this_truple_ptr->fetch_cycle, this_truple_ptr->prev_fetch_cycle,prev_truple_ptr->fetch_cycle, prev_truple_ptr->prev_fetch_cycle );
             }
