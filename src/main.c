@@ -217,6 +217,7 @@ Scarab's source code is organized as follows:
 
 #include "general.param.h"
 
+
 /**************************************************************************************/
 
 void* voided_global_starlab_ht_ptr = NULL;
@@ -316,129 +317,102 @@ int main(int argc, char* argv[], char* envp[]) {
   if(opt2_in_use())
     opt2_sim_complete();
   
-  // char **keys;
-  // void **values_array;
 
-  // KeyValuePair *key_value_pairs;
-  // long count = get_count(voided_global_starlab_types_ht);
-  // key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
+  char **keys;
+  void **values_array;
+
+  KeyValuePair *key_value_pairs;
+  long count = get_count(voided_global_starlab_types_ht);
+  key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
+
+
+  starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
+
+  for (long i = 0; i < count; i++) {
+      key_value_pairs[i].key = keys[i];
+      key_value_pairs[i].value = values_array[i];
+  }
+
+    qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+
+    unsigned long total_cc_count = 0;
+    for (long i = 0; i < count; i++) {
+        total_cc_count += *(unsigned long *)key_value_pairs[i].value;
+    }
+
+    unsigned long running_cc_count = 0;
+    for (long i = 0; i < count; i++) {
+        printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
+        running_cc_count += *(unsigned long *)key_value_pairs[i].value;
+        if (running_cc_count > ((total_cc_count * 99) / 100)) 
+            break;
+    }
+
+    // Print the CPU cycles % consumed based on the values in the following hash table:
+    // void* voided_prev_mem_mem_curr_reg_reg_ptr = NULL;
+    // void* voided_prev_mem_mem_curr_reg_mem_ptr = NULL;
+    // void* voided_prev_mem_mem_curr_mem_mem_ptr = NULL;
+    // void* voided_prev_reg_reg_curr_reg_reg_ptr = NULL;
+    // void* voided_prev_reg_reg_curr_reg_mem_ptr = NULL;
+    // void* voided_prev_reg_reg_curr_mem_mem_ptr = NULL;
+    // void* voided_prev_reg_mem_curr_reg_mem_ptr = NULL;
+    // void* voided_prev_reg_mem_curr_mem_mem_ptr = NULL;
+    // void* voided_prev_reg_mem_curr_reg_reg_ptr = NULL;
+    void* hash_tables[] = {
+      voided_prev_mem_mem_curr_reg_reg_ptr,
+      voided_prev_mem_mem_curr_reg_mem_ptr,
+      voided_prev_mem_mem_curr_mem_mem_ptr,
+      voided_prev_reg_reg_curr_reg_reg_ptr,
+      voided_prev_reg_reg_curr_reg_mem_ptr,
+      voided_prev_reg_reg_curr_mem_mem_ptr,
+      voided_prev_reg_mem_curr_reg_mem_ptr,
+      voided_prev_reg_mem_curr_mem_mem_ptr,
+      voided_prev_reg_mem_curr_reg_reg_ptr
+    };
+
+    const char* hash_table_names[] = {
+      "prev_mem_mem_curr_reg_reg",
+      "prev_mem_mem_curr_reg_mem",
+      "prev_mem_mem_curr_mem_mem",
+      "prev_reg_reg_curr_reg_reg",
+      "prev_reg_reg_curr_reg_mem",
+      "prev_reg_reg_curr_mem_mem",
+      "prev_reg_mem_curr_reg_mem",
+      "prev_reg_mem_curr_mem_mem",
+      "prev_reg_mem_curr_reg_reg"
+    };
+
+    for (int i = 0; i < sizeof(hash_tables) / sizeof(hash_tables[0]); i++) {
+      count = get_count(hash_tables[i]);
+      key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
+      starlab_return_key_value_arr(hash_tables[i], &keys, &values_array);
+
+      for (long j = 0; j < count; j++) {
+        key_value_pairs[j].key = keys[j];
+        key_value_pairs[j].value = values_array[j];
+      }
+
+      qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+
+      total_cc_count = 0;
+      for (long j = 0; j < count; j++) {
+        total_cc_count += *(unsigned long *)key_value_pairs[j].value;
+      }
+
+      running_cc_count = 0;
+      for (long j = 0; j < count; j++) {
+        printf("%s: %s, cumulative CCs: %.2f%%\n", hash_table_names[i], key_value_pairs[j].key, ((double)*(unsigned long *)key_value_pairs[j].value / (double)total_cc_count) * 100);
+        running_cc_count += *(unsigned long *)key_value_pairs[j].value;
+        if (running_cc_count > ((total_cc_count * 99) / 100)) 
+          break;
+      }
+
+      free(key_value_pairs);
+    }
+
+  free(keys);
+  free(values_array);
   
-
-
-  // starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
-
-  // for (long i = 0; i < count; i++) {
-  //     key_value_pairs[i].key = keys[i];
-  //     key_value_pairs[i].value = values_array[i];
-  // }
-
-  //   qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
-
-  //   unsigned long total_cc_count = 0;
-  //   for (long i = 0; i < count; i++) {
-  //       total_cc_count += *(unsigned long *)key_value_pairs[i].value;
-  //   }
-
-  //   unsigned long running_cc_count = 0;
-  //   for (long i = 0; i < count; i++) {
-  //       printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
-  //       running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-  //       if (running_cc_count > ((total_cc_count * 99) / 100)) 
-  //           break;
-  //   }
-
-    // char **keys;
-    // void **values_array;
-    // KeyValuePair *key_value_pairs;
-    // long count = get_count(voided_global_starlab_types_ht);
-    // key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
-
-    // // Retrieve keys and values from main hash table
-    // starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
-
-    // for (long i = 0; i < count; i++) {
-    //     key_value_pairs[i].key = keys[i];
-    //     key_value_pairs[i].value = values_array[i];
-    // }
-
-    // qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
-
-    // unsigned long total_cc_count = 0;
-    // for (long i = 0; i < count; i++) {
-    //     total_cc_count += *(unsigned long *)key_value_pairs[i].value;
-    // }
-
-    // unsigned long running_cc_count = 0;
-    // for (long i = 0; i < count; i++) {
-    //     // printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, 
-    //           ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
-
-    //     // printf("Address: %s, Raw Value: %lu\n", key_value_pairs[i].key, *(unsigned long *)key_value_pairs[i].value);
-
-
-    //     running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-    //     if (running_cc_count > ((total_cc_count * 99) / 100)) 
-    //         break;
-    // }
-
-    // // Define an array of hash tables for each instruction pair type
-    // starlab_hash_table* tables[] = {
-    //   (starlab_hash_table*)voided_prev_mem_mem_curr_reg_reg_ptr,
-    //   (starlab_hash_table*)voided_prev_mem_mem_curr_reg_mem_ptr,
-    //   (starlab_hash_table*)voided_prev_mem_mem_curr_mem_mem_ptr,
-    //   (starlab_hash_table*)voided_prev_reg_reg_curr_reg_reg_ptr,
-    //   (starlab_hash_table*)voided_prev_reg_reg_curr_reg_mem_ptr,
-    //   (starlab_hash_table*)voided_prev_reg_reg_curr_mem_mem_ptr,
-    //   (starlab_hash_table*)voided_prev_reg_mem_curr_reg_mem_ptr,
-    //   (starlab_hash_table*)voided_prev_reg_mem_curr_mem_mem_ptr,
-    //   (starlab_hash_table*)voided_prev_reg_mem_curr_reg_reg_ptr
-    // };
-
-    // // Names of each instruction type for printing purposes
-    // const char *type_names[] = {
-    //   "prev: mem->mem, curr: reg->reg",
-    //   "prev: mem->mem, curr: reg->mem",
-    //   "prev: mem->mem, curr: mem->mem",
-    //   "prev: reg->reg, curr: reg->reg",
-    //   "prev: reg->reg, curr: reg->mem",
-    //   "prev: reg->reg, curr: mem->mem",
-    //   "prev: reg->mem, curr: reg->mem",
-    //   "prev: reg->mem, curr: mem->mem",
-    //   "prev: reg->mem, curr: reg->reg"
-    // };
-
-    // // Iterate over each table, retrieve and print CPU cycle percentages
-    // for (int j = 0; j < sizeof(tables) / sizeof(tables[0]); j++) {
-    //   if (tables[j] == NULL) {
-    //     tables[j] = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
-    //   }
-
-    //   long sub_count = get_count(tables[j]);
-    //   char **sub_keys;
-    //   void **sub_values;
-    //   starlab_return_key_value_arr(tables[j], &sub_keys, &sub_values);
-
-    //   unsigned long sub_total_cc_count = 0;
-    //   for (long i = 0; i < sub_count; i++) {
-    //     sub_total_cc_count += *(unsigned long *)sub_values[i];
-    //   }
-
-    //   // printf("\nInstruction Type: %s, Number of Entries: %ld\n", type_names[j], sub_count);
-    //   for (long i = 0; i < sub_count; i++) {
-    //     // printf("inst tuple: %s, CCs: %lu\n", sub_keys[i], *(unsigned long *)sub_values[i]);
-    //   }
-
-    //   // Free memory for sub_keys and sub_values if needed
-    //   free(sub_keys);
-    //   free(sub_values);
-    // }
-
-    // // Free memory for main keys and values array if needed
-    // free(keys);
-    // free(values_array);
-    // free(key_value_pairs);
-
-
 
   return 0;
 }
