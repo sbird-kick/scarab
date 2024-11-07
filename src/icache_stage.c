@@ -1175,7 +1175,6 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
               } 
 
-
           if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
           {
             if(op->eom)
