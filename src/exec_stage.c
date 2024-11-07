@@ -382,6 +382,108 @@ void update_exec_stage(Stage_Data* src_sd) {
     {
       inst_truple_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(inst_fetch_exec_truple));
     }
+
+    // ------------------------------------------------------------------------------------------------
+
+    // Hashtables that store the type of MOV instruction - populated in the frontend
+
+    // ------------------------------------------------------------------------------------------------
+
+    // Hashtable to store mov instructions that perform reg->reg moves
+    starlab_hash_table* inst_reg_reg_mov_ptr = (starlab_hash_table*) voided_curr_inst_reg_reg_mov_ptr;
+    if(inst_reg_reg_mov_ptr == NULL)
+    {
+      inst_reg_reg_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+    }
+
+    // Hashtable to store mov instructions that perform mem->mem moves
+    starlab_hash_table* inst_mem_mem_mov_ptr = (starlab_hash_table*) voided_curr_inst_mem_mem_mov_ptr;
+    if(inst_mem_mem_mov_ptr == NULL)
+    {
+      inst_mem_mem_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+    }
+
+    // Hashtable to store mov instructions that perform mem->reg moves
+    starlab_hash_table* inst_mem_reg_mov_ptr = (starlab_hash_table*) voided_curr_inst_mem_reg_mov_ptr;
+    if(inst_mem_reg_mov_ptr == NULL)
+    {
+      inst_mem_reg_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+    }
+
+    // ------------------------------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------------------------------
+
+    // Hashtables to store the CPU cycles for each instruction tuple
+
+    // ------------------------------------------------------------------------------------------------
+
+    // prev: mem->mem, curr: reg->reg
+    starlab_hash_table* prev_mm_curr_rr_ptr = (starlab_hash_table*) voided_prev_mem_mem_curr_reg_reg_ptr;
+    if(prev_mm_curr_rr_ptr == NULL)
+    {
+      prev_mm_curr_rr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: mem->mem, curr: reg->mem
+    starlab_hash_table* prev_mm_curr_mr_ptr = (starlab_hash_table*) voided_prev_mem_mem_curr_reg_mem_ptr;
+    if(prev_mm_curr_mr_ptr == NULL)
+    {
+      prev_mm_curr_mr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: mem->mem curr: mem->mem
+    starlab_hash_table* prev_mm_curr_mm_ptr = (starlab_hash_table*) voided_prev_mem_mem_curr_mem_mem_ptr;
+    if(prev_mm_curr_mm_ptr == NULL)
+    {
+      prev_mm_curr_mm_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->reg, curr: reg->reg
+    starlab_hash_table* prev_rr_curr_rr_ptr = (starlab_hash_table*) voided_prev_reg_reg_curr_reg_reg_ptr;
+    if(prev_rr_curr_rr_ptr == NULL)
+    {
+      prev_rr_curr_rr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->reg, curr: reg->mem
+    starlab_hash_table* prev_rr_curr_mr_ptr = (starlab_hash_table*) voided_prev_reg_reg_curr_reg_mem_ptr;
+    if(prev_rr_curr_mr_ptr == NULL)
+    {
+      prev_rr_curr_mr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->reg, curr: mem->mem
+    starlab_hash_table* prev_rr_curr_mm_ptr = (starlab_hash_table*) voided_prev_reg_reg_curr_mem_mem_ptr;
+    if(prev_rr_curr_mm_ptr == NULL)
+    {
+      prev_rr_curr_mm_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->mem, curr: reg->mem
+    starlab_hash_table* prev_rm_curr_rm_ptr = (starlab_hash_table*) voided_prev_reg_mem_curr_reg_mem_ptr;
+    if(prev_rm_curr_rm_ptr == NULL)
+    {
+      prev_rm_curr_rm_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->mem, curr: mem->mem
+    starlab_hash_table* prev_rm_curr_mm_ptr = (starlab_hash_table*) voided_prev_reg_mem_curr_mem_mem_ptr;
+    if(prev_rm_curr_mm_ptr == NULL)
+    {
+      prev_rm_curr_mm_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->mem, curr: reg->reg
+    starlab_hash_table* prev_rm_curr_rr_ptr = (starlab_hash_table*) voided_prev_reg_mem_curr_reg_reg_ptr;
+    if(prev_rm_curr_rr_ptr == NULL)
+    {
+      prev_rm_curr_rr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // ------------------------------------------------------------------------------------------------
+
+
     // is this already present? 
     if(!starlab_search(inst_truple_ptr, address_as_string))
     {
@@ -450,6 +552,101 @@ void update_exec_stage(Stage_Data* src_sd) {
           if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
           {
             starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
+
+            if((strcmp(prev_iclass, "MOV") == 0) && strcmp(this_iclass, "MOV") == 0)
+            {
+              if(starlab_search(inst_mem_mem_mov_ptr, prev_address_as_string))
+                {
+
+                  if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
+                  {
+                    printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mreg->reg\033[0m\n");
+                    starlab_insert(prev_mm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                  }
+
+                }
+
+                // prev: mem->mem, curr: reg->mem/mem->reg
+                if(starlab_search(inst_mem_mem_mov_ptr, prev_address_as_string))
+                {
+                  if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
+                  {
+                    printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mreg->mem\033[0m\n");
+                    starlab_insert(prev_mm_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+                  }
+                }
+
+                // prev: mem->mem, curr: mem->mem
+                if(starlab_search(inst_mem_mem_mov_ptr, prev_address_as_string))
+                {
+                  if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
+                  {
+                    printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mmem->mem\033[0m\n");
+                    starlab_insert(prev_mm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                  }
+                }
+
+                // prev: reg->reg, curr: reg->reg
+                if(starlab_search(inst_reg_reg_mov_ptr, prev_address_as_string))
+                {
+                  if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
+                  {
+                    printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mreg->reg\033[0m\n");
+                    starlab_insert(prev_rr_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                  }
+                }
+
+                // prev: reg->reg, curr: reg->mem/mem->reg
+                if(starlab_search(inst_reg_reg_mov_ptr, prev_address_as_string))
+                {
+                  if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
+                  {
+                    printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mreg->mem\033[0m\n");
+                    starlab_insert(prev_rr_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+                  }
+                }
+
+                // prev: reg->reg, curr: mem->mem
+                if(starlab_search(inst_reg_reg_mov_ptr, prev_address_as_string))
+                {
+                  if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
+                  {
+                    printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mmem->mem\033[0m\n");
+                    starlab_insert(prev_rr_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                  }
+                }
+
+                // prev: reg->mem, curr: reg->mem
+                if(starlab_search(inst_mem_reg_mov_ptr, prev_address_as_string))
+                {
+                  if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
+                  {
+                    printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mreg->mem\033[0m\n");
+                    starlab_insert(prev_rm_curr_rm_ptr, prev_address_as_string, &cc_to_add);
+                  }
+                }
+
+                // prev: reg->mem, curr: mem->mem
+                if(starlab_search(inst_mem_reg_mov_ptr, prev_address_as_string))
+                {
+                  if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
+                  {
+                    printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mmem->mem\033[0m\n");
+                    starlab_insert(prev_rm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                  }
+                }
+
+                // prev: reg->mem, curr: reg->reg
+                if(starlab_search(inst_mem_reg_mov_ptr, prev_address_as_string))
+                {
+                  if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
+                  {
+                    printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mreg->reg\033[0m\n");
+                    starlab_insert(prev_rm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                  }
+                }
+            }
+
           }
           else
           {
