@@ -549,11 +549,7 @@ void update_exec_stage(Stage_Data* src_sd) {
           {
             voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
           }
-          if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
-          {
-            starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
 
-            // printf("Exec: CC to add %lu\n", cc_to_add);
 
             if((strcmp(prev_iclass, "MOV") == 0) && strcmp(this_iclass, "MOV") == 0)
             {
@@ -648,6 +644,12 @@ void update_exec_stage(Stage_Data* src_sd) {
                   }
                 }
             }
+
+          if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
+          {
+            starlab_insert(voided_global_starlab_types_ht, tuple_string, &cc_to_add);
+
+            // printf("Exec: CC to add %lu\n", cc_to_add);
 
           }
           else
