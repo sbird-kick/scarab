@@ -869,6 +869,103 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
 
+    // ------------------------------------------------------------------------------------------------
+
+    // Hashtables that store the type of MOV instruction - populated in the frontend
+
+    // Hashtable to store mov instructions that perform reg->reg moves
+    starlab_hash_table* inst_reg_reg_mov_ptr = (starlab_hash_table*) voided_curr_inst_reg_reg_mov_ptr;
+    if(inst_reg_reg_mov_ptr == NULL)
+    {
+      inst_reg_reg_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+    }
+
+    // Hashtable to store mov instructions that perform mem->mem moves
+    starlab_hash_table* inst_mem_mem_mov_ptr = (starlab_hash_table*) voided_curr_inst_mem_mem_mov_ptr;
+    if(inst_mem_mem_mov_ptr == NULL)
+    {
+      inst_mem_mem_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+    }
+
+    // Hashtable to store mov instructions that perform mem->reg moves
+    starlab_hash_table* inst_mem_reg_mov_ptr = (starlab_hash_table*) voided_curr_inst_mem_reg_mov_ptr;
+    if(inst_mem_reg_mov_ptr == NULL)
+    {
+      inst_mem_reg_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(char) * 128);
+    }
+
+    // ------------------------------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------------------------------
+
+    // Hashtables to store the CPU cycles for each instruction tuple
+
+    // prev: mem->mem, curr: reg->reg
+    starlab_hash_table* prev_mm_curr_rr_ptr = (starlab_hash_table*) voided_prev_mem_mem_curr_reg_reg_ptr;
+    if(prev_mm_curr_rr_ptr == NULL)
+    {
+      prev_mm_curr_rr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: mem->mem, curr: reg->mem
+    starlab_hash_table* prev_mm_curr_mr_ptr = (starlab_hash_table*) voided_prev_mem_mem_curr_reg_mem_ptr;
+    if(prev_mm_curr_mr_ptr == NULL)
+    {
+      prev_mm_curr_mr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: mem->mem curr: mem->mem
+    starlab_hash_table* prev_mm_curr_mm_ptr = (starlab_hash_table*) voided_prev_mem_mem_curr_mem_mem_ptr;
+    if(prev_mm_curr_mm_ptr == NULL)
+    {
+      prev_mm_curr_mm_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->reg, curr: reg->reg
+    starlab_hash_table* prev_rr_curr_rr_ptr = (starlab_hash_table*) voided_prev_reg_reg_curr_reg_reg_ptr;
+    if(prev_rr_curr_rr_ptr == NULL)
+    {
+      prev_rr_curr_rr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->reg, curr: reg->mem
+    starlab_hash_table* prev_rr_curr_mr_ptr = (starlab_hash_table*) voided_prev_reg_reg_curr_reg_mem_ptr;
+    if(prev_rr_curr_mr_ptr == NULL)
+    {
+      prev_rr_curr_mr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->reg, curr: mem->mem
+    starlab_hash_table* prev_rr_curr_mm_ptr = (starlab_hash_table*) voided_prev_reg_reg_curr_mem_mem_ptr;
+    if(prev_rr_curr_mm_ptr == NULL)
+    {
+      prev_rr_curr_mm_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->mem, curr: reg->mem
+    starlab_hash_table* prev_rm_curr_rm_ptr = (starlab_hash_table*) voided_prev_reg_mem_curr_reg_mem_ptr;
+    if(prev_rm_curr_rm_ptr == NULL)
+    {
+      prev_rm_curr_rm_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->mem, curr: mem->mem
+    starlab_hash_table* prev_rm_curr_mm_ptr = (starlab_hash_table*) voided_prev_reg_mem_curr_mem_mem_ptr;
+    if(prev_rm_curr_mm_ptr == NULL)
+    {
+      prev_rm_curr_mm_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // prev: reg->mem, curr: reg->reg
+    starlab_hash_table* prev_rm_curr_rr_ptr = (starlab_hash_table*) voided_prev_reg_mem_curr_reg_reg_ptr;
+    if(prev_rm_curr_rr_ptr == NULL)
+    {
+      prev_rm_curr_rr_ptr = starlab_create_table(INITIAL_TABLE_SIZE, USER_SPACE_HT_SIZE);
+    }
+
+    // ------------------------------------------------------------------------------------------------
+
+
     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
 
     char address_as_string[128] = {0};

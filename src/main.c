@@ -231,11 +231,13 @@ void* voided_curr_inst_mem_mem_mov_ptr;
 
 void* voided_prev_mem_mem_curr_reg_reg_ptr = NULL;
 void* voided_prev_mem_mem_curr_reg_mem_ptr = NULL;
-void* voided_prev_mem_mem_curr_mem_reg_ptr = NULL;
+void* voided_prev_mem_mem_curr_mem_mem_ptr = NULL;
 void* voided_prev_reg_reg_curr_reg_reg_ptr = NULL;
 void* voided_prev_reg_reg_curr_reg_mem_ptr = NULL;
 void* voided_prev_reg_reg_curr_mem_mem_ptr = NULL;
 void* voided_prev_reg_mem_curr_reg_mem_ptr = NULL;
+void* voided_prev_reg_mem_curr_mem_mem_ptr = NULL;
+void* voided_prev_reg_mem_curr_reg_reg_ptr = NULL;
 
 unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];

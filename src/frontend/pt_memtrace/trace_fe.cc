@@ -289,6 +289,7 @@ void ext_trace_fetch_op(uns proc_id, Op* op) {
             }
 
             sprintf(mov_type_string, "%s", "MEM<>REG");
+            // printf("Address: %s, Type: %s\n", address_as_string, mov_type_string);
             starlab_insert(curr_inst_mem_reg_mov_ptr, address_as_string, mov_type_string);
           }
         }
