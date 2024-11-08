@@ -200,7 +200,6 @@ Scarab's source code is organized as follows:
     + libs/port_lib.h
 
 ***************************************************************************************/
-
 #include <signal.h>
 #include <unistd.h>
 #include "globals/assert.h"
@@ -216,7 +215,6 @@ Scarab's source code is organized as follows:
 #include "version.h"
 
 #include "general.param.h"
-
 
 /**************************************************************************************/
 
@@ -317,14 +315,14 @@ int main(int argc, char* argv[], char* envp[]) {
   if(opt2_in_use())
     opt2_sim_complete();
   
-
+  // Print what % of <MOV, MOV> were due to reg->reg, reg->mem, mem->reg, mem->mem, etc. moves
+  // This can be obtained by looking at the curr_inst_reg_reg_mov_ptr, curr_inst_mem_reg_mov_ptr, etc. hash tables
   char **keys;
   void **values_array;
 
   KeyValuePair *key_value_pairs;
   long count = get_count(voided_global_starlab_types_ht);
   key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
-
 
   starlab_return_key_value_arr(voided_global_starlab_types_ht, &keys, &values_array);
 
@@ -333,86 +331,281 @@ int main(int argc, char* argv[], char* envp[]) {
       key_value_pairs[i].value = values_array[i];
   }
 
-    qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+  qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
-    unsigned long total_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        total_cc_count += *(unsigned long *)key_value_pairs[i].value;
-    }
+  unsigned long total_cc_count = 0;
+  for (long i = 0; i < count; i++) {
+      total_cc_count += *(unsigned long *)key_value_pairs[i].value;
+  }
 
-    unsigned long running_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
-        running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-        if (running_cc_count > ((total_cc_count * 99) / 100)) 
-            break;
-    }
-
-    // Print the CPU cycles % consumed based on the values in the following hash table:
-    // void* voided_prev_mem_mem_curr_reg_reg_ptr = NULL;
-    // void* voided_prev_mem_mem_curr_reg_mem_ptr = NULL;
-    // void* voided_prev_mem_mem_curr_mem_mem_ptr = NULL;
-    // void* voided_prev_reg_reg_curr_reg_reg_ptr = NULL;
-    // void* voided_prev_reg_reg_curr_reg_mem_ptr = NULL;
-    // void* voided_prev_reg_reg_curr_mem_mem_ptr = NULL;
-    // void* voided_prev_reg_mem_curr_reg_mem_ptr = NULL;
-    // void* voided_prev_reg_mem_curr_mem_mem_ptr = NULL;
-    // void* voided_prev_reg_mem_curr_reg_reg_ptr = NULL;
-    void* hash_tables[] = {
-      voided_prev_mem_mem_curr_reg_reg_ptr,
-      voided_prev_mem_mem_curr_reg_mem_ptr,
-      voided_prev_mem_mem_curr_mem_mem_ptr,
-      voided_prev_reg_reg_curr_reg_reg_ptr,
-      voided_prev_reg_reg_curr_reg_mem_ptr,
-      voided_prev_reg_reg_curr_mem_mem_ptr,
-      voided_prev_reg_mem_curr_reg_mem_ptr,
-      voided_prev_reg_mem_curr_mem_mem_ptr,
-      voided_prev_reg_mem_curr_reg_reg_ptr
-    };
-
-    const char* hash_table_names[] = {
-      "prev_mem_mem_curr_reg_reg",
-      "prev_mem_mem_curr_reg_mem",
-      "prev_mem_mem_curr_mem_mem",
-      "prev_reg_reg_curr_reg_reg",
-      "prev_reg_reg_curr_reg_mem",
-      "prev_reg_reg_curr_mem_mem",
-      "prev_reg_mem_curr_reg_mem",
-      "prev_reg_mem_curr_mem_mem",
-      "prev_reg_mem_curr_reg_reg"
-    };
-
-    for (int i = 0; i < sizeof(hash_tables) / sizeof(hash_tables[0]); i++) {
-      count = get_count(hash_tables[i]);
-      key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
-      starlab_return_key_value_arr(hash_tables[i], &keys, &values_array);
-
-      for (long j = 0; j < count; j++) {
-        key_value_pairs[j].key = keys[j];
-        key_value_pairs[j].value = values_array[j];
-      }
-
-      qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
-
-      total_cc_count = 0;
-      for (long j = 0; j < count; j++) {
-        total_cc_count += *(unsigned long *)key_value_pairs[j].value;
-      }
-
-      running_cc_count = 0;
-      for (long j = 0; j < count; j++) {
-        printf("%s: %s, cumulative CCs: %.2f%%\n", hash_table_names[i], key_value_pairs[j].key, ((double)*(unsigned long *)key_value_pairs[j].value / (double)total_cc_count) * 100);
-        running_cc_count += *(unsigned long *)key_value_pairs[j].value;
-        if (running_cc_count > ((total_cc_count * 99) / 100)) 
+  unsigned long running_cc_count = 0;
+  for (long i = 0; i < count; i++) {
+      printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
+      running_cc_count += *(unsigned long *)key_value_pairs[i].value;
+      if (running_cc_count > ((total_cc_count * 99) / 100)) 
           break;
+  }
+
+  // Initialize cycle counters for each category
+  unsigned long cc_prev_mem_mem_curr_reg_reg = 0;
+  unsigned long cc_prev_mem_mem_curr_reg_mem = 0;
+  unsigned long cc_prev_mem_mem_curr_mem_mem = 0;
+  unsigned long cc_prev_reg_reg_curr_reg_reg = 0;
+  unsigned long cc_prev_reg_reg_curr_reg_mem = 0;
+  unsigned long cc_prev_reg_reg_curr_mem_mem = 0;
+  unsigned long cc_prev_reg_mem_curr_reg_mem = 0;
+  unsigned long cc_prev_reg_mem_curr_mem_mem = 0;
+  unsigned long cc_prev_reg_mem_curr_reg_reg = 0;
+
+  // Get the total counts for each category
+  unsigned long total_count_prev_mem_mem_curr_reg_reg = get_count(voided_prev_mem_mem_curr_reg_reg_ptr);
+  unsigned long total_count_prev_mem_mem_curr_reg_mem = get_count(voided_prev_mem_mem_curr_reg_mem_ptr);
+  unsigned long total_count_prev_mem_mem_curr_mem_mem = get_count(voided_prev_mem_mem_curr_mem_mem_ptr);
+  unsigned long total_count_prev_reg_reg_curr_reg_reg = get_count(voided_prev_reg_reg_curr_reg_reg_ptr);
+  unsigned long total_count_prev_reg_reg_curr_reg_mem = get_count(voided_prev_reg_reg_curr_reg_mem_ptr);
+  unsigned long total_count_prev_reg_reg_curr_mem_mem = get_count(voided_prev_reg_reg_curr_mem_mem_ptr);
+  unsigned long total_count_prev_reg_mem_curr_reg_mem = get_count(voided_prev_reg_mem_curr_reg_mem_ptr);
+  unsigned long total_count_prev_reg_mem_curr_mem_mem = get_count(voided_prev_reg_mem_curr_mem_mem_ptr);
+  unsigned long total_count_prev_reg_mem_curr_reg_reg = get_count(voided_prev_reg_mem_curr_reg_reg_ptr);
+
+  // print the counts of each category
+  printf("Total counts:\n");
+  printf("prev_mem_mem_curr_reg_reg: %lu\n", total_count_prev_mem_mem_curr_reg_reg);
+  printf("prev_mem_mem_curr_reg_mem: %lu\n", total_count_prev_mem_mem_curr_reg_mem);
+  printf("prev_mem_mem_curr_mem_mem: %lu\n", total_count_prev_mem_mem_curr_mem_mem);
+  printf("prev_reg_reg_curr_reg_reg: %lu\n", total_count_prev_reg_reg_curr_reg_reg);
+  printf("prev_reg_reg_curr_reg_mem: %lu\n", total_count_prev_reg_reg_curr_reg_mem);
+  printf("prev_reg_reg_curr_mem_mem: %lu\n", total_count_prev_reg_reg_curr_mem_mem);
+  printf("prev_reg_mem_curr_reg_mem: %lu\n", total_count_prev_reg_mem_curr_reg_mem);
+  printf("prev_reg_mem_curr_mem_mem: %lu\n", total_count_prev_reg_mem_curr_mem_mem);
+  printf("prev_reg_mem_curr_reg_reg: %lu\n", total_count_prev_reg_mem_curr_reg_reg);
+
+  // get key value pairs from each category
+
+
+  // prev: mem->mem, curr: reg->reg
+  char **keys_prev_mem_mem_curr_reg_reg;
+  void **values_prev_mem_mem_curr_reg_reg;
+
+  KeyValuePair *key_value_pairs_prev_mem_mem_curr_reg_reg;
+  long count_prev_mem_mem_curr_reg_reg = get_count(voided_prev_mem_mem_curr_reg_reg_ptr);
+  key_value_pairs_prev_mem_mem_curr_reg_reg = (KeyValuePair *)malloc(count_prev_mem_mem_curr_reg_reg * sizeof(KeyValuePair));
+  starlab_return_key_value_arr(voided_prev_mem_mem_curr_reg_reg_ptr, &keys_prev_mem_mem_curr_reg_reg, &values_prev_mem_mem_curr_reg_reg);
+
+  for(long i = 0; i < count_prev_mem_mem_curr_reg_reg; i++) {
+      if (keys_prev_mem_mem_curr_reg_reg[i] == NULL || values_prev_mem_mem_curr_reg_reg[i] == NULL) {
+          fprintf(stderr, "Error: NULL key or value at index %ld for prev_mem_mem_curr_reg_reg\n", i);
       }
+      key_value_pairs_prev_mem_mem_curr_reg_reg[i].key = keys_prev_mem_mem_curr_reg_reg[i];
+      key_value_pairs_prev_mem_mem_curr_reg_reg[i].value = values_prev_mem_mem_curr_reg_reg[i];
+  }
 
-      free(key_value_pairs);
-    }
+  // prev: mem->mem, curr: reg->mem
+  char  **keys_prev_mem_mem_curr_reg_mem;
+  void **values_prev_mem_mem_curr_reg_mem;
 
-  free(keys);
-  free(values_array);
-  
+  KeyValuePair *key_value_pairs_prev_mem_mem_curr_reg_mem;
+  long count_prev_mem_mem_curr_reg_mem = get_count(voided_prev_mem_mem_curr_reg_mem_ptr);
+  key_value_pairs_prev_mem_mem_curr_reg_mem = (KeyValuePair *)malloc(count_prev_mem_mem_curr_reg_mem * sizeof(KeyValuePair));
+  starlab_return_key_value_arr(voided_prev_mem_mem_curr_reg_mem_ptr, &keys_prev_mem_mem_curr_reg_mem, &values_prev_mem_mem_curr_reg_mem);
 
-  return 0;
+  for(long i = 0; i < count_prev_mem_mem_curr_reg_mem; i++) {
+      if (keys_prev_mem_mem_curr_reg_mem[i] == NULL || values_prev_mem_mem_curr_reg_mem[i] == NULL) {
+          fprintf(stderr, "Error: NULL key or value at index %ld for prev_mem_mem_curr_reg_mem\n", i);
+      }
+      key_value_pairs_prev_mem_mem_curr_reg_mem[i].key = keys_prev_mem_mem_curr_reg_mem[i];
+      key_value_pairs_prev_mem_mem_curr_reg_mem[i].value = values_prev_mem_mem_curr_reg_mem[i];
+  }
+
+  // print the values of each category
+  printf("Values for prev_mem_mem_curr_reg_reg:\n");
+  for (long i = 0; i < count_prev_mem_mem_curr_reg_reg; i++) {
+      printf("key: %s, value: %lu\n", key_value_pairs_prev_mem_mem_curr_reg_reg[i].key, *(unsigned long *)key_value_pairs_prev_mem_mem_curr_reg_reg[i].value);
+      cc_prev_mem_mem_curr_reg_reg += *(unsigned long *)key_value_pairs_prev_mem_mem_curr_reg_reg[i].value;
+  }
+
+  // prev: mem->mem, curr: mem->mem
+  char  **keys_prev_mem_mem_curr_mem_mem;
+  void **values_prev_mem_mem_curr_mem_mem;
+
+  KeyValuePair *key_value_pairs_prev_mem_mem_curr_mem_mem;
+  long count_prev_mem_mem_curr_mem_mem = get_count(voided_prev_mem_mem_curr_mem_mem_ptr);
+  key_value_pairs_prev_mem_mem_curr_mem_mem = (KeyValuePair *)malloc(count_prev_mem_mem_curr_mem_mem * sizeof(KeyValuePair));
+  starlab_return_key_value_arr(voided_prev_mem_mem_curr_mem_mem_ptr, &keys_prev_mem_mem_curr_mem_mem, &values_prev_mem_mem_curr_mem_mem);
+
+  for(long i = 0; i < count_prev_mem_mem_curr_mem_mem; i++) {
+      if (keys_prev_mem_mem_curr_mem_mem[i] == NULL || values_prev_mem_mem_curr_mem_mem[i] == NULL) {
+          fprintf(stderr, "Error: NULL key or value at index %ld for prev_mem_mem_curr_mem_mem\n", i);
+      }
+      key_value_pairs_prev_mem_mem_curr_mem_mem[i].key = keys_prev_mem_mem_curr_mem_mem[i];
+      key_value_pairs_prev_mem_mem_curr_mem_mem[i].value = values_prev_mem_mem_curr_mem_mem[i];
+  }
+
+  // print the values of each category
+  printf("Values for prev_mem_mem_curr_mem_mem:\n");
+  for (long i = 0; i < count_prev_mem_mem_curr_mem_mem; i++) {
+      printf("key: %s, value: %lu\n", key_value_pairs_prev_mem_mem_curr_mem_mem[i].key, *(unsigned long *)key_value_pairs_prev_mem_mem_curr_mem_mem[i].value);
+      cc_prev_mem_mem_curr_mem_mem += *(unsigned long *)key_value_pairs_prev_mem_mem_curr_mem_mem[i].value;
+  }
+
+  // prev: reg->reg, curr: reg->reg
+  char  **keys_prev_reg_reg_curr_reg_reg;
+  void **values_prev_reg_reg_curr_reg_reg;
+
+  KeyValuePair *key_value_pairs_prev_reg_reg_curr_reg_reg;
+  long count_prev_reg_reg_curr_reg_reg = get_count(voided_prev_reg_reg_curr_reg_reg_ptr);
+  key_value_pairs_prev_reg_reg_curr_reg_reg = (KeyValuePair *)malloc(count_prev_reg_reg_curr_reg_reg * sizeof(KeyValuePair));
+  starlab_return_key_value_arr(voided_prev_reg_reg_curr_reg_reg_ptr, &keys_prev_reg_reg_curr_reg_reg, &values_prev_reg_reg_curr_reg_reg);
+
+  for(long i = 0; i < count_prev_reg_reg_curr_reg_reg; i++) {
+      if (keys_prev_reg_reg_curr_reg_reg[i] == NULL || values_prev_reg_reg_curr_reg_reg[i] == NULL) {
+          fprintf(stderr, "Error: NULL key or value at index %ld for prev_reg_reg_curr_reg_reg\n", i);
+      }
+      key_value_pairs_prev_reg_reg_curr_reg_reg[i].key = keys_prev_reg_reg_curr_reg_reg[i];
+      key_value_pairs_prev_reg_reg_curr_reg_reg[i].value = values_prev_reg_reg_curr_reg_reg[i];
+  }
+
+    // print the values of each category
+  printf("Values for prev_reg_reg_curr_reg_reg:\n");
+  for (long i = 0; i < count_prev_reg_reg_curr_reg_reg; i++) {
+      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_reg_curr_reg_reg[i].key, *(unsigned long *)key_value_pairs_prev_reg_reg_curr_reg_reg[i].value);
+      cc_prev_reg_reg_curr_reg_reg += *(unsigned long *)key_value_pairs_prev_reg_reg_curr_reg_reg[i].value;
+  }
+
+  // prev: reg->reg, curr: reg->mem
+  char  **keys_prev_reg_reg_curr_reg_mem;
+  void **values_prev_reg_reg_curr_reg_mem;
+
+  KeyValuePair *key_value_pairs_prev_reg_reg_curr_reg_mem;
+  long count_prev_reg_reg_curr_reg_mem = get_count(voided_prev_reg_reg_curr_reg_mem_ptr);
+  key_value_pairs_prev_reg_reg_curr_reg_mem = (KeyValuePair *)malloc(count_prev_reg_reg_curr_reg_mem * sizeof(KeyValuePair));
+  starlab_return_key_value_arr(voided_prev_reg_reg_curr_reg_mem_ptr, &keys_prev_reg_reg_curr_reg_mem, &values_prev_reg_reg_curr_reg_mem);
+
+  for(long i = 0; i < count_prev_reg_reg_curr_reg_mem; i++) {
+      if (keys_prev_reg_reg_curr_reg_mem[i] == NULL || values_prev_reg_reg_curr_reg_mem[i] == NULL) {
+          fprintf(stderr, "Error: NULL key or value at index %ld for prev_reg_reg_curr_reg_mem\n", i);
+      }
+      key_value_pairs_prev_reg_reg_curr_reg_mem[i].key = keys_prev_reg_reg_curr_reg_mem[i];
+      key_value_pairs_prev_reg_reg_curr_reg_mem[i].value = values_prev_reg_reg_curr_reg_mem[i];
+  }
+
+    // print the values of each category
+  printf("Values for prev_reg_reg_curr_reg_mem:\n");
+  for (long i = 0; i < count_prev_reg_reg_curr_reg_mem; i++) {
+      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_reg_curr_reg_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_reg_curr_reg_mem[i].value);
+      cc_prev_reg_reg_curr_reg_mem += *(unsigned long *)key_value_pairs_prev_reg_reg_curr_reg_mem[i].value;
+  }
+
+  // prev: reg->reg, curr: mem->mem
+  char  **keys_prev_reg_reg_curr_mem_mem;
+  void **values_prev_reg_reg_curr_mem_mem;
+
+  KeyValuePair *key_value_pairs_prev_reg_reg_curr_mem_mem;
+  long count_prev_reg_reg_curr_mem_mem = get_count(voided_prev_reg_reg_curr_mem_mem_ptr);
+  key_value_pairs_prev_reg_reg_curr_mem_mem = (KeyValuePair *)malloc(count_prev_reg_reg_curr_mem_mem * sizeof(KeyValuePair));
+  starlab_return_key_value_arr(voided_prev_reg_reg_curr_mem_mem_ptr, &keys_prev_reg_reg_curr_mem_mem, &values_prev_reg_reg_curr_mem_mem);
+
+  for(long i = 0; i < count_prev_reg_reg_curr_mem_mem; i++) {
+      if (keys_prev_reg_reg_curr_mem_mem[i] == NULL || values_prev_reg_reg_curr_mem_mem[i] == NULL) {
+          fprintf(stderr, "Error: NULL key or value at index %ld for prev_reg_reg_curr_mem_mem\n", i);
+      }
+      key_value_pairs_prev_reg_reg_curr_mem_mem[i].key = keys_prev_reg_reg_curr_mem_mem[i];
+      key_value_pairs_prev_reg_reg_curr_mem_mem[i].value = values_prev_reg_reg_curr_mem_mem[i];
+  }
+
+    // print the values of each category
+  printf("Values for prev_reg_reg_curr_mem_mem:\n");
+  for (long i = 0; i < count_prev_reg_reg_curr_mem_mem; i++) {
+      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_reg_curr_mem_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_reg_curr_mem_mem[i].value);
+      cc_prev_reg_reg_curr_mem_mem += *(unsigned long *)key_value_pairs_prev_reg_reg_curr_mem_mem[i].value;
+  }
+
+  // prev: reg->mem, curr: reg->mem
+  char  **keys_prev_reg_mem_curr_reg_mem;
+  void **values_prev_reg_mem_curr_reg_mem;
+
+  KeyValuePair *key_value_pairs_prev_reg_mem_curr_reg_mem;
+  long count_prev_reg_mem_curr_reg_mem = get_count(voided_prev_reg_mem_curr_reg_mem_ptr);
+  key_value_pairs_prev_reg_mem_curr_reg_mem = (KeyValuePair *)malloc(count_prev_reg_mem_curr_reg_mem * sizeof(KeyValuePair));
+  starlab_return_key_value_arr(voided_prev_reg_mem_curr_reg_mem_ptr, &keys_prev_reg_mem_curr_reg_mem, &values_prev_reg_mem_curr_reg_mem);
+
+  for(long i = 0; i < count_prev_reg_mem_curr_reg_mem; i++) {
+      if (keys_prev_reg_mem_curr_reg_mem[i] == NULL || values_prev_reg_mem_curr_reg_mem[i] == NULL) {
+          fprintf(stderr, "Error: NULL key or value at index %ld for prev_reg_mem_curr_reg_mem\n", i);
+      }
+      key_value_pairs_prev_reg_mem_curr_reg_mem[i].key = keys_prev_reg_mem_curr_reg_mem[i];
+      key_value_pairs_prev_reg_mem_curr_reg_mem[i].value = values_prev_reg_mem_curr_reg_mem[i];
+  }
+
+    // print the values of each category
+  printf("Values for prev_reg_mem_curr_reg_mem:\n");
+  for (long i = 0; i < count_prev_reg_mem_curr_reg_mem; i++) {
+      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_mem_curr_reg_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_mem_curr_reg_mem[i].value);
+      cc_prev_reg_mem_curr_reg_mem += *(unsigned long *)key_value_pairs_prev_reg_mem_curr_reg_mem[i].value;
+  }
+
+  // prev: reg->mem, curr: mem->mem
+  char  **keys_prev_reg_mem_curr_mem_mem;
+  void **values_prev_reg_mem_curr_mem_mem;
+
+  KeyValuePair *key_value_pairs_prev_reg_mem_curr_mem_mem;
+  long count_prev_reg_mem_curr_mem_mem = get_count(voided_prev_reg_mem_curr_mem_mem_ptr);
+  key_value_pairs_prev_reg_mem_curr_mem_mem = (KeyValuePair *)malloc(count_prev_reg_mem_curr_mem_mem * sizeof(KeyValuePair));
+  starlab_return_key_value_arr(voided_prev_reg_mem_curr_mem_mem_ptr, &keys_prev_reg_mem_curr_mem_mem, &values_prev_reg_mem_curr_mem_mem);
+
+  for(long i = 0; i < count_prev_reg_mem_curr_mem_mem; i++) {
+      if (keys_prev_reg_mem_curr_mem_mem[i] == NULL || values_prev_reg_mem_curr_mem_mem[i] == NULL) {
+          fprintf(stderr, "Error: NULL key or value at index %ld for prev_reg_mem_curr_mem_mem\n", i);
+      }
+      key_value_pairs_prev_reg_mem_curr_mem_mem[i].key = keys_prev_reg_mem_curr_mem_mem[i];
+      key_value_pairs_prev_reg_mem_curr_mem_mem[i].value = values_prev_reg_mem_curr_mem_mem[i];
+  }
+
+    // print the values of each category
+  printf("Values for prev_reg_mem_curr_mem_mem:\n");
+  for (long i = 0; i < count_prev_reg_mem_curr_mem_mem; i++) {
+      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_mem_curr_mem_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_mem_curr_mem_mem[i].value);
+      cc_prev_reg_mem_curr_mem_mem += *(unsigned long *)key_value_pairs_prev_reg_mem_curr_mem_mem[i].value;
+  }
+
+  // prev: reg->mem, curr: reg->reg
+  char  **keys_prev_reg_mem_curr_reg_reg;
+  void **values_prev_reg_mem_curr_reg_reg;
+
+  KeyValuePair *key_value_pairs_prev_reg_mem_curr_reg_reg;
+  long count_prev_reg_mem_curr_reg_reg = get_count(voided_prev_reg_mem_curr_reg_reg_ptr);
+  key_value_pairs_prev_reg_mem_curr_reg_reg = (KeyValuePair *)malloc(count_prev_reg_mem_curr_reg_reg * sizeof(KeyValuePair));
+  starlab_return_key_value_arr(voided_prev_reg_mem_curr_reg_reg_ptr, &keys_prev_reg_mem_curr_reg_reg, &values_prev_reg_mem_curr_reg_reg);
+
+  for(long i = 0; i < count_prev_reg_mem_curr_reg_reg; i++) {
+      if (keys_prev_reg_mem_curr_reg_reg[i] == NULL || values_prev_reg_mem_curr_reg_reg[i] == NULL) {
+          fprintf(stderr, "Error: NULL key or value at index %ld for prev_reg_mem_curr_reg_reg\n", i);
+      }
+      key_value_pairs_prev_reg_mem_curr_reg_reg[i].key = keys_prev_reg_mem_curr_reg_reg[i];
+      key_value_pairs_prev_reg_mem_curr_reg_reg[i].value = values_prev_reg_mem_curr_reg_reg[i];
+  }
+
+    // print the values of each category
+  printf("Values for prev_reg_mem_curr_reg_reg:\n");
+  for (long i = 0; i < count_prev_reg_mem_curr_reg_reg; i++) {
+      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_mem_curr_reg_reg[i].key, *(unsigned long *)key_value_pairs_prev_reg_mem_curr_reg_reg[i].value);
+      cc_prev_reg_mem_curr_reg_reg += *(unsigned long *)key_value_pairs_prev_reg_mem_curr_reg_reg[i].value;
+  }
+
+
+  // Print the final percentage
+  printf("Final percentages:\n");
+  printf("cc_prev_mem_mem_curr_reg_reg: %.2f%%\n", ((double)cc_prev_mem_mem_curr_reg_reg / (double)total_cc_count) * 100);
+  printf("cc_prev_mem_mem_curr_reg_mem: %.2f%%\n", ((double)cc_prev_mem_mem_curr_reg_mem / (double)total_cc_count) * 100);
+  printf("cc_prev_mem_mem_curr_mem_mem: %.2f%%\n", ((double)cc_prev_mem_mem_curr_mem_mem / (double)total_cc_count) * 100);
+  printf("cc_prev_reg_reg_curr_reg_reg: %.2f%%\n", ((double)cc_prev_reg_reg_curr_reg_reg / (double)total_cc_count) * 100);
+  printf("cc_prev_reg_reg_curr_reg_mem: %.2f%%\n", ((double)cc_prev_reg_reg_curr_reg_mem / (double)total_cc_count) * 100);
+  printf("cc_prev_reg_reg_curr_mem_mem: %.2f%%\n", ((double)cc_prev_reg_reg_curr_mem_mem / (double)total_cc_count) * 100);
+  printf("cc_prev_reg_mem_curr_reg_mem: %.2f%%\n", ((double)cc_prev_reg_mem_curr_reg_mem / (double)total_cc_count) * 100);
+  printf("cc_prev_reg_mem_curr_mem_mem: %.2f%%\n", ((double)cc_prev_reg_mem_curr_mem_mem / (double)total_cc_count) * 100);
+  printf("cc_prev_reg_mem_curr_reg_reg: %.2f%%\n", ((double)cc_prev_reg_mem_curr_reg_reg / (double)total_cc_count) * 100);
+
+
+    free(key_value_pairs);
+    return 0;
 }
