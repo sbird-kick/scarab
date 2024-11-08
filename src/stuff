@@ -1,5 +1,5 @@
-Scarab gitrev: b3818a0
-Scarab started at Fri Nov  8 13:48:03 2024
+Scarab gitrev: 41019fb
+Scarab started at Fri Nov  8 14:46:24 2024
 
 Initialized Ramulator. 
 Icache tuple_string: <ALU,JUMP>
@@ -16,6 +16,7 @@ Icache tuple_string: <ALU,JUMP>
 Icache tuple_string: <JUMP,MOV>
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 0
+Icache: inserted address 00007F9A15759068 into prev_rm_curr_rr_ptr
 Icache tuple_string: <MOV,ALU>
 Icache tuple_string: <ALU,LOCK>
 Icache tuple_string: <LOCK,LOCK>
@@ -43,7 +44,11 @@ Exec: tuple_string: <ALU,CALL>
 Exec: tuple_string: <CALL,MOV>
 Exec: tuple_string: <ALU,CALL>
 Exec: tuple_string: <MOV,MOV>
-Exec: Since tuple_string is MOV,MOV
+Exec: since tuple is <MOV,MOV>, adding 170
+prev addr: 00007F9A15759068, this addr: 00007F9A15759070
+Exec: Prev: this instruction performs: mem->reg
+Exec: Curr: this instruction performs: reg->reg
+Exec: Added value: 170 in prev_rm_curr_rr_ptr
 Exec: tuple_string: <MOV,ALU>
 Exec: tuple_string: <JUMP,MOV>
 Exec: tuple_string: <MOV,ALU>
@@ -51,8 +56,10 @@ Exec: tuple_string: <ALU,ALU>
 Exec: tuple_string: <ALU,JUMP>
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 0
+Icache: inserted address 00007F9A15758C50 into prev_rr_curr_mr_ptr
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 0
+Icache: inserted address 00007F9A15758C53 into prev_rm_curr_rm_ptr
 Icache tuple_string: <MOV,ALU>
 Icache tuple_string: <ALU,JUMP>
 Exec: tuple_string: <MOV,ALU>
@@ -61,6 +68,7 @@ Icache tuple_string: <POP,POP>
 Icache tuple_string: <POP,MOV>
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 16
+Icache: inserted address 00007F9A15755EF9 into prev_rm_curr_rm_ptr
 Icache tuple_string: <MOV,LOCK>
 Icache tuple_string: <LOCK,LOCK>
 Icache tuple_string: <LOCK,LOCK>
@@ -69,9 +77,17 @@ Icache tuple_string: <ALU,JUMP>
 Icache tuple_string: <JUMP,MOV>
 Icache tuple_string: <MOV,JUMP>
 Exec: tuple_string: <MOV,MOV>
-Exec: Since tuple_string is MOV,MOV
+Exec: since tuple is <MOV,MOV>, adding 24
+prev addr: 00007F9A15758C50, this addr: 00007F9A15758C53
+Exec: Prev: this instruction performs: reg->reg
+Exec: Curr: this instruction performs: mem->reg
+Exec: Added value: 24 in prev_rr_curr_mr_ptr
 Exec: tuple_string: <MOV,MOV>
-Exec: Since tuple_string is MOV,MOV
+Exec: since tuple is <MOV,MOV>, adding 15
+prev addr: 00007F9A15755EF9, this addr: 00007F9A15755EFE
+Exec: Prev: this instruction performs: mem->reg
+Exec: Curr: this instruction performs: mem->reg
+Exec: Added value: 15 in prev_rm_curr_rm_ptr
 Exec: tuple_string: <JUMP,MOV>
 Exec: tuple_string: <JUMP,POP>
 Exec: tuple_string: <ALU,LOCK>
@@ -101,7 +117,11 @@ Exec: tuple_string: <ALU,JUMP>
 Exec: tuple_string: <ALU,ALU>
 Exec: tuple_string: <MOV,LOCK>
 Exec: tuple_string: <MOV,MOV>
-Exec: Since tuple_string is MOV,MOV
+Exec: since tuple is <MOV,MOV>, adding 226
+prev addr: 00007F9A15758C53, this addr: 00007F9A15758C57
+Exec: Prev: this instruction performs: mem->reg
+Exec: Curr: this instruction performs: mem->reg
+Exec: Added value: 226 in prev_rm_curr_rm_ptr
 Icache tuple_string: <JUMP,MOV>
 Icache tuple_string: <CALL,CALL>
 Icache tuple_string: <CALL,ALU>
@@ -109,6 +129,7 @@ Icache tuple_string: <ALU,JUMP>
 Icache tuple_string: <JUMP,MOV>
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 565
+Icache: added 565 to address 00007F9A15759068 in prev_rm_curr_rr_ptr
 Icache tuple_string: <MOV,ALU>
 Icache tuple_string: <LOCK,LOCK>
 Icache tuple_string: <LOCK,JUMP>
@@ -126,14 +147,17 @@ Exec: tuple_string: <ALU,LOCK>
 Icache tuple_string: <CALL,MOV>
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 296
+Icache: added 296 to address 00007F9A15758C50 in prev_rr_curr_mr_ptr
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 296
+Icache: added 296 to address 00007F9A15758C53 in prev_rm_curr_rm_ptr
 Icache tuple_string: <MOV,ALU>
 Icache tuple_string: <ALU,JUMP>
 Icache tuple_string: <POP,POP>
 Icache tuple_string: <POP,MOV>
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 280
+Icache: added 280 to address 00007F9A15755EF9 in prev_rm_curr_rm_ptr
 Icache tuple_string: <LOCK,LOCK>
 Icache tuple_string: <LOCK,ALU>
 Icache tuple_string: <ALU,JUMP>
@@ -169,12 +193,20 @@ Exec: tuple_string: <CALL,MOV>
 Exec: tuple_string: <MOV,ALU>
 Exec: tuple_string: <MOV,ALU>
 Exec: tuple_string: <MOV,MOV>
-Exec: Since tuple_string is MOV,MOV
+Exec: since tuple is <MOV,MOV>, adding 20
+prev addr: 00007F9A15759068, this addr: 00007F9A15759070
+Exec: Prev: this instruction performs: mem->reg
+Exec: Curr: this instruction performs: reg->reg
+Exec: Added value: 20 in prev_rm_curr_rr_ptr
 Exec: tuple_string: <ALU,CALL>
 Exec: tuple_string: <MOV,ALU>
 Exec: tuple_string: <ALU,JUMP>
 Exec: tuple_string: <MOV,MOV>
-Exec: Since tuple_string is MOV,MOV
+Exec: since tuple is <MOV,MOV>, adding 15
+prev addr: 00007F9A15755EF9, this addr: 00007F9A15755EFE
+Exec: Prev: this instruction performs: mem->reg
+Exec: Curr: this instruction performs: mem->reg
+Exec: Added value: 15 in prev_rm_curr_rm_ptr
 Exec: tuple_string: <JUMP,MOV>
 Exec: tuple_string: <ALU,LOCK>
 Exec: tuple_string: <JUMP,POP>
@@ -183,7 +215,11 @@ Exec: tuple_string: <MOV,ALU>
 Exec: tuple_string: <ALU,LOCK>
 Exec: tuple_string: <ALU,ALU>
 Exec: tuple_string: <MOV,MOV>
-Exec: Since tuple_string is MOV,MOV
+Exec: since tuple is <MOV,MOV>, adding 19
+prev addr: 00007F9A15758C50, this addr: 00007F9A15758C53
+Exec: Prev: this instruction performs: reg->reg
+Exec: Curr: this instruction performs: mem->reg
+Exec: Added value: 19 in prev_rr_curr_mr_ptr
 Exec: tuple_string: <ALU,JUMP>
 Exec: tuple_string: <JUMP,MOV>
 Exec: tuple_string: <MOV,LOCK>
@@ -196,7 +232,11 @@ Exec: tuple_string: <ALU,ALU>
 Exec: tuple_string: <MOV,LOCK>
 Exec: tuple_string: <ALU,JUMP>
 Exec: tuple_string: <MOV,MOV>
-Exec: Since tuple_string is MOV,MOV
+Exec: since tuple is <MOV,MOV>, adding 24
+prev addr: 00007F9A15758C53, this addr: 00007F9A15758C57
+Exec: Prev: this instruction performs: mem->reg
+Exec: Curr: this instruction performs: mem->reg
+Exec: Added value: 24 in prev_rm_curr_rm_ptr
 Exec: tuple_string: <JUMP,ALU>
 Exec: tuple_string: <JUMP,ALU>
 Exec: tuple_string: <ALU,JUMP>
@@ -217,6 +257,7 @@ Icache tuple_string: <ALU,JUMP>
 Icache tuple_string: <JUMP,MOV>
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 38
+Icache: added 38 to address 00007F9A15759068 in prev_rm_curr_rr_ptr
 Icache tuple_string: <MOV,ALU>
 Icache tuple_string: <LOCK,LOCK>
 Icache tuple_string: <LOCK,JUMP>
@@ -236,8 +277,10 @@ Exec: tuple_string: <ALU,JUMP>
 Icache tuple_string: <CALL,MOV>
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 38
+Icache: added 38 to address 00007F9A15758C50 in prev_rr_curr_mr_ptr
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 38
+Icache: added 38 to address 00007F9A15758C53 in prev_rm_curr_rm_ptr
 Icache tuple_string: <MOV,ALU>
 Icache tuple_string: <ALU,JUMP>
 Icache tuple_string: <JUMP,MOV>
@@ -260,6 +303,7 @@ Exec: tuple_string: <ALU,ALU>
 Exec: tuple_string: <ALU,JUMP>
 Icache tuple_string: <MOV,MOV>
 Icache: since tuple is <MOV,MOV>, adding 0
+Icache: inserted address 00007F9A15753EC0 into prev_rm_curr_rr_ptr
 Icache tuple_string: <MOV,ALU>
 Icache tuple_string: <ALU,ALU>
 Icache tuple_string: <ALU,ALU>
@@ -270,12 +314,16 @@ Exec: tuple_string: <ALU,ALU>
 Exec: tuple_string: <JUMP,ALU>
 Exec: tuple_string: <ALU,ALU>
 Exec: tuple_string: <MOV,MOV>
-Exec: Since tuple_string is MOV,MOV
+Exec: since tuple is <MOV,MOV>, adding 128
+prev addr: 00007F9A15753EC0, this addr: 00007F9A15753EC3
+Exec: Prev: this instruction performs: mem->reg
+Exec: Curr: this instruction performs: reg->reg
+Exec: Added value: 128 in prev_rm_curr_rr_ptr
 Exec: tuple_string: <MOV,ALU>
 Exec: tuple_string: <ALU,JUMP>
 Exec: tuple_string: <ALU,ALU>
 ** Core 0 Finished:    insts:60          cycles:1213        time:379062500           -- 0.05 IPC (0.05 IPC) --  N/A  KIPS (inf KIPS)
-Scarab finished at Fri Nov  8 13:48:03 2024
+Scarab finished at Fri Nov  8 14:46:24 2024
 
 Total CC count: 21031
 inst tuple: <MOV,ALU>, cumulative CCs: 2999
@@ -304,18 +352,18 @@ cc_prev_mem_mem_curr_reg_reg: 0.00%
 cc_prev_mem_mem_curr_reg_mem: 0.00%
 cc_prev_mem_mem_curr_mem_mem: 0.00%
 cc_prev_reg_reg_curr_reg_reg: 0.00%
-cc_prev_reg_reg_curr_reg_mem: 1.59%
+cc_prev_reg_reg_curr_reg_mem: 1.79%
 cc_prev_reg_reg_curr_mem_mem: 0.00%
 cc_prev_reg_mem_curr_reg_mem: 4.33%
 cc_prev_reg_mem_curr_mem_mem: 0.00%
-cc_prev_reg_mem_curr_reg_reg: 2.87%
+cc_prev_reg_mem_curr_reg_reg: 4.38%
 Computation:
 cc_prev_mem_mem_curr_reg_reg: 0 / 21031
 cc_prev_mem_mem_curr_reg_mem: 0 / 21031
 cc_prev_mem_mem_curr_mem_mem: 0 / 21031
 cc_prev_reg_reg_curr_reg_reg: 0 / 21031
-cc_prev_reg_reg_curr_reg_mem: 334 / 21031
+cc_prev_reg_reg_curr_reg_mem: 377 / 21031
 cc_prev_reg_reg_curr_mem_mem: 0 / 21031
 cc_prev_reg_mem_curr_reg_mem: 910 / 21031
 cc_prev_reg_mem_curr_mem_mem: 0 / 21031
-cc_prev_reg_mem_curr_reg_reg: 603 / 21031
+cc_prev_reg_mem_curr_reg_reg: 921 / 21031
