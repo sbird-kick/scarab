@@ -1058,6 +1058,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
           // printf("Prev iclass: %s, This iclass: %s\n", prev_iclass, this_iclass);
 
+          printf("Icache tuple_string: %s\n", tuple_string);
+
           if(voided_global_starlab_types_ht == NULL)
           {
             voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
@@ -1065,10 +1067,48 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
           // Folloing search is looking for tuples in starlab hashtable, but then we don't 
           // care about that since we know that we are looking for <MOV, MOV> only 
-          if((strcmp(prev_iclass, "MOV") == 0) && strcmp(this_iclass, "MOV") == 0)
+    
+          // if tuple_string is <MOV, MOV>
+          if(strcmp (tuple_string, "<MOV,MOV>") == 0)
+
               {
+
+                printf("Icache: since tuple is <MOV,MOV>, adding %lu\n", cc_to_add);
                 // printf("\033[0;34mMOV MOV\033[0m\n");
                 // printf("prev addr: %s, this addr: %s\n", prev_address_as_string, address_as_string);
+
+                // print the type of MOV instruction for prev and current instructions
+                // if(starlab_search(inst_mem_mem_mov_ptr, prev_address_as_string))
+                // {
+                //   printf("Prev: this instruction performs: mem->mem\n");
+                // }
+
+                // else if(starlab_search(inst_reg_reg_mov_ptr, prev_address_as_string))
+                // {
+                //   printf("Prev: this instruction performs: reg->reg\n");
+                // }
+
+                // else if(starlab_search(inst_mem_reg_mov_ptr, prev_address_as_string))
+                // {
+                //   printf("Prev: this instruction performs: mem->reg\n");
+                // }
+
+                // // print the type of MOV instruction for current instruction
+                // if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
+                // {
+                //   printf("Curr: this instruction performs: mem->mem\n");
+                // }
+
+                // else if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
+                // {
+                //   printf("Curr: this instruction performs: reg->reg\n");
+                // }
+
+                // else if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
+                // {
+                //   printf("Curr: this instruction performs: mem->reg\n");
+                // }
+
 
                 // Identfy the type of MOV instruction for both instructions 
 
@@ -1079,7 +1119,18 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                   if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_mm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_mm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    // not just insert, just add it to the existing value in the hashtable
+                    unsigned long* prev_mm_curr_rr_ptr_val = (unsigned long*) starlab_search(prev_mm_curr_rr_ptr, prev_address_as_string);
+                    if(prev_mm_curr_rr_ptr_val == NULL)
+                    {
+                      starlab_insert(prev_mm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      *prev_mm_curr_rr_ptr_val += cc_to_add;
+                    }
+
                     // printf("\033[0;34mICache: inserted address %s into prev_mm_curr_rr_ptr\033[0m\n", prev_address_as_string);
                   }
 
@@ -1091,8 +1142,18 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                   if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_mm_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_mm_curr_mr_ptr, prev_address_as_string, &cc_to_add);
                     // printf("\033[0;34mICache: inserted address %s into prev_mm_curr_mr_ptr\033[0m\n", prev_address_as_string);
+
+                    unsigned long* prev_mm_curr_mr_ptr_val = (unsigned long*) starlab_search(prev_mm_curr_mr_ptr, prev_address_as_string);
+                    if(prev_mm_curr_mr_ptr_val == NULL)
+                    {
+                      starlab_insert(prev_mm_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      *prev_mm_curr_mr_ptr_val += cc_to_add;
+                    }
                   }
                 }
 
@@ -1102,8 +1163,18 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                   if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_mm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_mm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
                     // printf("\033[0;34mICache: inserted address %s into prev_mm_curr_mm_ptr\033[0m\n", prev_address_as_string);
+
+                    unsigned long* prev_mm_curr_mm_ptr_val = (unsigned long*) starlab_search(prev_mm_curr_mm_ptr, prev_address_as_string);
+                    if(prev_mm_curr_mm_ptr_val == NULL)
+                    {
+                      starlab_insert(prev_mm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      *prev_mm_curr_mm_ptr_val += cc_to_add;
+                    }
                   }
                 }
 
@@ -1113,8 +1184,18 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                   if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rr_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_rr_curr_rr_ptr, prev_address_as_string, &cc_to_add);
                     // printf("\033[0;34mICache: inserted address %s into prev_rr_curr_rr_ptr\033[0m\n", prev_address_as_string);
+
+                    unsigned long* prev_rr_curr_rr_ptr_val = (unsigned long*) starlab_search(prev_rr_curr_rr_ptr, prev_address_as_string);
+                    if(prev_rr_curr_rr_ptr_val == NULL)
+                    {
+                      starlab_insert(prev_rr_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      *prev_rr_curr_rr_ptr_val += cc_to_add;
+                    }
                   }
                 }
 
@@ -1124,8 +1205,18 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                   if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rr_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_rr_curr_mr_ptr, prev_address_as_string, &cc_to_add);
                     // printf("\033[0;34mICache: inserted address %s into prev_rr_curr_mr_ptr\033[0m\n", prev_address_as_string);
+
+                    unsigned long* prev_rr_curr_mr_ptr_val = (unsigned long*) starlab_search(prev_rr_curr_mr_ptr, prev_address_as_string);
+                    if(prev_rr_curr_mr_ptr_val == NULL)
+                    {
+                      starlab_insert(prev_rr_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      *prev_rr_curr_mr_ptr_val += cc_to_add;
+                    }
                   }
                 }
 
@@ -1135,8 +1226,18 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                   if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rr_curr_mm_ptr, prev_address_as_string, &cc_to_add);
-                    printf("\033[0;34mICache: inserted address %s into prev_rr_curr_mm_ptr\033[0m\n", prev_address_as_string);
+                    // starlab_insert(prev_rr_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    // printf("\033[0;34mICache: inserted address %s into prev_rr_curr_mm_ptr\033[0m\n", prev_address_as_string);
+
+                    unsigned long* prev_rr_curr_mm_ptr_val = (unsigned long*) starlab_search(prev_rr_curr_mm_ptr, prev_address_as_string);
+                    if(prev_rr_curr_mm_ptr_val == NULL)
+                    {
+                      starlab_insert(prev_rr_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      *prev_rr_curr_mm_ptr_val += cc_to_add;
+                    }
                   }
                 }
 
@@ -1146,8 +1247,18 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                   if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rm_curr_rm_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_rm_curr_rm_ptr, prev_address_as_string, &cc_to_add);
                     // printf("\033[0;34mICache: inserted address %s into prev_rm_curr_rm_ptr\033[0m\n", prev_address_as_string);
+
+                    unsigned long* prev_rm_curr_rm_ptr_val = (unsigned long*) starlab_search(prev_rm_curr_rm_ptr, prev_address_as_string);
+                    if(prev_rm_curr_rm_ptr_val == NULL)
+                    {
+                      starlab_insert(prev_rm_curr_rm_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      *prev_rm_curr_rm_ptr_val += cc_to_add;
+                    }
                   }
                 }
 
@@ -1157,8 +1268,18 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                   if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_rm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
                     // printf("\033[0;34mICache: inserted address %s into prev_rm_curr_mm_ptr\033[0m\n", prev_address_as_string);
+
+                    unsigned long* prev_rm_curr_mm_ptr_val = (unsigned long*) starlab_search(prev_rm_curr_mm_ptr, prev_address_as_string);
+                    if(prev_rm_curr_mm_ptr_val == NULL)
+                    {
+                      starlab_insert(prev_rm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      *prev_rm_curr_mm_ptr_val += cc_to_add;
+                    }
                   }
                 }
 
@@ -1168,8 +1289,18 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                   if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_rm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
                     // printf("\033[0;34mICache: inserted address %s into prev_rm_curr_rr_ptr\033[0m\n", prev_address_as_string);
+
+                    unsigned long* prev_rm_curr_rr_ptr_val = (unsigned long*) starlab_search(prev_rm_curr_rr_ptr, prev_address_as_string);
+                    if(prev_rm_curr_rr_ptr_val == NULL)
+                    {
+                      starlab_insert(prev_rm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      *prev_rm_curr_rr_ptr_val += cc_to_add;
+                    }
                   }
                 }
 

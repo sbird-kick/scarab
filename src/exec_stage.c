@@ -545,21 +545,35 @@ void update_exec_stage(Stage_Data* src_sd) {
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, this_iclass);
 
+          printf("Exec: tuple_string: %s\n", tuple_string);
+
           if(voided_global_starlab_types_ht == NULL)
           {
             voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
           }
 
 
-            if((strcmp(prev_iclass, "MOV") == 0) && strcmp(this_iclass, "MOV") == 0)
+            if(strcmp (tuple_string, "<MOV,MOV>") == 0)
             {
+
+              printf("Exec: Since tuple_string is MOV,MOV\n");
               if(starlab_search(inst_mem_mem_mov_ptr, prev_address_as_string))
                 {
 
                   if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_mm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_mm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    // just add to the existing value in the hashtable
+                    if(!starlab_search(prev_mm_curr_rr_ptr, prev_address_as_string))
+                    {
+                      starlab_insert(prev_mm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      unsigned long* cc_ptr = (unsigned long*) starlab_search(prev_mm_curr_rr_ptr, prev_address_as_string);
+                      *cc_ptr += cc_to_add;
+                    }
                   }
 
                 }
@@ -570,7 +584,17 @@ void update_exec_stage(Stage_Data* src_sd) {
                   if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_mm_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_mm_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+
+                    if(!starlab_search(prev_mm_curr_mr_ptr, prev_address_as_string))
+                    {
+                      starlab_insert(prev_mm_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      unsigned long* cc_ptr = (unsigned long*) starlab_search(prev_mm_curr_mr_ptr, prev_address_as_string);
+                      *cc_ptr += cc_to_add;
+                    }
                   }
                 }
 
@@ -580,7 +604,17 @@ void update_exec_stage(Stage_Data* src_sd) {
                   if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mmem->mem\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_mm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_mm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+
+                    if(!starlab_search(prev_mm_curr_mm_ptr, prev_address_as_string))
+                    {
+                      starlab_insert(prev_mm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      unsigned long* cc_ptr = (unsigned long*) starlab_search(prev_mm_curr_mm_ptr, prev_address_as_string);
+                      *cc_ptr += cc_to_add;
+                    }
                   }
                 }
 
@@ -590,7 +624,17 @@ void update_exec_stage(Stage_Data* src_sd) {
                   if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rr_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_rr_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+
+                    if(!starlab_search(prev_rr_curr_rr_ptr, prev_address_as_string))
+                    {
+                      starlab_insert(prev_rr_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      unsigned long* cc_ptr = (unsigned long*) starlab_search(prev_rr_curr_rr_ptr, prev_address_as_string);
+                      *cc_ptr += cc_to_add;
+                    }
                   }
                 }
 
@@ -600,7 +644,17 @@ void update_exec_stage(Stage_Data* src_sd) {
                   if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rr_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_rr_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+
+                    if(!starlab_search(prev_rr_curr_mr_ptr, prev_address_as_string))
+                    {
+                      starlab_insert(prev_rr_curr_mr_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      unsigned long* cc_ptr = (unsigned long*) starlab_search(prev_rr_curr_mr_ptr, prev_address_as_string);
+                      *cc_ptr += cc_to_add;
+                    }
                   }
                 }
 
@@ -610,7 +664,17 @@ void update_exec_stage(Stage_Data* src_sd) {
                   if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->reg\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rr_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_rr_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+
+                    if(!starlab_search(prev_rr_curr_mm_ptr, prev_address_as_string))
+                    {
+                      starlab_insert(prev_rr_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      unsigned long* cc_ptr = (unsigned long*) starlab_search(prev_rr_curr_mm_ptr, prev_address_as_string);
+                      *cc_ptr += cc_to_add;
+                    }
                   }
                 }
 
@@ -620,7 +684,17 @@ void update_exec_stage(Stage_Data* src_sd) {
                   if(starlab_search(inst_mem_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mreg->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rm_curr_rm_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_rm_curr_rm_ptr, prev_address_as_string, &cc_to_add);
+
+                    if(!starlab_search(prev_rm_curr_rm_ptr, prev_address_as_string))
+                    {
+                      starlab_insert(prev_rm_curr_rm_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      unsigned long* cc_ptr = (unsigned long*) starlab_search(prev_rm_curr_rm_ptr, prev_address_as_string);
+                      *cc_ptr += cc_to_add;
+                    }
                   }
                 }
 
@@ -630,7 +704,17 @@ void update_exec_stage(Stage_Data* src_sd) {
                   if(starlab_search(inst_mem_mem_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mmem->mem\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_rm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+
+                    if(!starlab_search(prev_rm_curr_mm_ptr, prev_address_as_string))
+                    {
+                      starlab_insert(prev_rm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      unsigned long* cc_ptr = (unsigned long*) starlab_search(prev_rm_curr_mm_ptr, prev_address_as_string);
+                      *cc_ptr += cc_to_add;
+                    }
                   }
                 }
 
@@ -640,7 +724,17 @@ void update_exec_stage(Stage_Data* src_sd) {
                   if(starlab_search(inst_reg_reg_mov_ptr, address_as_string))
                   {
                     // printf("prev: \033[0;31mreg->mem\033[0m, curr: \033[0;31mreg->reg\033[0m; Added %lu\n", cc_to_add);
-                    starlab_insert(prev_rm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    // starlab_insert(prev_rm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+
+                    if(!starlab_search(prev_rm_curr_rr_ptr, prev_address_as_string))
+                    {
+                      starlab_insert(prev_rm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
+                    }
+                    else
+                    {
+                      unsigned long* cc_ptr = (unsigned long*) starlab_search(prev_rm_curr_rr_ptr, prev_address_as_string);
+                      *cc_ptr += cc_to_add;
+                    }
                   }
                 }
             }
