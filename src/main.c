@@ -341,16 +341,20 @@ int main(int argc, char* argv[], char* envp[]) {
   // print total cc count
   printf("Total CC count: %lu\n", total_cc_count);
 
-  // unsigned long running_cc_count = 0;
+  unsigned long running_cc_count = 0;
   for (long i = 0; i < count; i++) {
 
-    // print the raw value
-    printf("inst tuple: %s, cumulative CCs: %lu\n", key_value_pairs[i].key, *(unsigned long *)key_value_pairs[i].value);
 
-      // printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
-      // running_cc_count += *(unsigned long *)key_value_pairs[i].value;
-      // if (running_cc_count > ((total_cc_count * 99) / 100)) 
-      //     break;
+      printf("inst tuple: %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, ((double)*(unsigned long *)key_value_pairs[i].value / (double)total_cc_count) * 100);
+      running_cc_count += *(unsigned long *)key_value_pairs[i].value;
+      if (running_cc_count > ((total_cc_count * 99) / 100)) 
+          break;
+  }
+
+
+  printf("Raw counts:\n");
+  for (long i = 0; i < count; i++) {
+    printf("inst tuple: %s, cumulative CCs: %lu\n", key_value_pairs[i].key, *(unsigned long *)key_value_pairs[i].value);
   }
 
   // Initialize cycle counters for each category

@@ -1058,7 +1058,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
           // printf("Prev iclass: %s, This iclass: %s\n", prev_iclass, this_iclass);
 
-          printf("Icache tuple_string: %s\n", tuple_string);
+          // printf("Icache tuple_string: %s\n", tuple_string);
 
           if(voided_global_starlab_types_ht == NULL)
           {
@@ -1074,7 +1074,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
               {
 
-                printf("Icache: since tuple is <MOV,MOV>, adding %lu\n", cc_to_add);
+                // printf("Icache: since tuple is <MOV,MOV>, adding %lu\n", cc_to_add);
                 // printf("\033[0;34mMOV MOV\033[0m\n");
                 // printf("prev addr: %s, this addr: %s\n", prev_address_as_string, address_as_string);
 
@@ -1126,13 +1126,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                     if(prev_mm_curr_rr_ptr_val == NULL)
                     {
                       starlab_insert(prev_mm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
-                      printf("Icache: inserted address %s into prev_mm_curr_rr_ptr\n", prev_address_as_string);
+                      // printf("Icache: inserted address %s into prev_mm_curr_rr_ptr\n", prev_address_as_string);
                       
                     }
                     else
                     {
                       *prev_mm_curr_rr_ptr_val += cc_to_add;
-                      printf("Icache: added %lu to address %s in prev_mm_curr_rr_ptr\n", cc_to_add, prev_address_as_string);
+                      // printf("Icache: added %lu to address %s in prev_mm_curr_rr_ptr\n", cc_to_add, prev_address_as_string);
                     
                     }
 
@@ -1154,13 +1154,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                     if(prev_mm_curr_mr_ptr_val == NULL)
                     {
                       starlab_insert(prev_mm_curr_mr_ptr, prev_address_as_string, &cc_to_add);
-                      printf("Icache: inserted address %s into prev_mm_curr_mr_ptr\n", prev_address_as_string);
+                      // printf("Icache: inserted address %s into prev_mm_curr_mr_ptr\n", prev_address_as_string);
                       
                     }
                     else
                     {
                       *prev_mm_curr_mr_ptr_val += cc_to_add;
-                      printf("Icache: added %lu to address %s in prev_mm_curr_mr_ptr\n", cc_to_add, prev_address_as_string);
+                      // printf("Icache: added %lu to address %s in prev_mm_curr_mr_ptr\n", cc_to_add, prev_address_as_string);
                      
                     }
                   }
@@ -1179,13 +1179,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                     if(prev_mm_curr_mm_ptr_val == NULL)
                     {
                       starlab_insert(prev_mm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
-                      printf("Icache: inserted address %s into prev_mm_curr_mm_ptr\n", prev_address_as_string);
+                      // printf("Icache: inserted address %s into prev_mm_curr_mm_ptr\n", prev_address_as_string);
                      
                     }
                     else
                     {
                       *prev_mm_curr_mm_ptr_val += cc_to_add;
-                      printf("Icache: added %lu to address %s in prev_mm_curr_mm_ptr\n", cc_to_add, prev_address_as_string);
+                      // printf("Icache: added %lu to address %s in prev_mm_curr_mm_ptr\n", cc_to_add, prev_address_as_string);
                       
                     }
                   }
@@ -1204,13 +1204,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                     if(prev_rr_curr_rr_ptr_val == NULL)
                     {
                       starlab_insert(prev_rr_curr_rr_ptr, prev_address_as_string, &cc_to_add);
-                      printf("Icache: inserted address %s into prev_rr_curr_rr_ptr\n", prev_address_as_string);
+                      // printf("Icache: inserted address %s into prev_rr_curr_rr_ptr\n", prev_address_as_string);
                       
                     }
                     else
                     {
                       *prev_rr_curr_rr_ptr_val += cc_to_add;
-                      printf("Icache: added %lu to address %s in prev_rr_curr_rr_ptr\n", cc_to_add, prev_address_as_string);
+                      // printf("Icache: added %lu to address %s in prev_rr_curr_rr_ptr\n", cc_to_add, prev_address_as_string);
                        
                     }
                   }
@@ -1229,13 +1229,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                     if(prev_rr_curr_mr_ptr_val == NULL)
                     {
                       starlab_insert(prev_rr_curr_mr_ptr, prev_address_as_string, &cc_to_add);
-                      printf("Icache: inserted address %s into prev_rr_curr_mr_ptr\n", prev_address_as_string);
+                      // printf("Icache: inserted address %s into prev_rr_curr_mr_ptr\n", prev_address_as_string);
                        
                     }
                     else
                     {
                       *prev_rr_curr_mr_ptr_val += cc_to_add;
-                      printf("Icache: added %lu to address %s in prev_rr_curr_mr_ptr\n", cc_to_add, prev_address_as_string);
+                      // printf("Icache: added %lu to address %s in prev_rr_curr_mr_ptr\n", cc_to_add, prev_address_as_string);
                        
                     }
                   }
@@ -1254,13 +1254,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                     if(prev_rr_curr_mm_ptr_val == NULL)
                     {
                       starlab_insert(prev_rr_curr_mm_ptr, prev_address_as_string, &cc_to_add);
-                      printf("Icache: inserted address %s into prev_rr_curr_mm_ptr\n", prev_address_as_string);
+                      // printf("Icache: inserted address %s into prev_rr_curr_mm_ptr\n", prev_address_as_string);
                       
                     }
                     else
                     {
                       *prev_rr_curr_mm_ptr_val += cc_to_add;
-                      printf("Icache: added %lu to address %s in prev_rr_curr_mm_ptr\n", cc_to_add, prev_address_as_string);
+                      // printf("Icache: added %lu to address %s in prev_rr_curr_mm_ptr\n", cc_to_add, prev_address_as_string);
                       
                     }
                   }
@@ -1279,13 +1279,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                     if(prev_rm_curr_rm_ptr_val == NULL)
                     {
                       starlab_insert(prev_rm_curr_rm_ptr, prev_address_as_string, &cc_to_add);
-                      printf("Icache: inserted address %s into prev_rm_curr_rm_ptr\n", prev_address_as_string);
+                      // printf("Icache: inserted address %s into prev_rm_curr_rm_ptr\n", prev_address_as_string);
                        
                     }
                     else
                     {
                       *prev_rm_curr_rm_ptr_val += cc_to_add;
-                      printf("Icache: added %lu to address %s in prev_rm_curr_rm_ptr\n", cc_to_add, prev_address_as_string);
+                      // printf("Icache: added %lu to address %s in prev_rm_curr_rm_ptr\n", cc_to_add, prev_address_as_string);
                       
                     }
                   }
@@ -1304,13 +1304,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                     if(prev_rm_curr_mm_ptr_val == NULL)
                     {
                       starlab_insert(prev_rm_curr_mm_ptr, prev_address_as_string, &cc_to_add);
-                      printf("Icache: inserted address %s into prev_rm_curr_mm_ptr\n", prev_address_as_string);
+                      // printf("Icache: inserted address %s into prev_rm_curr_mm_ptr\n", prev_address_as_string);
                        
                     }
                     else
                     {
                       *prev_rm_curr_mm_ptr_val += cc_to_add;
-                      printf("Icache: added %lu to address %s in prev_rm_curr_mm_ptr\n", cc_to_add, prev_address_as_string);
+                      // printf("Icache: added %lu to address %s in prev_rm_curr_mm_ptr\n", cc_to_add, prev_address_as_string);
                       
                     }
                   }
@@ -1329,13 +1329,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
                     if(prev_rm_curr_rr_ptr_val == NULL)
                     {
                       starlab_insert(prev_rm_curr_rr_ptr, prev_address_as_string, &cc_to_add);
-                      printf("Icache: inserted address %s into prev_rm_curr_rr_ptr\n", prev_address_as_string);
+                      // printf("Icache: inserted address %s into prev_rm_curr_rr_ptr\n", prev_address_as_string);
                      
                     }
                     else
                     {
                       *prev_rm_curr_rr_ptr_val += cc_to_add;
-                      printf("Icache: added %lu to address %s in prev_rm_curr_rr_ptr\n", cc_to_add, prev_address_as_string);
+                      // printf("Icache: added %lu to address %s in prev_rm_curr_rr_ptr\n", cc_to_add, prev_address_as_string);
                        
                     }
                   }
