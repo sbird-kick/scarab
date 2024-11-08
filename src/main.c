@@ -358,27 +358,27 @@ int main(int argc, char* argv[], char* envp[]) {
   unsigned long cc_prev_reg_mem_curr_reg_reg = 0;
 
   // Get the total counts for each category
-  unsigned long total_count_prev_mem_mem_curr_reg_reg = get_count(voided_prev_mem_mem_curr_reg_reg_ptr);
-  unsigned long total_count_prev_mem_mem_curr_reg_mem = get_count(voided_prev_mem_mem_curr_reg_mem_ptr);
-  unsigned long total_count_prev_mem_mem_curr_mem_mem = get_count(voided_prev_mem_mem_curr_mem_mem_ptr);
-  unsigned long total_count_prev_reg_reg_curr_reg_reg = get_count(voided_prev_reg_reg_curr_reg_reg_ptr);
-  unsigned long total_count_prev_reg_reg_curr_reg_mem = get_count(voided_prev_reg_reg_curr_reg_mem_ptr);
-  unsigned long total_count_prev_reg_reg_curr_mem_mem = get_count(voided_prev_reg_reg_curr_mem_mem_ptr);
-  unsigned long total_count_prev_reg_mem_curr_reg_mem = get_count(voided_prev_reg_mem_curr_reg_mem_ptr);
-  unsigned long total_count_prev_reg_mem_curr_mem_mem = get_count(voided_prev_reg_mem_curr_mem_mem_ptr);
-  unsigned long total_count_prev_reg_mem_curr_reg_reg = get_count(voided_prev_reg_mem_curr_reg_reg_ptr);
+  // unsigned long total_count_prev_mem_mem_curr_reg_reg = get_count(voided_prev_mem_mem_curr_reg_reg_ptr);
+  // unsigned long total_count_prev_mem_mem_curr_reg_mem = get_count(voided_prev_mem_mem_curr_reg_mem_ptr);
+  // unsigned long total_count_prev_mem_mem_curr_mem_mem = get_count(voided_prev_mem_mem_curr_mem_mem_ptr);
+  // unsigned long total_count_prev_reg_reg_curr_reg_reg = get_count(voided_prev_reg_reg_curr_reg_reg_ptr);
+  // unsigned long total_count_prev_reg_reg_curr_reg_mem = get_count(voided_prev_reg_reg_curr_reg_mem_ptr);
+  // unsigned long total_count_prev_reg_reg_curr_mem_mem = get_count(voided_prev_reg_reg_curr_mem_mem_ptr);
+  // unsigned long total_count_prev_reg_mem_curr_reg_mem = get_count(voided_prev_reg_mem_curr_reg_mem_ptr);
+  // unsigned long total_count_prev_reg_mem_curr_mem_mem = get_count(voided_prev_reg_mem_curr_mem_mem_ptr);
+  // unsigned long total_count_prev_reg_mem_curr_reg_reg = get_count(voided_prev_reg_mem_curr_reg_reg_ptr);
 
-  // print the counts of each category
-  printf("Total counts:\n");
-  printf("prev_mem_mem_curr_reg_reg: %lu\n", total_count_prev_mem_mem_curr_reg_reg);
-  printf("prev_mem_mem_curr_reg_mem: %lu\n", total_count_prev_mem_mem_curr_reg_mem);
-  printf("prev_mem_mem_curr_mem_mem: %lu\n", total_count_prev_mem_mem_curr_mem_mem);
-  printf("prev_reg_reg_curr_reg_reg: %lu\n", total_count_prev_reg_reg_curr_reg_reg);
-  printf("prev_reg_reg_curr_reg_mem: %lu\n", total_count_prev_reg_reg_curr_reg_mem);
-  printf("prev_reg_reg_curr_mem_mem: %lu\n", total_count_prev_reg_reg_curr_mem_mem);
-  printf("prev_reg_mem_curr_reg_mem: %lu\n", total_count_prev_reg_mem_curr_reg_mem);
-  printf("prev_reg_mem_curr_mem_mem: %lu\n", total_count_prev_reg_mem_curr_mem_mem);
-  printf("prev_reg_mem_curr_reg_reg: %lu\n", total_count_prev_reg_mem_curr_reg_reg);
+  // // print the counts of each category
+  // printf("Total counts:\n");
+  // printf("prev_mem_mem_curr_reg_reg: %lu\n", total_count_prev_mem_mem_curr_reg_reg);
+  // printf("prev_mem_mem_curr_reg_mem: %lu\n", total_count_prev_mem_mem_curr_reg_mem);
+  // printf("prev_mem_mem_curr_mem_mem: %lu\n", total_count_prev_mem_mem_curr_mem_mem);
+  // printf("prev_reg_reg_curr_reg_reg: %lu\n", total_count_prev_reg_reg_curr_reg_reg);
+  // printf("prev_reg_reg_curr_reg_mem: %lu\n", total_count_prev_reg_reg_curr_reg_mem);
+  // printf("prev_reg_reg_curr_mem_mem: %lu\n", total_count_prev_reg_reg_curr_mem_mem);
+  // printf("prev_reg_mem_curr_reg_mem: %lu\n", total_count_prev_reg_mem_curr_reg_mem);
+  // printf("prev_reg_mem_curr_mem_mem: %lu\n", total_count_prev_reg_mem_curr_mem_mem);
+  // printf("prev_reg_mem_curr_reg_reg: %lu\n", total_count_prev_reg_mem_curr_reg_reg);
 
   // get key value pairs from each category
 
@@ -418,9 +418,9 @@ int main(int argc, char* argv[], char* envp[]) {
   }
 
   // print the values of each category
-  printf("Values for prev_mem_mem_curr_reg_reg:\n");
+  // printf("Values for prev_mem_mem_curr_reg_reg:\n");
   for (long i = 0; i < count_prev_mem_mem_curr_reg_reg; i++) {
-      printf("key: %s, value: %lu\n", key_value_pairs_prev_mem_mem_curr_reg_reg[i].key, *(unsigned long *)key_value_pairs_prev_mem_mem_curr_reg_reg[i].value);
+      // printf("key: %s, value: %lu\n", key_value_pairs_prev_mem_mem_curr_reg_reg[i].key, *(unsigned long *)key_value_pairs_prev_mem_mem_curr_reg_reg[i].value);
       cc_prev_mem_mem_curr_reg_reg += *(unsigned long *)key_value_pairs_prev_mem_mem_curr_reg_reg[i].value;
   }
 
@@ -442,9 +442,9 @@ int main(int argc, char* argv[], char* envp[]) {
   }
 
   // print the values of each category
-  printf("Values for prev_mem_mem_curr_mem_mem:\n");
+  // printf("Values for prev_mem_mem_curr_mem_mem:\n");
   for (long i = 0; i < count_prev_mem_mem_curr_mem_mem; i++) {
-      printf("key: %s, value: %lu\n", key_value_pairs_prev_mem_mem_curr_mem_mem[i].key, *(unsigned long *)key_value_pairs_prev_mem_mem_curr_mem_mem[i].value);
+      // printf("key: %s, value: %lu\n", key_value_pairs_prev_mem_mem_curr_mem_mem[i].key, *(unsigned long *)key_value_pairs_prev_mem_mem_curr_mem_mem[i].value);
       cc_prev_mem_mem_curr_mem_mem += *(unsigned long *)key_value_pairs_prev_mem_mem_curr_mem_mem[i].value;
   }
 
@@ -466,9 +466,9 @@ int main(int argc, char* argv[], char* envp[]) {
   }
 
     // print the values of each category
-  printf("Values for prev_reg_reg_curr_reg_reg:\n");
+  // printf("Values for prev_reg_reg_curr_reg_reg:\n");
   for (long i = 0; i < count_prev_reg_reg_curr_reg_reg; i++) {
-      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_reg_curr_reg_reg[i].key, *(unsigned long *)key_value_pairs_prev_reg_reg_curr_reg_reg[i].value);
+      // printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_reg_curr_reg_reg[i].key, *(unsigned long *)key_value_pairs_prev_reg_reg_curr_reg_reg[i].value);
       cc_prev_reg_reg_curr_reg_reg += *(unsigned long *)key_value_pairs_prev_reg_reg_curr_reg_reg[i].value;
   }
 
@@ -490,9 +490,9 @@ int main(int argc, char* argv[], char* envp[]) {
   }
 
     // print the values of each category
-  printf("Values for prev_reg_reg_curr_reg_mem:\n");
+  // printf("Values for prev_reg_reg_curr_reg_mem:\n");
   for (long i = 0; i < count_prev_reg_reg_curr_reg_mem; i++) {
-      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_reg_curr_reg_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_reg_curr_reg_mem[i].value);
+      // printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_reg_curr_reg_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_reg_curr_reg_mem[i].value);
       cc_prev_reg_reg_curr_reg_mem += *(unsigned long *)key_value_pairs_prev_reg_reg_curr_reg_mem[i].value;
   }
 
@@ -514,9 +514,9 @@ int main(int argc, char* argv[], char* envp[]) {
   }
 
     // print the values of each category
-  printf("Values for prev_reg_reg_curr_mem_mem:\n");
+  // printf("Values for prev_reg_reg_curr_mem_mem:\n");
   for (long i = 0; i < count_prev_reg_reg_curr_mem_mem; i++) {
-      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_reg_curr_mem_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_reg_curr_mem_mem[i].value);
+      // printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_reg_curr_mem_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_reg_curr_mem_mem[i].value);
       cc_prev_reg_reg_curr_mem_mem += *(unsigned long *)key_value_pairs_prev_reg_reg_curr_mem_mem[i].value;
   }
 
@@ -538,9 +538,9 @@ int main(int argc, char* argv[], char* envp[]) {
   }
 
     // print the values of each category
-  printf("Values for prev_reg_mem_curr_reg_mem:\n");
+  // printf("Values for prev_reg_mem_curr_reg_mem:\n");
   for (long i = 0; i < count_prev_reg_mem_curr_reg_mem; i++) {
-      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_mem_curr_reg_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_mem_curr_reg_mem[i].value);
+      // printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_mem_curr_reg_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_mem_curr_reg_mem[i].value);
       cc_prev_reg_mem_curr_reg_mem += *(unsigned long *)key_value_pairs_prev_reg_mem_curr_reg_mem[i].value;
   }
 
@@ -562,9 +562,9 @@ int main(int argc, char* argv[], char* envp[]) {
   }
 
     // print the values of each category
-  printf("Values for prev_reg_mem_curr_mem_mem:\n");
+  // printf("Values for prev_reg_mem_curr_mem_mem:\n");
   for (long i = 0; i < count_prev_reg_mem_curr_mem_mem; i++) {
-      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_mem_curr_mem_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_mem_curr_mem_mem[i].value);
+      // printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_mem_curr_mem_mem[i].key, *(unsigned long *)key_value_pairs_prev_reg_mem_curr_mem_mem[i].value);
       cc_prev_reg_mem_curr_mem_mem += *(unsigned long *)key_value_pairs_prev_reg_mem_curr_mem_mem[i].value;
   }
 
@@ -586,9 +586,9 @@ int main(int argc, char* argv[], char* envp[]) {
   }
 
     // print the values of each category
-  printf("Values for prev_reg_mem_curr_reg_reg:\n");
+  // printf("Values for prev_reg_mem_curr_reg_reg:\n");
   for (long i = 0; i < count_prev_reg_mem_curr_reg_reg; i++) {
-      printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_mem_curr_reg_reg[i].key, *(unsigned long *)key_value_pairs_prev_reg_mem_curr_reg_reg[i].value);
+      // printf("key: %s, value: %lu\n", key_value_pairs_prev_reg_mem_curr_reg_reg[i].key, *(unsigned long *)key_value_pairs_prev_reg_mem_curr_reg_reg[i].value);
       cc_prev_reg_mem_curr_reg_reg += *(unsigned long *)key_value_pairs_prev_reg_mem_curr_reg_reg[i].value;
   }
 
