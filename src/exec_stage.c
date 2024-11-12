@@ -371,6 +371,8 @@ void update_exec_stage(Stage_Data* src_sd) {
     }
     op->exec_cycle = cycle_count + MAX2(latency, -latency);
 
+    // MY CODE STARTS HERE
+
     char address_as_string[128] = {0};
     sprintf(address_as_string, "%016llX", op->inst_info->addr);
 
@@ -410,42 +412,61 @@ void update_exec_stage(Stage_Data* src_sd) {
       // printf("[%016llu] set %lu whenin %llu\n", op->inst_info->addr, ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, address_as_string))->exec_cycle, op->exec_cycle);
     }
 
+    bool skip = false;
+
     char prev_address_as_string[128] = {0};
-    
     unsigned long long* starlab_prev_address_for_exec_stage_ptr = (unsigned long long*) starlab_search(voided_address_to_prev_address, address_as_string);
+    if(starlab_prev_address_for_exec_stage_ptr != NULL)
+      sprintf(prev_address_as_string, "%016llX", *starlab_prev_address_for_exec_stage_ptr);
+    else
+      skip = true;
+
+    char prev_prev_address_as_string[128] = {0};
+    unsigned long long* starlab_prev_prev_address_for_exec_stage_ptr = (unsigned long long*) starlab_search(voided_address_to_prev_address, prev_address_as_string);
+    if(starlab_prev_prev_address_for_exec_stage_ptr != NULL)
+      sprintf(prev_prev_address_as_string, "%016llX", *starlab_prev_prev_address_for_exec_stage_ptr);
+    else
+      skip = true;
     
-    if(starlab_prev_address_for_exec_stage_ptr == NULL)
+    if(skip)
     {
       // do nothing
     }
     else
     {
-      sprintf(prev_address_as_string, "%016llX", *starlab_prev_address_for_exec_stage_ptr);
-
+      
+      
+      inst_fetch_exec_truple* prev_prev_truple_ptr = ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, prev_prev_address_as_string));
       inst_fetch_exec_truple* prev_truple_ptr = ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, prev_address_as_string));
       inst_fetch_exec_truple* this_truple_ptr = ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, address_as_string));
-      if(prev_truple_ptr == NULL || this_truple_ptr == NULL)
+      if(prev_prev_truple_ptr == NULL || prev_truple_ptr == NULL || this_truple_ptr == NULL)
       {
         // do nothing
       }
       else
       {
-        unsigned long cc_to_add = this_truple_ptr->exec_cycle - prev_truple_ptr->fetch_cycle;
+        unsigned long cc_to_add = this_truple_ptr->exec_cycle - prev_prev_truple_ptr->fetch_cycle;
         if(!first_time_exec)
         {
           cc_to_add = extra_exec_cycles;
         }
+        
+        char* prev_prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_prev_address_as_string);
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
 
-        if(prev_iclass != NULL && this_iclass != NULL)
+        if(prev_prev_iclass != NULL && prev_iclass != NULL && this_iclass != NULL)
         {
-          char tuple_string[128] = {0};
-          sprintf(tuple_string, "<%s,%s>", prev_iclass, this_iclass);
+          char tuple_string[256] = {0};
+          sprintf(tuple_string, "<%s,%s,%s>", prev_prev_iclass, prev_iclass, this_iclass);
+
+          if (strcmp(prev_prev_iclass, "MOV") == 0 && strcmp(prev_iclass, "MOV") == 0 && strcmp(this_iclass, "MOV") == 0) {
+              printf("MOV TUPLE addr: %s\n", address_as_string);  // Replace 'address' with the address variable
+          }
 
           if(voided_global_starlab_types_ht == NULL)
           {
-            voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
+            voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, 256);
           }
           if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
           {
@@ -464,62 +485,7 @@ void update_exec_stage(Stage_Data* src_sd) {
     }
     voided_inst_truple_ptr = (void *) inst_truple_ptr;
 
-    // starlab_hash_table* global_starlab_ht_ptr = (starlab_hash_table*) voided_global_starlab_ht_ptr;
-
-    // if(global_starlab_ht_ptr == NULL)
-    // {
-    //   global_starlab_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(starlab_table_value));
-    // }
-    // starlab_hash_table* starlab_types_table_ptr = (starlab_hash_table*) voided_global_starlab_types_ht;
-    // if(starlab_types_table_ptr == NULL)
-    // {
-    //   starlab_types_table_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
-    // }
-
-    // char address_as_string[128] = {0};
-    // sprintf(address_as_string, "%016llX%s",  op->inst_info->addr, starlab_get_opcode_string(op->table_info->op_type));
-    // if(!starlab_search(global_starlab_ht_ptr,address_as_string))
-    // {
-    //   printf("[exec] Address ret %s not found [%016llX]\n", address_as_string, op->inst_info->addr);
-    //   starlab_table_value temp_val_to_insert = {op->fetch_cycle, op->fetch_cycle};
-    //   starlab_insert(global_starlab_ht_ptr, address_as_string, &temp_val_to_insert);
-    //   strncpy(prev_address_as_string, address_as_string, 128);
-    // }
-    // else
-    // {
-    //   unsigned long prev_inst_prev_fetch;
-    //   if(starlab_search(global_starlab_ht_ptr, prev_address_as_string) == NULL)
-    //   {
-    //     prev_inst_prev_fetch = prev_instruction_time;
-    //   }
-    //   else
-    //     prev_inst_prev_fetch = ((starlab_table_value *) starlab_search(global_starlab_ht_ptr, prev_address_as_string))->prev_fetch;
-
-    //   // unsigned long this_fetch_cc = op->fetch_cycle;
-    //   unsigned long cc_taken_by_tuple = op->exec_cycle - prev_inst_prev_fetch;      
-    //   printf("[exec] Address %s, %s FOUND ret! [%ld, %lld, %ld] -> <%s,%s>\n", prev_address_as_string, address_as_string, prev_inst_prev_fetch, op->exec_cycle, cc_taken_by_tuple, prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type));
-    //   starlab_delete_key(global_starlab_ht_ptr, address_as_string);
-
-    //   char tuple_of_types[256] = {0};
-    //   sprintf(tuple_of_types, "<%s,%s>", prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type));
-
-    //   if(!starlab_search(starlab_types_table_ptr, tuple_of_types))
-    //   {
-    //     unsigned long insert_val = cc_taken_by_tuple;
-    //     starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-    //   }
-    //   else
-    //   {
-    //     unsigned long insert_val = *(unsigned long*) starlab_search(starlab_types_table_ptr, tuple_of_types) + cc_taken_by_tuple;
-    //     starlab_insert(starlab_types_table_ptr, tuple_of_types, &insert_val);
-    //   }
-    //   prev_instruction_time = op->fetch_cycle;
-    //   strncpy(prev_instruction_class, starlab_get_opcode_string(op->table_info->op_type), 100);
-    //   strncpy(prev_address_as_string, address_as_string, 128);
-    // }
-
-    // voided_global_starlab_ht_ptr = (void *) global_starlab_ht_ptr;
-    // voided_global_starlab_types_ht = (void *) starlab_types_table_ptr;
+    // ENDS HERE
 
 
     op->exec_count++;

@@ -862,7 +862,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     thread_map_mem_dep(op);
     op->fetch_cycle = cycle_count;
 
-    
+    // MY CODE STARTS HERE
+
     starlab_hash_table* address_to_prev_address = (starlab_hash_table*) voided_address_to_prev_address;
     if(address_to_prev_address == NULL)
     {
@@ -873,15 +874,22 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
     char address_as_string[128] = {0};
     char prev_address_as_string[128] = {0};
+    char prev_prev_address_as_string[128] = {0};
     sprintf(address_as_string, "%016llX", op->inst_info->addr);
     sprintf(prev_address_as_string, "%016llX", starlab_prev_address);
+    sprintf(prev_prev_address_as_string, "%016llX", starlab_prev_prev_address);
     
     if(!starlab_search(address_to_prev_address, address_as_string))
     {
         starlab_insert(address_to_prev_address, address_as_string, &starlab_prev_address);
     }
+
+
     if(op->inst_info->addr != starlab_prev_address) // track changes only
-      starlab_prev_address = op->inst_info->addr;
+    {
+        starlab_prev_prev_address = starlab_prev_address;
+        starlab_prev_address = op->inst_info->addr;
+    }
 
     voided_address_to_prev_address = (void *) address_to_prev_address;
 
@@ -923,39 +931,48 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     // calculate values
+    inst_fetch_exec_truple* prev_prev_truple_ptr = ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, prev_prev_address_as_string));
     inst_fetch_exec_truple* prev_truple_ptr = ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, prev_address_as_string));
     inst_fetch_exec_truple* this_truple_ptr = ((inst_fetch_exec_truple*) starlab_search(inst_truple_ptr, address_as_string));
 
-    if(prev_truple_ptr == NULL)
+    if(prev_truple_ptr == NULL || prev_prev_truple_ptr == NULL)
     {
       // printf("Doing nothing1\n");
     }
     else
     {
-      if(prev_truple_ptr->prev_fetch_cycle == -1 || this_truple_ptr->prev_fetch_cycle == -1)
+      if(prev_prev_truple_ptr->fetch_cycle == -1 || prev_truple_ptr->prev_fetch_cycle == -1 || this_truple_ptr->prev_fetch_cycle == -1)
       {
         //  printf("Doing nothing2\n");
       }
       else
       {
-        unsigned long cc_to_add = this_truple_ptr->fetch_cycle - prev_truple_ptr->prev_fetch_cycle;
+        // important change?
+        unsigned long cc_to_add = this_truple_ptr->fetch_cycle - prev_prev_truple_ptr->prev_fetch_cycle;
+
+
+        char* prev_prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_prev_address_as_string);
         char* prev_iclass = (char*) starlab_search(voided_address_to_type_ptr, prev_address_as_string);
         char* this_iclass = (char*) starlab_search(voided_address_to_type_ptr, address_as_string);
 
         // printf("[icache] Adding %lu\n", cc_to_add);
 
-        if(prev_truple_ptr->prev_fetch_cycle == -1)
+        if(prev_truple_ptr->prev_fetch_cycle == -1 || prev_prev_truple_ptr->prev_fetch_cycle == -1)
         {
           // do nothing
         }
-        else if(prev_iclass != NULL && this_iclass != NULL)
+        else if(prev_prev_iclass != NULL && prev_iclass != NULL && this_iclass != NULL)
         {
-          char tuple_string[128] = {0};
-          sprintf(tuple_string, "<%s,%s>", prev_iclass, this_iclass);
+          char tuple_string[256] = {0};
+          sprintf(tuple_string, "<%s,%s,%s>", prev_prev_iclass, prev_iclass, this_iclass);
 
+          if (strcmp(prev_prev_iclass, "MOV") == 0 && strcmp(prev_iclass, "MOV") == 0 && strcmp(this_iclass, "MOV") == 0) {
+              printf("MOV TUPLE addr: %s\n", address_as_string);  // Replace 'address' with the address variable
+          }
+    
           if(voided_global_starlab_types_ht == NULL)
           {
-            voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
+            voided_global_starlab_types_ht = starlab_create_table(INITIAL_TABLE_SIZE, 256);
           }
           if(!starlab_search(voided_global_starlab_types_ht, tuple_string))
           {
@@ -977,6 +994,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     voided_inst_truple_ptr = (void *) inst_truple_ptr;
+
+    // ENDS HERE 
 
 
     op_count[ic->proc_id]++;          /* increment instruction counters */

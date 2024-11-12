@@ -225,10 +225,10 @@ void* voided_address_to_type_ptr = NULL;
 void* voided_address_to_prev_address = NULL;
 void* voided_inst_truple_ptr = NULL;
 
-unsigned long long prev_instruction_time = 0;
-char prev_instruction_class[128];
-char prev_address_as_string[128];
+// char prev_address_as_string[128];
+// char prev_prev_address_as_string[128];
 unsigned long long starlab_prev_address = 0;
+unsigned long long starlab_prev_prev_address = 0;
 
 
 int main(int argc, char* argv[], char* envp[]) {

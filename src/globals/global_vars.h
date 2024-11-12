@@ -85,11 +85,8 @@ extern void* voided_inst_truple_ptr;
 extern void* voided_address_to_type_ptr;
 extern void* voided_address_to_prev_address;
 
-extern unsigned long long prev_instruction_time;
-extern char prev_instruction_class[128];
-
-extern char prev_address_as_string[128];
 extern unsigned long long starlab_prev_address;
+extern unsigned long long starlab_prev_prev_address;
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */
