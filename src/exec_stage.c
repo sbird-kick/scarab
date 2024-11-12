@@ -462,7 +462,7 @@ void update_exec_stage(Stage_Data* src_sd) {
 
           if (strcmp(prev_prev_iclass, "MOV") == 0 && strcmp(prev_iclass, "MOV") == 0 && strcmp(this_iclass, "MOV") == 0) {
               printf("MOV TUPLE addr: %s\n", address_as_string);  // Replace 'address' with the address variable
-          }
+          } 
 
           if(voided_global_starlab_types_ht == NULL)
           {
