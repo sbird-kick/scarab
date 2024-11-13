@@ -603,47 +603,7 @@ void update_icache_stage() {
         } else if (ic->line) {
           // uop cache miss and icache hit
 
-          // DEEPANJALI
-
-          int alu_jump_stats_counter = 1;
-
-          alu_jump_hash_table *voided_alu_jump_table_ptr = (alu_jump_hash_table *) voided_alu_jump_ht;
-
-          if (voided_alu_jump_table_ptr == NULL) {
-              voided_alu_jump_table_ptr = alu_jump_create_table(INITIAL_TABLE_SIZE, sizeof(alu_jump_entry));
-              if (voided_alu_jump_table_ptr == NULL) {
-                  fprintf(stderr, "Error: Failed to create ALU/JUMP hash table\n");
-                  return;
-              }
-          }
-
-          alu_jump_entry *entry = alu_jump_return_entry(voided_alu_jump_table_ptr, ic->fetch_addr);
-
-            if (entry != NULL) {
-              INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS, alu_jump_stats_counter);
-              INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_ICACHE_HIT, alu_jump_stats_counter);
-
-              if(entry->is_mov) {
-                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_MOV, alu_jump_stats_counter);
-            }
-
-            else if(entry->has_push){
-                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_HAS_PUSH, alu_jump_stats_counter);
-            }
-
-            else if(entry->has_pop){
-                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_HAS_POP, alu_jump_stats_counter);
-            }
-
-            else if(entry->is_prefetch){
-                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_PREFETCH, alu_jump_stats_counter);
-            }
-
-            else if(entry->is_call){
-                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_CALL, alu_jump_stats_counter);
-            }
-
-        }
+        
 
           if (!ic->off_path) {
             STAT_EVENT(ic->proc_id, FT_UOP_CACHE_MISS_ICACHE_HIT_ON_PATH);
@@ -658,7 +618,16 @@ void update_icache_stage() {
           }
         } else {
           // uop cache miss and icache miss
-           // DEEPANJALI
+          
+
+          if (!ic->off_path) {
+            STAT_EVENT(ic->proc_id, FT_UOP_CACHE_MISS_ICACHE_MISS_ON_PATH);
+
+
+            // DEEPANJALI
+            // In the frontend we track <ALU, CF, Inst3> sequences
+            // If Inst3 is a miss, we check if the previous two instructions were ALU and CF by looking up the hash table
+            // If they were, we log the miss as an ALU/CF miss for micro-op cache
 
           int alu_jump_stats_counter = 1;
 
@@ -675,33 +644,30 @@ void update_icache_stage() {
           alu_jump_entry *entry = alu_jump_return_entry(voided_alu_jump_table_ptr, ic->fetch_addr);
 
             if (entry != NULL) {
-              INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS, alu_jump_stats_counter);
               INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_ICACHE_MISS, alu_jump_stats_counter);
 
               if(entry->is_mov) {
-                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_MOV, alu_jump_stats_counter);
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_ICACHE_IS_MOV, alu_jump_stats_counter);
             }
 
             else if(entry->has_push){
-                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_HAS_PUSH, alu_jump_stats_counter);
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_ICACHE_HAS_PUSH, alu_jump_stats_counter);
             }
 
             else if(entry->has_pop){
-                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_HAS_POP, alu_jump_stats_counter);
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_ICACHE_HAS_POP, alu_jump_stats_counter);
             }
 
             else if(entry->is_prefetch){
-                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_PREFETCH, alu_jump_stats_counter);
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_ICACHE_IS_PREFETCH, alu_jump_stats_counter);
             }
 
             else if(entry->is_call){
-                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_IS_CALL, alu_jump_stats_counter);
+                INC_STAT_EVENT(ic->proc_id, CODVERCH_UOP_CACHE_ALU_CF_MISS_ICACHE_IS_CALL, alu_jump_stats_counter);
             }
 
         }
 
-          if (!ic->off_path) {
-            STAT_EVENT(ic->proc_id, FT_UOP_CACHE_MISS_ICACHE_MISS_ON_PATH);
           } else {
             STAT_EVENT(ic->proc_id, FT_UOP_CACHE_MISS_ICACHE_MISS_OFF_PATH);
           }
