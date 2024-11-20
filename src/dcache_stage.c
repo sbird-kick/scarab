@@ -362,11 +362,27 @@ void update_dcache_stage(Stage_Data* src_sd) {
       line->write_count[op->off_path] = line->write_count[op->off_path] +
                                         (op->table_info->mem_type == MEM_ST);
 
-      if(op->table_info->mem_type != MEM_ST) {
+      if(op->table_info->mem_type != MEM_ST) { 
         op->wake_cycle = op->done_cycle;
         wake_up_ops(op, REG_DATA_DEP, model->wake_hook);
       }
     } else {  // data cache miss
+
+      int alu_jump_stats_counter = 1;
+
+      alu_jump_hash_table *voided_alu_jump_table_ptr = (alu_jump_hash_table *) voided_alu_jump_ht;
+
+      if (voided_alu_jump_table_ptr == NULL) {
+          voided_alu_jump_table_ptr = alu_jump_create_table(INITIAL_TABLE_SIZE, sizeof(alu_jump_entry));
+          if (voided_alu_jump_table_ptr == NULL) {
+              fprintf(stderr, "Error: Failed to create ALU/JUMP hash table\n");
+              return;
+          }
+      }
+
+      alu_jump_entry *entry = alu_jump_return_entry(voided_alu_jump_table_ptr, op->inst_info->addr);
+
+
       if(op->table_info->mem_type == MEM_ST)
         STAT_EVENT(op->proc_id, POWER_DCACHE_WRITE_MISS);
       else
@@ -431,6 +447,15 @@ void update_dcache_stage(Stage_Data* src_sd) {
             STAT_EVENT(op->proc_id, DCACHE_MISS_LD_ONPATH);
             op->oracle_info.dcmiss = TRUE;
             STAT_EVENT(op->proc_id, DCACHE_MISS_LD);
+
+            if (entry != NULL) {
+              INC_STAT_EVENT(op->proc_id, CODVERCH_DCACHE_MISS, alu_jump_stats_counter);
+
+            }
+
+
+
+
           } else {
             wrongpath_dcmiss = TRUE;
             STAT_EVENT(op->proc_id, DCACHE_MISS_OFFPATH);
@@ -486,6 +511,14 @@ void update_dcache_stage(Stage_Data* src_sd) {
             STAT_EVENT(op->proc_id, DCACHE_MISS_LD_ONPATH);
             op->oracle_info.dcmiss = TRUE;
             STAT_EVENT(op->proc_id, DCACHE_MISS_LD);
+
+
+            if (entry != NULL) {
+              INC_STAT_EVENT(op->proc_id, CODVERCH_DCACHE_MISS, alu_jump_stats_counter);
+
+            }
+
+
           } else {
             wrongpath_dcmiss = TRUE;
             STAT_EVENT(op->proc_id, DCACHE_MISS_OFFPATH);
@@ -544,6 +577,12 @@ void update_dcache_stage(Stage_Data* src_sd) {
             STAT_EVENT(op->proc_id, DCACHE_MISS_ST_ONPATH);
             op->oracle_info.dcmiss = TRUE;
             STAT_EVENT(op->proc_id, DCACHE_MISS_ST);
+
+            if (entry != NULL) {
+              INC_STAT_EVENT(op->proc_id, CODVERCH_DCACHE_MISS, alu_jump_stats_counter);
+
+            }
+
           } else {
             wrongpath_dcmiss = TRUE;
             STAT_EVENT(op->proc_id, DCACHE_MISS_OFFPATH);
