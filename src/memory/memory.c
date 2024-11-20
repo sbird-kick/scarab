@@ -1438,11 +1438,32 @@ static Flag mem_process_mlc_miss_access(Mem_Req*         req,
       STAT_EVENT(req->proc_id, CORE_MLC_WB_MISS);
     }
 
+    // DEEPANJALI
+    int alu_jump_stats_counter = 1;
+
+      alu_jump_hash_table *voided_alu_jump_table_ptr = (alu_jump_hash_table *) voided_alu_jump_ht;
+
+      if (voided_alu_jump_table_ptr == NULL) {
+          voided_alu_jump_table_ptr = alu_jump_create_table(INITIAL_TABLE_SIZE, sizeof(alu_jump_entry));
+          if (voided_alu_jump_table_ptr == NULL) {
+              fprintf(stderr, "Error: Failed to create ALU/JUMP hash table\n");
+              return 0;
+          }
+      }
+
+      alu_jump_entry *entry = alu_jump_return_entry(voided_alu_jump_table_ptr, req->addr);
+
     if((req->type == MRT_DFETCH) || (req->type == MRT_DSTORE) ||
        (req->type == MRT_IFETCH)) {
       STAT_EVENT(req->proc_id, MLC_MISS);
       STAT_EVENT(req->proc_id, CORE_MLC_MISS);
       STAT_EVENT(req->proc_id, MLC_MISS_ONPATH + req->off_path);
+
+      if (entry != NULL){
+              INC_STAT_EVENT(req->proc_id, CODVERCH_MLC_MISS, alu_jump_stats_counter);
+
+            }
+
     }
     STAT_EVENT(req->proc_id, MLC_MISS_ALL);
     STAT_EVENT(req->proc_id, MLC_MISS_ALL_ONPATH + req->off_path);
