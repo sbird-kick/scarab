@@ -1301,12 +1301,34 @@ static Flag mem_process_l1_miss_access(Mem_Req*         req,
       STAT_EVENT(req->proc_id, CORE_L1_WB_MISS);
     }
 
+    // DEEPANJALI
+    int alu_jump_stats_counter = 1;
+
+      alu_jump_hash_table *voided_alu_jump_table_ptr = (alu_jump_hash_table *) voided_alu_jump_ht;
+
+      if (voided_alu_jump_table_ptr == NULL) {
+          voided_alu_jump_table_ptr = alu_jump_create_table(INITIAL_TABLE_SIZE, sizeof(alu_jump_entry));
+          if (voided_alu_jump_table_ptr == NULL) {
+              fprintf(stderr, "Error: Failed to create ALU/JUMP hash table\n");
+              return 0;
+          }
+      }
+
+      alu_jump_entry *entry = alu_jump_return_entry(voided_alu_jump_table_ptr, req->addr);
+
     if((req->type == MRT_DFETCH) || (req->type == MRT_DSTORE) ||
        (req->type == MRT_IFETCH)) {
       STAT_EVENT(req->proc_id, L1_MISS);
       STAT_EVENT(req->proc_id, CORE_L1_MISS);
       STAT_EVENT(req->proc_id, L1_MISS_ONPATH + req->off_path);
       STAT_EVENT(req->proc_id, PER1K_L1_DEMAND_MISS_ONPATH + req->off_path);
+
+      if (entry != NULL){
+        // note that in PARAMS.sunny_cove L1 is LLC, DCACHE is L1, and MLC is L2
+              INC_STAT_EVENT(req->proc_id, CODVERCH_LLC_MISS, alu_jump_stats_counter);
+            }
+
+
     }
     STAT_EVENT_ALL(L1_MISS_ALL);
     STAT_EVENT_ALL(L1_MISS_ALL_ONPATH + req->off_path);
