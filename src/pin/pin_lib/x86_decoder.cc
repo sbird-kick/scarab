@@ -774,13 +774,14 @@ void init_reg_compress_map(void) {
 
 void init_pin_opcode_convert(void) {
   assert(OP_INV == 0);
-
-  iclass_to_scarab_map[XED_ICLASS_XRSTORS64] = {OP_LOGIC, -1, 1, NONE};
-  iclass_to_scarab_map[XED_ICLASS_BZHI] = {OP_LOGIC, -1, 1, NONE};
-  iclass_to_scarab_map[XED_ICLASS_VPTESTMB] = {OP_LOGIC, -1, 1, NONE};
-  iclass_to_scarab_map[XED_ICLASS_VPCMPUB] = {OP_LOGIC, -1, 1, NONE};
-  iclass_to_scarab_map[XED_ICLASS_RDMSR] = {OP_LOGIC, -1, 1, NONE};
-  iclass_to_scarab_map[XED_ICLASS_RDGSBASE] = {OP_LOGIC, -1, 1, NONE};
+  iclass_to_scarab_map[XED_ICLASS_XRSTORS64] = {OP_NOTPIPELINED_SLOW, -1, 1, NONE};  
+  iclass_to_scarab_map[XED_ICLASS_WRPKRU] = {OP_NOTPIPELINED_SLOW, -1, 1, NONE};
+  iclass_to_scarab_map[XED_ICLASS_WRGSBASE] = {OP_NOTPIPELINED_SLOW, -1, 1, NONE};
+  iclass_to_scarab_map[XED_ICLASS_BZHI] = {OP_LOGIC, -1, 1, NONE}; 
+  iclass_to_scarab_map[XED_ICLASS_VPTESTMB] = {OP_LOGIC, -1, 1, NONE}; 
+  iclass_to_scarab_map[XED_ICLASS_VPCMPUB] = {OP_LOGIC, -1, 1, NONE};  
+  iclass_to_scarab_map[XED_ICLASS_RDMSR] = {OP_NOTPIPELINED_SLOW, -1, 1, NONE}; 
+  iclass_to_scarab_map[XED_ICLASS_RDGSBASE] = {OP_NOTPIPELINED_SLOW, -1, 1, NONE}; 
   iclass_to_scarab_map[XED_ICLASS_ADC]      = {OP_IADD, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_ADCX]     = {OP_IADD, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_ADC_LOCK] = {OP_IADD, -1, 1, NONE};
