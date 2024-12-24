@@ -408,6 +408,16 @@ void update_node_stage(Stage_Data* src_sd) {
  * is done later.*/
 
 void node_issue(Stage_Data* src_sd) {
+
+
+  /* Whenever instructions are inserted into the node table (reorder buffer) 
+    track their insert_cycles in the metadata_rob_cycles hash table.
+  */
+  starlab_hash_table* metadata_ptr = (starlab_hash_table*) voided_metadata_rob_cycles_table; 
+  if(metadata_ptr == NULL){
+    metadata_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rob_metadata_table_entry));
+  }
+
   Flag on_path = FALSE;
   uns  ii;
 
@@ -473,10 +483,23 @@ void node_issue(Stage_Data* src_sd) {
 
     op->state = OS_ISSUED;
 
+    // insert ops and their insert_cycle into ROB in metadata hash table
+
+    char op_address[21]; 
+    sprintf(op_address, "%lld", op->inst_info->addr); 
+
+    rob_metadata_table_entry metadata_entry; 
+
+    metadata_entry.op_addr = op->inst_info->addr; 
+    metadata_entry.rob_insert_cycle = cycle_count; 
+
+    starlab_insert(metadata_ptr, op_address, &metadata_entry);
+
     /* always stop issuing after a synchronizing op */
     if(op->table_info->bar_type & BAR_ISSUE)
       break;
   }
+
 }
 
 /**************************************************************************************/
@@ -899,6 +922,23 @@ void node_retire() {
 
     node->node_count--;
     ASSERT(node->proc_id, node->node_count >= 0);
+
+    // Metadata table 
+
+    /*
+      Get the current op address, convert it into string, look for it in the
+      metadata hashtable and delete that entry in it since the op is being 
+      retired.
+    */ 
+
+    char curr_op_addr_as_key[21]; 
+    sprintf(curr_op_addr_as_key, "%lld", op->inst_info->addr); 
+
+    rob_metadata_table_entry *meta_data_addr_aptr = (rob_metadata_table_entry*) starlab_search(metadata_ptr, curr_op_addr_as_key);
+    if(meta_data_addr_aptr){
+      starlab_delete_key(metadata_ptr, curr_op_addr_as_key);
+    }
+
   }
 
   STAT_EVENT(node->proc_id, ROW_SIZE_0 + ret_count);
