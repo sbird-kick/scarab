@@ -226,6 +226,24 @@ void* voided_address_to_prev_address = NULL;
 void* voided_inst_truple_ptr = NULL;
 void* is_candidate_ptr = NULL;
 
+// Hash tables to track the processor cycles consumed by instruction tuples in reorder buffer
+
+void* voided_mov_mov_rob_cycles_table = NULL; 
+void* voided_mov_alu_rob_cycles_table = NULL;
+void* voided_mov_jmp_rob_cycles_table = NULL;
+
+void* voided_alu_alu_rob_cycles_table = NULL; 
+void* voided_alu_mov_rob_cycles_table = NULL; 
+void* voided_alu_jmp_rob_cycles_table = NULL; 
+
+void* voided_jmp_jmp_rob_cycles_table = NULL;
+void* voided_jmp_mov_rob_cycles_table = NULL; 
+void* voided_jmp_alu_rob_cycles_table = NULL;
+
+// Hash table to track metadata (such as instruction insertion cycle) required for tuple cycles consumed computation 
+
+void* voided_metadata_rob_cycles_table = NULL; 
+
 // const char starlab_do_write = 1;
 
 unsigned long long prev_instruction_time = 0;
