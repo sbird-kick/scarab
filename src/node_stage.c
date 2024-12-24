@@ -72,6 +72,8 @@ Node_Stage*            node                   = NULL;
 Rob_Stall_Reason       rob_stall_reason       = ROB_STALL_NONE;
 Rob_Block_Issue_Reason rob_block_issue_reason = ROB_BLOCK_ISSUE_NONE;
 
+static unsigned long long prev_op_addr = 0; 
+static bool is_first_op = true; 
 
 /**************************************************************************************/
 /* Prototypes */
@@ -796,7 +798,6 @@ void node_retire() {
     metadata_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rob_metadata_table_entry));
   }
 
-
   // If node table is empty, then there is nothing to retire
   if(is_node_table_empty())
     return;
@@ -824,6 +825,136 @@ void node_retire() {
 
     // Debug prints mainly used for testing the uop generation of PIN frontend
     debug_print_retired_uop(op);
+
+
+    // Metadata table 
+
+    /*
+      Get the current op address, convert it into string, look for it in the
+      metadata hashtable and delete that entry in it since the op is being 
+      retired.
+    */ 
+
+   if(is_first_op){
+    // there is no prev_op to track tuple cycles: do nothing 
+    is_first_op = false;
+    prev_op_addr = op->inst_info->addr; 
+   }
+
+   else {
+
+    /* this is not the first op so there is a prev op 
+       get the rob insert cycle of the prev_op 
+    */
+
+    char curr_op_addr_as_key[21], prev_op_addr_as_key[21]; 
+    sprintf(curr_op_addr_as_key, "%lld", op->inst_info->addr); 
+    sprintf(prev_op_addr_as_key, "%lld", prev_op_addr); 
+
+    // Fetch prev op i.e., instr1 in <instr1, instr2> metadata 
+    rob_metadata_table_entry *meta_data_addr_aptr = (rob_metadata_table_entry*) starlab_search(metadata_ptr, prev_op_addr_as_key);
+    if(meta_data_addr_aptr){
+
+      // Determine the prev and curr op type 
+      unsigned int prev_op_type = meta_data_addr_aptr->op_type;
+      unsigned int rob_insert_cycle = meta_data_addr_aptr->rob_insert_cycle; 
+
+      // <MOV, MOV>
+      if(prev_op_type == 3 && op->table_info->op_type == 3){
+        // insert into <MOV, MOV> ht
+      }
+
+      // <MOV, ALU>
+      else if(prev_op_type == 3 && (op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
+      op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
+      op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
+      op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
+      op->table_info->op_type == 21)){
+
+        // insert into <MOV, ALU> ht
+
+      }
+
+      // <MOV, JMP>
+      else if(prev_op_type == 3 && op->table_info->op_type == 2){
+
+      }
+
+      // <ALU, ALU>
+      else if( (prev_op_type == 8 || prev_op_type == 9 ||
+      prev_op_type == 10 || prev_op_type == 11 || prev_op_type == 12 ||
+      prev_op_type == 13 || prev_op_type == 16 || prev_op_type == 17 ||
+      prev_op_type == 18 || prev_op_type == 19 || prev_op_type == 20 ||
+      prev_op_type == 21) 
+      
+      && 
+
+      (op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
+      op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
+      op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
+      op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
+      op->table_info->op_type == 21)
+      ){
+
+      }
+
+      // <ALU, MOV>
+      else if((prev_op_type == 8 || prev_op_type == 9 ||
+      prev_op_type == 10 || prev_op_type == 11 || prev_op_type == 12 ||
+      prev_op_type == 13 || prev_op_type == 16 || prev_op_type == 17 ||
+      prev_op_type == 18 || prev_op_type == 19 || prev_op_type == 20 ||
+      prev_op_type == 21) 
+      
+      && 
+      
+      op->table_info->op_type == 3
+
+      ){
+
+      }
+
+      // <ALU, JMP>
+      else if((prev_op_type == 8 || prev_op_type == 9 ||
+      prev_op_type == 10 || prev_op_type == 11 || prev_op_type == 12 ||
+      prev_op_type == 13 || prev_op_type == 16 || prev_op_type == 17 ||
+      prev_op_type == 18 || prev_op_type == 19 || prev_op_type == 20 ||
+      prev_op_type == 21) 
+      
+      && 
+      
+      op->table_info->op_type == 2
+      
+      ){
+
+      }
+
+      // <JMP, JMP>
+      else if(prev_op_type == 2 && op->table_info->op_type == 2){
+
+      }
+
+      // <JMP, MOV>
+      else if(prev_op_type == 2 && op->table_info->op_type == 3){
+
+      }
+
+      // <JMP, ALU> 
+      else if(prev_op_type == 2 &&   (op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
+      op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
+      op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
+      op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
+      op->table_info->op_type == 21)){
+
+      }
+      
+      starlab_delete_key(metadata_ptr, curr_op_addr_as_key);
+    }
+
+
+
+
+   }
+
 
     // count number of stall cycles
     STAT_EVENT(node->proc_id,
@@ -923,22 +1054,6 @@ void node_retire() {
 
     node->node_count--;
     ASSERT(node->proc_id, node->node_count >= 0);
-
-    // Metadata table 
-
-    /*
-      Get the current op address, convert it into string, look for it in the
-      metadata hashtable and delete that entry in it since the op is being 
-      retired.
-    */ 
-
-    char curr_op_addr_as_key[21]; 
-    sprintf(curr_op_addr_as_key, "%lld", op->inst_info->addr); 
-
-    rob_metadata_table_entry *meta_data_addr_aptr = (rob_metadata_table_entry*) starlab_search(metadata_ptr, curr_op_addr_as_key);
-    if(meta_data_addr_aptr){
-      starlab_delete_key(metadata_ptr, curr_op_addr_as_key);
-    }
 
   }
 
