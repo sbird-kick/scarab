@@ -414,6 +414,7 @@ typedef struct rob_cycles_entry{
 typedef struct rob_metadata_table_entry{
   unsigned long long op_addr; 
   unsigned long rob_insert_cycle;
+  unsigned int op_type; 
 } rob_metadata_table_entry;
 
 // starlab_hash_table* global_starlab_ht_ptr;

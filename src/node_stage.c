@@ -491,7 +491,8 @@ void node_issue(Stage_Data* src_sd) {
     rob_metadata_table_entry metadata_entry; 
 
     metadata_entry.op_addr = op->inst_info->addr; 
-    metadata_entry.rob_insert_cycle = cycle_count; 
+    metadata_entry.rob_insert_cycle = cycle_count;
+    metadata_entry.op_type = op->table_info->op_type;  
 
     starlab_insert(metadata_ptr, op_address, &metadata_entry);
 
