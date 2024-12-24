@@ -406,6 +406,16 @@ typedef struct {
     void *value;
 } KeyValuePair;
 
+typedef struct rob_cycles_entry{
+  char *instr_tuple_addr_as_key; 
+  unsigned long rob_cycles_consumed; 
+} rob_cycles_entry;
+
+typedef struct rob_metadata_table_entry{
+  unsigned long long op_addr; 
+  unsigned long rob_insert_cycle;
+} rob_metadata_table_entry;
+
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);
