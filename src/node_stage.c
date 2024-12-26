@@ -409,7 +409,7 @@ void update_node_stage(Stage_Data* src_sd) {
  *    the node table. Note, this function does not place the Op in the RS, that
  * is done later.*/
 
-void node_issue(Stage_Data* src_sd) {
+void node_issue(Stage_Data* src_sd) { 
 
   /* Whenever instructions are inserted into the node table (reorder buffer) 
      track their insert_cycles in the metadata_rob_cycles hash table.
@@ -469,8 +469,9 @@ void node_issue(Stage_Data* src_sd) {
     metadata_entry.op_type = op->table_info->op_type;  
 
     starlab_insert(metadata_ptr, op_address, &metadata_entry);
+    printf("[In node_issue()] inserted addr: %s\n", op_address); 
     free(metadata_entry.op_addr);
-    printf("[In node_issue()] inserted addr: %s with cycle_count: %lld\n", op_address, cycle_count);
+    // printf("[In node_issue()] inserted addr: %s with cycle_count: %lld\n", op_address, cycle_count);
 
     /* add to node list & update node state*/
     ASSERT(node->proc_id, !op->in_node_list);
@@ -834,6 +835,32 @@ void node_retire() {
     // Debug prints mainly used for testing the uop generation of PIN frontend
     debug_print_retired_uop(op);
 
+    // count number of stall cycles
+    STAT_EVENT(node->proc_id,
+               RET_STALL_LENGTH_0 + MIN2(node->ret_stall_length, 5000) / 100);
+    if(DIE_ON_RET_STALL_THRESH) {
+      // time out code
+      if(node->proc_id == DIE_ON_RET_STALL_CORE) {
+        ASSERTM(node->proc_id, node->ret_stall_length < DIE_ON_RET_STALL_THRESH,
+                "Retire stalled for %u cycles (%llu--%llu)\n",
+                node->ret_stall_length, cycle_count - node->ret_stall_length,
+                cycle_count);
+      }
+    }
+    node->ret_stall_length = 0;
+
+    // retire the ops
+    Counter real_rdy_cycle = MAX2(op->rdy_cycle, op->issue_cycle);
+
+    ASSERT(node->proc_id, node->proc_id == op->proc_id);
+    ASSERT(node->proc_id, op->in_node_list);
+    ASSERT(node->proc_id, !op->off_path);
+    STAT_EVENT(op->proc_id,
+               OP_WAIT_0 + MIN2(op->sched_cycle - real_rdy_cycle, 31));
+    STAT_EVENT(op->proc_id, OP_RETIRED);  // Counts all ops retired, not just
+                                          // those in primary thread
+
+    DEBUG(node->proc_id, "Retiring op_num:%s\n", unsstr64(op->op_num));
 
     // Metadata table 
 
@@ -852,19 +879,21 @@ void node_retire() {
 
    else {
 
-  //   /* this is not the first op so there is a prev op 
-  //      get the rob insert cycle of the prev_op 
-  //   */
+     /* this is not the first op so there is a prev op 
+       get the rob insert cycle of the prev_op 
+     */
 
     char curr_op_addr_as_key[21], prev_op_addr_as_key[21]; 
     sprintf(curr_op_addr_as_key, "%lld", op->inst_info->addr); 
     sprintf(prev_op_addr_as_key, "%lld", prev_op_addr); 
 
   //   printf("before fetching metadata");
-  //   // Fetch prev op i.e., instr1 in <instr1, instr2> metadata 
+    // Fetch prev op i.e., instr1 in <instr1, instr2> metadata 
     rob_metadata_table_entry *meta_data_addr_aptr = (rob_metadata_table_entry*) starlab_search(metadata_ptr, prev_op_addr_as_key);
+    printf("[in node_retire()] Looking for addr: %s\n", prev_op_addr_as_key);
     if(meta_data_addr_aptr){
 
+      printf("[in node_retire()] Found addr: %s\n", prev_op_addr_as_key);
       char instr_tuple_as_key[42];
       sprintf(instr_tuple_as_key, "%s%s", prev_op_addr_as_key, curr_op_addr_as_key);
 
@@ -878,8 +907,6 @@ void node_retire() {
       // instr2 retire cycle - instr 1 ROB insert cycle
       tuple_cycles_entry.rob_cycles_consumed = cycle_count - rob_insert_cycle;  
       strcpy(tuple_cycles_entry.instr_tuple_addr_as_key, instr_tuple_as_key);
-
-    
 
       // <MOV, MOV>
       if(prev_op_type == 3 && op->table_info->op_type == 3){
@@ -984,44 +1011,19 @@ void node_retire() {
         starlab_insert(jmp_alu_ptr, instr_tuple_as_key, &tuple_cycles_entry); 
       }
       
-      starlab_delete_key(metadata_ptr, curr_op_addr_as_key);
+      if((strcmp(prev_op_addr_as_key, curr_op_addr_as_key) != 0)){
+        starlab_delete_key(metadata_ptr, prev_op_addr_as_key);
+      }
 
       // update the prev op addr as curr op addr
       prev_op_addr = op->inst_info->addr; 
     }
 
-    else{
-      printf("hey, could not find the op in the metadata table..\n");
+    else{  
+      printf("[in node_retire()] Could not find addr: %s in metadata table\n", prev_op_addr_as_key);
     }
 
    }
-
-    // count number of stall cycles
-    STAT_EVENT(node->proc_id,
-               RET_STALL_LENGTH_0 + MIN2(node->ret_stall_length, 5000) / 100);
-    if(DIE_ON_RET_STALL_THRESH) {
-      // time out code
-      if(node->proc_id == DIE_ON_RET_STALL_CORE) {
-        ASSERTM(node->proc_id, node->ret_stall_length < DIE_ON_RET_STALL_THRESH,
-                "Retire stalled for %u cycles (%llu--%llu)\n",
-                node->ret_stall_length, cycle_count - node->ret_stall_length,
-                cycle_count);
-      }
-    }
-    node->ret_stall_length = 0;
-
-    // retire the ops
-    Counter real_rdy_cycle = MAX2(op->rdy_cycle, op->issue_cycle);
-
-    ASSERT(node->proc_id, node->proc_id == op->proc_id);
-    ASSERT(node->proc_id, op->in_node_list);
-    ASSERT(node->proc_id, !op->off_path);
-    STAT_EVENT(op->proc_id,
-               OP_WAIT_0 + MIN2(op->sched_cycle - real_rdy_cycle, 31));
-    STAT_EVENT(op->proc_id, OP_RETIRED);  // Counts all ops retired, not just
-                                          // those in primary thread
-
-    DEBUG(node->proc_id, "Retiring op_num:%s\n", unsstr64(op->op_num));
 
     ASSERTM(node->proc_id, op->op_num == node->ret_op, "op_num=%s  ret_op=%s\n",
             unsstr64(op->op_num), unsstr64(node->ret_op));
