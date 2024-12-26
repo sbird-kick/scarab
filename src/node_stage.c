@@ -411,9 +411,8 @@ void update_node_stage(Stage_Data* src_sd) {
 
 void node_issue(Stage_Data* src_sd) {
 
-
   /* Whenever instructions are inserted into the node table (reorder buffer) 
-    track their insert_cycles in the metadata_rob_cycles hash table.
+     track their insert_cycles in the metadata_rob_cycles hash table.
   */
   starlab_hash_table* metadata_ptr = (starlab_hash_table*) voided_metadata_rob_cycles_table; 
   if(metadata_ptr == NULL){
@@ -457,6 +456,21 @@ void node_issue(Stage_Data* src_sd) {
     /* set op fields */
     op->node_id     = node->node_count;
     op->issue_cycle = cycle_count;
+    
+    // insert ops and their insert_cycle into ROB in metadata hash table
+
+    char op_address[21]; 
+    sprintf(op_address, "%lld", op->inst_info->addr); 
+
+    rob_metadata_table_entry metadata_entry; 
+    metadata_entry.op_addr = malloc(21 * sizeof(char));
+    strcpy(metadata_entry.op_addr, op_address);
+    metadata_entry.rob_insert_cycle = cycle_count;
+    metadata_entry.op_type = op->table_info->op_type;  
+
+    starlab_insert(metadata_ptr, op_address, &metadata_entry);
+    free(metadata_entry.op_addr);
+    printf("[In node_issue()] inserted addr: %s with cycle_count: %lld\n", op_address, cycle_count);
 
     /* add to node list & update node state*/
     ASSERT(node->proc_id, !op->in_node_list);
@@ -469,6 +483,7 @@ void node_issue(Stage_Data* src_sd) {
     node->node_tail  = op;
 
     STAT_EVENT(node->proc_id, OP_ISSUED);
+
 
     if(!node->next_op_into_rs)    /* if there are no ops waiting to enter RS */
       node->next_op_into_rs = op; /* this will be the first one */
@@ -484,20 +499,6 @@ void node_issue(Stage_Data* src_sd) {
           unsstr64(op->op_num), op->off_path);
 
     op->state = OS_ISSUED;
-
-    // insert ops and their insert_cycle into ROB in metadata hash table
-
-    char op_address[21]; 
-    sprintf(op_address, "%lld", op->inst_info->addr); 
-
-    rob_metadata_table_entry metadata_entry; 
-
-    strcpy(metadata_entry.op_addr, op_address);
-    metadata_entry.rob_insert_cycle = cycle_count;
-    metadata_entry.op_type = op->table_info->op_type;  
-
-    starlab_insert(metadata_ptr, op_address, &metadata_entry);
-    printf("[In node_issue()] inserted addr: %s with cycle_count: %lld\n", op_address, cycle_count);
 
     /* always stop issuing after a synchronizing op */
     if(op->table_info->bar_type & BAR_ISSUE)
@@ -748,7 +749,7 @@ void node_sched_ops() {
 
 void node_retire() {
 
-  printf("[In node_retire()]\n");
+  // printf("[In node_retire()]\n");
   uns ret_count = 0;
   Op* op        = NULL;
 
@@ -812,6 +813,7 @@ void node_retire() {
   // them
   for(op = node->node_head; op && ret_count < NODE_RET_WIDTH;
       op = op->next_node) {
+        
     ASSERT(node->proc_id, node->proc_id == op->proc_id);
 
     // check to see if the head of the node table is ready to retire
@@ -845,19 +847,21 @@ void node_retire() {
     // there is no prev_op to track tuple cycles: do nothing 
     is_first_op = false;
     prev_op_addr = op->inst_info->addr; 
+    printf("first op");
    }
 
    else {
 
-    /* this is not the first op so there is a prev op 
-       get the rob insert cycle of the prev_op 
-    */
+  //   /* this is not the first op so there is a prev op 
+  //      get the rob insert cycle of the prev_op 
+  //   */
 
     char curr_op_addr_as_key[21], prev_op_addr_as_key[21]; 
     sprintf(curr_op_addr_as_key, "%lld", op->inst_info->addr); 
     sprintf(prev_op_addr_as_key, "%lld", prev_op_addr); 
 
-    // Fetch prev op i.e., instr1 in <instr1, instr2> metadata 
+  //   printf("before fetching metadata");
+  //   // Fetch prev op i.e., instr1 in <instr1, instr2> metadata 
     rob_metadata_table_entry *meta_data_addr_aptr = (rob_metadata_table_entry*) starlab_search(metadata_ptr, prev_op_addr_as_key);
     if(meta_data_addr_aptr){
 
@@ -869,10 +873,13 @@ void node_retire() {
       unsigned int rob_insert_cycle = meta_data_addr_aptr->rob_insert_cycle; 
 
       rob_cycles_entry tuple_cycles_entry;
+      tuple_cycles_entry.instr_tuple_addr_as_key = malloc(42 * sizeof(char));
 
       // instr2 retire cycle - instr 1 ROB insert cycle
-      tuple_cycles_entry.rob_cycles_consumed = cycle_count - rob_insert_cycle; 
+      tuple_cycles_entry.rob_cycles_consumed = cycle_count - rob_insert_cycle;  
       strcpy(tuple_cycles_entry.instr_tuple_addr_as_key, instr_tuple_as_key);
+
+    
 
       // <MOV, MOV>
       if(prev_op_type == 3 && op->table_info->op_type == 3){
@@ -1104,19 +1111,19 @@ void node_retire() {
             "Node table must be empty if next node is null!\n");
   }
 
-  voided_mov_mov_rob_cycles_table = (void*) mov_mov_ptr; 
-  voided_mov_alu_rob_cycles_table = (void*) mov_alu_ptr; 
-  voided_mov_jmp_rob_cycles_table = (void*) mov_jmp_ptr; 
+  // voided_mov_mov_rob_cycles_table = (void*) mov_mov_ptr; 
+  // voided_mov_alu_rob_cycles_table = (void*) mov_alu_ptr; 
+  // voided_mov_jmp_rob_cycles_table = (void*) mov_jmp_ptr; 
 
-  voided_alu_alu_rob_cycles_table = (void*) alu_alu_ptr; 
-  voided_alu_mov_rob_cycles_table = (void*) alu_mov_ptr; 
-  voided_alu_jmp_rob_cycles_table = (void*) alu_jmp_ptr; 
+  // voided_alu_alu_rob_cycles_table = (void*) alu_alu_ptr; 
+  // voided_alu_mov_rob_cycles_table = (void*) alu_mov_ptr; 
+  // voided_alu_jmp_rob_cycles_table = (void*) alu_jmp_ptr; 
 
-  voided_jmp_jmp_rob_cycles_table = (void*) jmp_jmp_ptr; 
-  voided_jmp_mov_rob_cycles_table = (void*) jmp_mov_ptr; 
-  voided_jmp_alu_rob_cycles_table = (void*) jmp_alu_ptr;
+  // voided_jmp_jmp_rob_cycles_table = (void*) jmp_jmp_ptr; 
+  // voided_jmp_mov_rob_cycles_table = (void*) jmp_mov_ptr; 
+  // voided_jmp_alu_rob_cycles_table = (void*) jmp_alu_ptr;
 
-  voided_metadata_rob_cycles_table = (void*) metadata_ptr;
+  // voided_metadata_rob_cycles_table = (void*) metadata_ptr;
 
 }
 
