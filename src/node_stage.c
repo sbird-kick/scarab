@@ -921,7 +921,7 @@ void node_retire() {
 
       // <MOV, MOV>
       if(prev_op_type == 3 && op->table_info->op_type == 3){
-        printf("[In node_retire()] inserted into <MOV, MOV>\n");
+        // printf("[In node_retire()] inserted into <MOV, MOV>\n");
         starlab_insert(mov_mov_ptr, instr_tuple_as_key, &tuple_cycles_entry);
       }
 
@@ -932,14 +932,14 @@ void node_retire() {
       op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
       op->table_info->op_type == 21)){
 
-        printf("[In node_retire()] inserted into <MOV, ALU>\n");
+        // printf("[In node_retire()] inserted into <MOV, ALU>\n");
         starlab_insert(mov_alu_ptr, instr_tuple_as_key, &tuple_cycles_entry);
       }
 
       // <MOV, JMP>
       else if(prev_op_type == 3 && op->table_info->op_type == 2){
 
-        printf("[In node_retire()] inserted into <MOV, JMP>\n");
+        // printf("[In node_retire()] inserted into <MOV, JMP>\n");
         starlab_insert(mov_jmp_ptr, instr_tuple_as_key, &tuple_cycles_entry);
       }
 
@@ -959,7 +959,7 @@ void node_retire() {
       op->table_info->op_type == 21)
       ){
         
-        printf("[In node_retire()] inserted into <ALU, ALU>\n");
+        // printf("[In node_retire()] inserted into <ALU, ALU>\n");
         starlab_insert(alu_alu_ptr, instr_tuple_as_key, &tuple_cycles_entry);
       }
 
@@ -976,7 +976,7 @@ void node_retire() {
 
       ){
 
-        printf("[In node_retire()] inserted into <ALU, MOV>\n");
+        // printf("[In node_retire()] inserted into <ALU, MOV>\n");
         starlab_insert(alu_mov_ptr, instr_tuple_as_key, &tuple_cycles_entry);
       }
 
@@ -993,21 +993,21 @@ void node_retire() {
       
       ){
 
-        printf("[In node_retire()] inserted into <ALU, JMP>\n");
+        // printf("[In node_retire()] inserted into <ALU, JMP>\n");
         starlab_insert(alu_jmp_ptr, instr_tuple_as_key, &tuple_cycles_entry);
       }
 
       // <JMP, JMP>
       else if(prev_op_type == 2 && op->table_info->op_type == 2){
 
-        printf("[In node_retire()] inserted into <JMP, JMP>\n");
+        // printf("[In node_retire()] inserted into <JMP, JMP>\n");
         starlab_insert(jmp_jmp_ptr, instr_tuple_as_key, &tuple_cycles_entry);
       }
 
       // <JMP, MOV>
       else if(prev_op_type == 2 && op->table_info->op_type == 3){
 
-        printf("[In node_retire()] inserted into <JMP, MOV>\n");
+        // printf("[In node_retire()] inserted into <JMP, MOV>\n");
         starlab_insert(jmp_mov_ptr, instr_tuple_as_key, &tuple_cycles_entry); 
       }
 
@@ -1018,7 +1018,7 @@ void node_retire() {
       op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
       op->table_info->op_type == 21)){
 
-        printf("[In node_retire()] inserted into <JMP, ALU>\n");
+        // printf("[In node_retire()] inserted into <JMP, ALU>\n");
         starlab_insert(jmp_alu_ptr, instr_tuple_as_key, &tuple_cycles_entry); 
       }
       
@@ -1031,7 +1031,7 @@ void node_retire() {
     }
 
     else{  
-      printf("[in node_retire()] Could not find addr: %s in metadata table\n", prev_op_addr_as_key);
+      printf("[In node_retire()] Could not find addr: %s in metadata table\n", prev_op_addr_as_key);
     }
 
    }
