@@ -38,6 +38,7 @@
 #include "globals/global_defs.h"
 #include "globals/global_vars.h"
 #include "statistics.h"
+#include "stdbool.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -408,13 +409,14 @@ typedef struct {
 
 typedef struct rob_cycles_entry{
   char *instr_tuple_addr_as_key; 
-  unsigned long rob_cycles_consumed; 
+  unsigned long long rob_cycles_consumed; 
 } rob_cycles_entry;
 
 typedef struct rob_metadata_table_entry{
-  unsigned long long op_addr; 
-  unsigned long rob_insert_cycle;
+  char  *op_addr; 
+  unsigned long long rob_insert_cycle;
   unsigned int op_type; 
+  bool has_instr_retired; 
 } rob_metadata_table_entry;
 
 // starlab_hash_table* global_starlab_ht_ptr;

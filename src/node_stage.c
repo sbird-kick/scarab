@@ -467,18 +467,20 @@ void node_issue(Stage_Data* src_sd) {
     strcpy(metadata_entry.op_addr, op_address);
     metadata_entry.rob_insert_cycle = cycle_count;
     metadata_entry.op_type = op->table_info->op_type;  
+    // when inserting into ROB, has_instr1_retired is not true
+    metadata_entry.has_instr_retired = false; 
 
     rob_metadata_table_entry *meta_data_addr_aptr = (rob_metadata_table_entry*) starlab_search(metadata_ptr, op_address);
 
     if(meta_data_addr_aptr){
       meta_data_addr_aptr->rob_insert_cycle = cycle_count; 
       meta_data_addr_aptr->op_type = op->table_info->op_type; 
-      // printf("[In node_issue()] updated address: %s\n", op_address); 
+      // printf("[In node_issue()] updated address: %s\twith cycle count: %lld\n", op_address, cycle_count); 
     }
 
     else{ 
       starlab_insert(metadata_ptr, op_address, &metadata_entry); 
-      // printf("[In node_issue()] inserted addr: %s\n", op_address); 
+      // printf("[In node_issue()] inserted addr: %s\twith cycle count: %lld\n", op_address, cycle_count); 
     }
 
     free(metadata_entry.op_addr);
@@ -843,6 +845,8 @@ void node_retire() {
     ret_count++;
     DEBUG(node->proc_id, "Retiring op:%llu\n", op->op_num);
 
+    // printf("Curr op being retired: %lld\n", op->inst_info->addr);
+
     // Debug prints mainly used for testing the uop generation of PIN frontend
     debug_print_retired_uop(op);
 
@@ -894,9 +898,11 @@ void node_retire() {
        get the rob insert cycle of the prev_op 
      */
 
+
     char curr_op_addr_as_key[21], prev_op_addr_as_key[21]; 
     sprintf(curr_op_addr_as_key, "%lld", op->inst_info->addr); 
     sprintf(prev_op_addr_as_key, "%lld", prev_op_addr); 
+
 
   //   printf("before fetching metadata");
     // Fetch prev op i.e., instr1 in <instr1, instr2> metadata 
@@ -921,7 +927,11 @@ void node_retire() {
 
       // <MOV, MOV>
       if(prev_op_type == 3 && op->table_info->op_type == 3){
+        // printf("Instruction tuple: %s\n", instr_tuple_as_key); 
         // printf("[In node_retire()] inserted into <MOV, MOV>\n");
+        // printf("Current cycle (when %s is being retired): %lld\n", curr_op_addr_as_key, cycle_count); 
+        // printf("Cycle count when instruction 1 in the tuple was inserted into ROB: %lld\n", meta_data_addr_aptr->rob_insert_cycle); 
+        // printf("Was intruction 1 retired: %d\n", meta_data_addr_aptr->has_instr_retired);
         starlab_insert(mov_mov_ptr, instr_tuple_as_key, &tuple_cycles_entry);
       }
 
@@ -932,7 +942,11 @@ void node_retire() {
       op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
       op->table_info->op_type == 21)){
 
+        // printf("Instruction tuple: %s:%s\n", prev_op_addr_as_key, curr_op_addr_as_key); 
         // printf("[In node_retire()] inserted into <MOV, ALU>\n");
+        // printf("Current cycle (when %s is being retired): %lld\n", curr_op_addr_as_key, cycle_count); 
+        // printf("Cycle count when instruction 1 in the tuple was inserted into ROB: %lld\n", meta_data_addr_aptr->rob_insert_cycle); 
+        // printf("Was intruction 1 retired: %d\n", meta_data_addr_aptr->has_instr_retired);
         starlab_insert(mov_alu_ptr, instr_tuple_as_key, &tuple_cycles_entry);
       }
 
@@ -1025,6 +1039,13 @@ void node_retire() {
       // if((strcmp(prev_op_addr_as_key, curr_op_addr_as_key) != 0)){
       //   starlab_delete_key(metadata_ptr, prev_op_addr_as_key);
       // }
+
+      // Since the current op has retired, update it in the metadata table
+      rob_metadata_table_entry *curr_meta_data_addr_aptr = (rob_metadata_table_entry*) starlab_search(metadata_ptr, curr_op_addr_as_key);
+
+      if(curr_meta_data_addr_aptr){
+        curr_meta_data_addr_aptr->has_instr_retired = true; 
+      }
 
       // update the prev op addr as curr op addr
       prev_op_addr = op->inst_info->addr; 
