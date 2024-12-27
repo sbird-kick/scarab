@@ -468,8 +468,19 @@ void node_issue(Stage_Data* src_sd) {
     metadata_entry.rob_insert_cycle = cycle_count;
     metadata_entry.op_type = op->table_info->op_type;  
 
-    starlab_insert(metadata_ptr, op_address, &metadata_entry);
-    // printf("[In node_issue()] inserted addr: %s\n", op_address); 
+    rob_metadata_table_entry *meta_data_addr_aptr = (rob_metadata_table_entry*) starlab_search(metadata_ptr, op_address);
+
+    if(meta_data_addr_aptr){
+      meta_data_addr_aptr->rob_insert_cycle = cycle_count; 
+      meta_data_addr_aptr->op_type = op->table_info->op_type; 
+      printf("[In node_issue()] updated address: %s\n", op_address); 
+    }
+
+    else{ 
+      starlab_insert(metadata_ptr, op_address, &metadata_entry); 
+      printf("[In node_issue()] inserted addr: %s\n", op_address); 
+    }
+
     free(metadata_entry.op_addr);
     // printf("[In node_issue()] inserted addr: %s with cycle_count: %lld\n", op_address, cycle_count);
 
@@ -755,7 +766,7 @@ void node_retire() {
   Op* op        = NULL;
 
   // Hash tables to track the processor cycles consumed by instruction tuples in reorder buffer
-
+  
   starlab_hash_table* mov_mov_ptr = (starlab_hash_table*) voided_mov_mov_rob_cycles_table; 
   if(mov_mov_ptr == NULL){
     mov_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rob_cycles_entry)); 
@@ -890,10 +901,10 @@ void node_retire() {
   //   printf("before fetching metadata");
     // Fetch prev op i.e., instr1 in <instr1, instr2> metadata 
     rob_metadata_table_entry *meta_data_addr_aptr = (rob_metadata_table_entry*) starlab_search(metadata_ptr, prev_op_addr_as_key);
-    // printf("[in node_retire()] Looking for addr: %s\n", prev_op_addr_as_key);
+    printf("[in node_retire()] Looking for addr: %s\n", prev_op_addr_as_key);
     if(meta_data_addr_aptr){
 
-      // printf("[in node_retire()] Found addr: %s\n", prev_op_addr_as_key);
+      printf("[in node_retire()] Found addr: %s\n", prev_op_addr_as_key);
       char instr_tuple_as_key[42];
       sprintf(instr_tuple_as_key, "%s%s", prev_op_addr_as_key, curr_op_addr_as_key);
 
@@ -1011,9 +1022,9 @@ void node_retire() {
         starlab_insert(jmp_alu_ptr, instr_tuple_as_key, &tuple_cycles_entry); 
       }
       
-      if((strcmp(prev_op_addr_as_key, curr_op_addr_as_key) != 0)){
-        starlab_delete_key(metadata_ptr, prev_op_addr_as_key);
-      }
+      // if((strcmp(prev_op_addr_as_key, curr_op_addr_as_key) != 0)){
+      //   starlab_delete_key(metadata_ptr, prev_op_addr_as_key);
+      // }
 
       // update the prev op addr as curr op addr
       prev_op_addr = op->inst_info->addr; 
