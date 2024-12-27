@@ -360,15 +360,15 @@ int main(int argc, char* argv[], char* envp[]) {
   if(opt2_in_use())
     opt2_sim_complete();
 
-  // print_hash_table_values("mov_mov", voided_mov_mov_rob_cycles_table);
-  // print_hash_table_values("mov_alu", voided_mov_alu_rob_cycles_table);
-  // print_hash_table_values("mov_jmp", voided_mov_jmp_rob_cycles_table);
-  // print_hash_table_values("alu_alu", voided_alu_alu_rob_cycles_table);
-  // print_hash_table_values("alu_mov", voided_alu_mov_rob_cycles_table);
-  // print_hash_table_values("alu_jmp", voided_alu_jmp_rob_cycles_table);
-  // print_hash_table_values("jmp_jmp", voided_jmp_mov_rob_cycles_table);
-  // print_hash_table_values("jmp_mov", voided_jmp_mov_rob_cycles_table);
-  // print_hash_table_values("jmp_alu", voided_jmp_alu_rob_cycles_table);
+  print_hash_table_values("mov_mov", voided_mov_mov_rob_cycles_table);
+  print_hash_table_values("mov_alu", voided_mov_alu_rob_cycles_table);
+  print_hash_table_values("mov_jmp", voided_mov_jmp_rob_cycles_table);
+  print_hash_table_values("alu_alu", voided_alu_alu_rob_cycles_table);
+  print_hash_table_values("alu_mov", voided_alu_mov_rob_cycles_table);
+  print_hash_table_values("alu_jmp", voided_alu_jmp_rob_cycles_table);
+  print_hash_table_values("jmp_jmp", voided_jmp_mov_rob_cycles_table);
+  print_hash_table_values("jmp_mov", voided_jmp_mov_rob_cycles_table);
+  print_hash_table_values("jmp_alu", voided_jmp_alu_rob_cycles_table);
 
   // char **keys;
   // void **values_array;
@@ -377,23 +377,28 @@ int main(int argc, char* argv[], char* envp[]) {
   // long count = get_count(voided_mov_mov_rob_cycles_table);
   // key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
 
-  // starlab_return_key_value_arr(voided_mov_mov_rob_cycles_table, &keys, &values_array);
+  // printf("count: %ld\n", count);
 
-  // for (long i = 0; i < count; i++) {
+  // if(count > 0)
+  // {
+  //   starlab_return_key_value_arr(voided_mov_mov_rob_cycles_table, &keys, &values_array);
+
+  //   for (long i = 0; i < count; i++) {
   //     key_value_pairs[i].key = keys[i];
   //     key_value_pairs[i].value = values_array[i];
-  // }
+  //    }
 
-  // qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+  //   qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
-  // unsigned long total_cc_count = 0;
-  // for (long i = 0; i < count; i++) {
-  //     rob_cycles_entry *tuple = (rob_cycles_entry *)key_value_pairs[i].value;
-  //     total_cc_count += tuple->rob_cycles_consumed;
-  // }
+  //   unsigned long total_cc_count = 0;
+  //   for (long i = 0; i < count; i++) {
+  //       rob_cycles_entry *tuple = (rob_cycles_entry *)key_value_pairs[i].value;
+  //       // printf("Key: %s\tValue: %lld\n", tuple->instr_tuple_addr_as_key, tuple->rob_cycles_consumed);
+  //       total_cc_count += tuple->rob_cycles_consumed;
+  //   }
 
-  // printf("hey: %ld\n", total_cc_count);
-
+  //   printf("Total cycles count: %ld\n", total_cc_count);
+  //   }
 
   return 0;
 }
@@ -413,7 +418,7 @@ void print_hash_table_values(const char* table_name, starlab_hash_table* table_p
         return;
     }
 
-    printf("Summary for table: %s\n", table_name);
+    // printf("Summary for table: %s\n", table_name);
 
     // Allocate space for keys and values
     keys = malloc(count * sizeof(char*));
@@ -432,7 +437,7 @@ void print_hash_table_values(const char* table_name, starlab_hash_table* table_p
     for (long i = 0; i < count; i++) {
         rob_cycles_entry *tuple = (rob_cycles_entry *)key_value_pairs[i].value;
         total_cc_count += tuple->rob_cycles_consumed;
-        printf("Key: %s, ROB Cycles Consumed: %lu\n", key_value_pairs[i].key, tuple->rob_cycles_consumed);
+        // printf("Key: %s, ROB Cycles Consumed: %llu\n", key_value_pairs[i].key, tuple->rob_cycles_consumed);
     }
 
     printf("Total ROB Cycles Consumed for %s: %lu\n", table_name, total_cc_count);
