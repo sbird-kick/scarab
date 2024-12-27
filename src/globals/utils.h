@@ -419,6 +419,11 @@ typedef struct rob_metadata_table_entry{
   bool has_instr_retired; 
 } rob_metadata_table_entry;
 
+typedef struct rob_total_cycles_entry{
+  unsigned long long rob_first_op_insert_cycle; 
+  unsigned long long rob_last_op_retire_cycle; 
+} rob_total_cycles_entry; 
+
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);

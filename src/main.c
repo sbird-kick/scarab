@@ -243,6 +243,7 @@ void* voided_jmp_alu_rob_cycles_table = NULL;
 // Hash table to track metadata (such as instruction insertion cycle) required for tuple cycles consumed computation 
 
 void* voided_metadata_rob_cycles_table = NULL; 
+void* voided_rob_total_cycles_table = NULL; 
 
 void print_hash_table_values(const char* table_name, starlab_hash_table* table_ptr);
 
@@ -370,35 +371,50 @@ int main(int argc, char* argv[], char* envp[]) {
   print_hash_table_values("jmp_mov", voided_jmp_mov_rob_cycles_table);
   print_hash_table_values("jmp_alu", voided_jmp_alu_rob_cycles_table);
 
-  // char **keys;
-  // void **values_array;
+   char **keys;
+    void **values_array;
+    KeyValuePair *key_value_pairs;
+    unsigned long total_cc_count = 0;
+    
+    long count = get_count(voided_rob_total_cycles_table);
+    if (count <= 0) {
+        printf("Error: No entries in hashtable\n");
+        return 0;
+    }
+    
+    key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
+    if (!key_value_pairs) {
+        printf("Error: Memory allocation failed\n");
+        return 0;
+    }
+    
+    starlab_return_key_value_arr(voided_rob_total_cycles_table, &keys, &values_array);
 
-  // KeyValuePair *key_value_pairs;
-  // long count = get_count(voided_mov_mov_rob_cycles_table);
-  // key_value_pairs = (KeyValuePair *)malloc(count * sizeof(KeyValuePair));
+    for (long i = 0; i < count; i++) {
+        key_value_pairs[i].key = keys[i];
+        key_value_pairs[i].value = values_array[i];
+    }
 
-  // printf("count: %ld\n", count);
+    if (count > 1) {
+        qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+    }
+    
+    // Process entries
+    for (long i = 0; i < count; i++) {
+        rob_total_cycles_entry *tuple = (rob_total_cycles_entry *)key_value_pairs[i].value;
+        if (tuple) {
 
-  // if(count > 0)
-  // {
-  //   starlab_return_key_value_arr(voided_mov_mov_rob_cycles_table, &keys, &values_array);
-
-  //   for (long i = 0; i < count; i++) {
-  //     key_value_pairs[i].key = keys[i];
-  //     key_value_pairs[i].value = values_array[i];
-  //    }
-
-  //   qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
-
-  //   unsigned long total_cc_count = 0;
-  //   for (long i = 0; i < count; i++) {
-  //       rob_cycles_entry *tuple = (rob_cycles_entry *)key_value_pairs[i].value;
-  //       // printf("Key: %s\tValue: %lld\n", tuple->instr_tuple_addr_as_key, tuple->rob_cycles_consumed);
-  //       total_cc_count += tuple->rob_cycles_consumed;
-  //   }
-
-  //   printf("Total cycles count: %ld\n", total_cc_count);
-  //   }
+            printf("First op insert cycle: %lld\t Last op retire cycle: %lld\n", tuple->rob_first_op_insert_cycle, tuple->rob_last_op_retire_cycle); 
+            unsigned long long entry_cycles = tuple->rob_last_op_retire_cycle - tuple->rob_first_op_insert_cycle;
+            total_cc_count = entry_cycles;  
+            
+        }
+    }
+    
+    free(key_value_pairs);
+    
+    printf("Total cycles spent by all ops in ROB: %lu\n", total_cc_count);
+  
 
   return 0;
 }

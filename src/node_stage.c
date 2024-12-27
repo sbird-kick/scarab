@@ -419,6 +419,22 @@ void node_issue(Stage_Data* src_sd) {
     metadata_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rob_metadata_table_entry));
   }
 
+  starlab_hash_table* rob_total_cycles_ptr = (starlab_hash_table*) voided_rob_total_cycles_table; 
+  if(rob_total_cycles_ptr == NULL){
+    rob_total_cycles_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rob_total_cycles_entry)); 
+  }
+
+  if(is_first_op){
+
+    char cycles_entry_key[10] = "cycles";
+    rob_total_cycles_entry cycles_entry;
+    cycles_entry.rob_first_op_insert_cycle = cycle_count;
+    cycles_entry.rob_last_op_retire_cycle = 0; // Will be populated in node_retire()
+
+    starlab_insert(rob_total_cycles_ptr, cycles_entry_key, &cycles_entry);
+
+  }
+
   Flag on_path = FALSE;
   uns  ii;
 
@@ -521,6 +537,7 @@ void node_issue(Stage_Data* src_sd) {
   }
 
   voided_metadata_rob_cycles_table = (void*) metadata_ptr;
+  voided_rob_total_cycles_table = (void*) rob_total_cycles_ptr; 
 
 }
 
@@ -768,6 +785,11 @@ void node_retire() {
   Op* op        = NULL;
 
   // Hash tables to track the processor cycles consumed by instruction tuples in reorder buffer
+
+  starlab_hash_table* rob_total_cycles_ptr = (starlab_hash_table*) voided_rob_total_cycles_table; 
+  if(rob_total_cycles_ptr == NULL){
+    rob_total_cycles_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rob_total_cycles_entry)); 
+  }
   
   starlab_hash_table* mov_mov_ptr = (starlab_hash_table*) voided_mov_mov_rob_cycles_table; 
   if(mov_mov_ptr == NULL){
@@ -877,6 +899,17 @@ void node_retire() {
 
     DEBUG(node->proc_id, "Retiring op_num:%s\n", unsstr64(op->op_num));
 
+    // ROB cycles table
+
+    rob_total_cycles_entry *rob_cycles_ptr = (rob_total_cycles_entry*) starlab_search(rob_total_cycles_ptr, "cycles");
+    if(rob_cycles_ptr != NULL){ 
+      rob_cycles_ptr->rob_last_op_retire_cycle = cycle_count; 
+    }
+
+    else{
+      printf("Could not find an entry with the name cycles.\n");
+    }
+
     // Metadata table 
 
     /*
@@ -884,6 +917,7 @@ void node_retire() {
       metadata hashtable and delete that entry in it since the op is being 
       retired.
     */ 
+
 
    if(is_first_op){
     // there is no prev_op to track tuple cycles: do nothing 
@@ -1158,6 +1192,7 @@ void node_retire() {
   voided_jmp_alu_rob_cycles_table = (void*) jmp_alu_ptr;
 
   voided_metadata_rob_cycles_table = (void*) metadata_ptr;
+  voided_rob_total_cycles_table = (void*) rob_total_cycles_ptr; 
 
 }
 

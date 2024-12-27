@@ -112,6 +112,8 @@ extern void* voided_jmp_alu_rob_cycles_table;
 // Hash table to track metadata (such as instruction insertion cycle) required for tuples cycles consumed computation
 
 extern void* voided_metadata_rob_cycles_table; 
+extern void* voided_rob_total_cycles_table; 
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */
