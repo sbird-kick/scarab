@@ -9,8 +9,7 @@ mkdir -p "$RESULTS_DIR"
 
 cd "$SCARAB_DIR" || { echo "Failed to change directory to $SCARAB_DIR"; exit 1; }
 
-# INST_LIMIT=100000000
-INST_LIMIT=10
+INST_LIMIT=100000000
 
 for WORKLOAD_DIR in "$DATACENTER_DIR"/*; do
   if [ -d "$WORKLOAD_DIR" ]; then
