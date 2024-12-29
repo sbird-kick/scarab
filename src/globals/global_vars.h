@@ -94,6 +94,24 @@ extern char prev_instruction_class[128];
 
 extern char prev_address_as_string[128];
 extern unsigned long long starlab_prev_address;
+
+// Hash tables to track the processor cycles consumed by instruction tuples in reservation station 
+
+extern void* voided_mov_mov_rs_cycles_table; 
+extern void* voided_mov_alu_rs_cycles_table; 
+extern void* voided_mov_jmp_rs_cycles_table; 
+
+extern void* voided_alu_alu_rs_cycles_table; 
+extern void* voided_alu_mov_rs_cycles_table;
+extern void* voided_alu_jmp_rs_cycles_table; 
+
+extern void* voided_jmp_jmp_rs_cycles_table; 
+extern void* voided_jmp_mov_rs_cycles_table; 
+extern void* voided_jmp_alu_rs_cycles_table; 
+
+// Hash table to track the previous instruction's metadata (for forming a tuple)
+extern void* voided_metadata_rs_cycles_table; 
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */
