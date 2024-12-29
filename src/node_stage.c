@@ -916,6 +916,56 @@ void node_fill_rs() {
   Op*   op          = NULL;
   uns32 num_fill_rs = 0;
 
+  starlab_hash_table* metadata_ptr = (starlab_hash_table*) voided_metadata_rs_cycles_table; 
+  if(metadata_ptr == NULL){ 
+    metadata_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_prev_op)); 
+  }
+
+  starlab_hash_table* mov_mov_ptr = (starlab_hash_table*) voided_mov_mov_rs_cycles_table; 
+  if(mov_mov_ptr == NULL){
+    mov_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+  }
+
+  starlab_hash_table* mov_alu_ptr = (starlab_hash_table*) voided_mov_alu_rs_cycles_table; 
+  if(mov_alu_ptr == NULL){ 
+    mov_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+  }
+
+  starlab_hash_table* mov_jmp_ptr = (starlab_hash_table*) voided_mov_jmp_rs_cycles_table; 
+  if(mov_alu_ptr == NULL){ 
+    mov_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+  }
+
+  starlab_hash_table* alu_alu_ptr = (starlab_hash_table*) voided_alu_alu_rs_cycles_table; 
+  if(alu_alu_ptr == NULL){ 
+    alu_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
+  }
+
+  starlab_hash_table* alu_mov_ptr = (starlab_hash_table*) voided_alu_mov_rs_cycles_table; 
+  if(alu_mov_ptr == NULL){ 
+    alu_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
+  }
+
+  starlab_hash_table* alu_jmp_ptr = (starlab_hash_table*) voided_alu_jmp_rs_cycles_table; 
+  if(alu_jmp_ptr == NULL){ 
+    alu_jmp_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
+  }
+
+  starlab_hash_table* jmp_jmp_ptr = (starlab_hash_table*) voided_jmp_jmp_rs_cycles_table; 
+  if(jmp_jmp_ptr == NULL){ 
+    jmp_jmp_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
+  }
+
+  starlab_hash_table* jmp_mov_ptr = (starlab_hash_table*) voided_jmp_mov_rs_cycles_table; 
+  if(jmp_mov_ptr == NULL){
+    jmp_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+  }
+
+  starlab_hash_table* jmp_alu_ptr = (starlab_hash_table*) voided_jmp_alu_rs_cycles_table; 
+  if(jmp_alu_ptr == NULL){
+    jmp_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
+  }
+
   // Scan through issued nodes in node table that have not been issued to RS
   // yet.
   for(op = node->next_op_into_rs; op; op = op->next_node) {
@@ -960,6 +1010,21 @@ void node_fill_rs() {
 
   // had to stop issuing, this is the next node that should be issued to the RS
   node->next_op_into_rs = op;
+
+  voided_metadata_rs_cycles_table = (void*) metadata_ptr; 
+
+  voided_mov_mov_rs_cycles_table = (void*) mov_mov_ptr; 
+  voided_mov_alu_rs_cycles_table = (void*) mov_alu_ptr; 
+  voided_mov_jmp_rs_cycles_table = (void*) mov_jmp_ptr; 
+
+  voided_alu_alu_rs_cycles_table = (void*) alu_alu_ptr; 
+  voided_alu_mov_rs_cycles_table = (void*) alu_mov_ptr; 
+  voided_alu_jmp_rs_cycles_table = (void*) alu_jmp_ptr; 
+
+  voided_jmp_jmp_rs_cycles_table = (void*) jmp_jmp_ptr; 
+  voided_jmp_mov_rs_cycles_table = (void*) jmp_mov_ptr; 
+  voided_jmp_alu_rs_cycles_table = (void*) jmp_alu_ptr; 
+
 }
 
 /**************************************************************************************/

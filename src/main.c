@@ -234,6 +234,10 @@ void* voided_alu_alu_rs_cycles_table = NULL;
 void* voided_alu_mov_rs_cycles_table = NULL; 
 void* voided_alu_jmp_rs_cycles_table = NULL; 
 
+void* voided_jmp_jmp_rs_cycles_table = NULL; 
+void* voided_jmp_mov_rs_cycles_table = NULL; 
+void* voided_jmp_alu_rs_cycles_table = NULL; 
+
 void* voided_metadata_rs_cycles_table = NULL; 
 
 // const char starlab_do_write = 1;
