@@ -226,6 +226,16 @@ void* voided_address_to_prev_address = NULL;
 void* voided_inst_truple_ptr = NULL;
 void* is_candidate_ptr = NULL;
 
+void* voided_mov_mov_rs_cycles_table = NULL;
+void* voided_mov_alu_rs_cycles_table = NULL; 
+void* voided_mov_jmp_rs_cycles_table = NULL; 
+
+void* voided_alu_alu_rs_cycles_table = NULL; 
+void* voided_alu_mov_rs_cycles_table = NULL; 
+void* voided_alu_jmp_rs_cycles_table = NULL; 
+
+void* voided_metadata_rs_cycles_table = NULL; 
+
 // const char starlab_do_write = 1;
 
 unsigned long long prev_instruction_time = 0;
