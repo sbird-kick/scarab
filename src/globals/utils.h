@@ -418,8 +418,16 @@ typedef struct rs_cycles_entry{
 
 typedef struct rs_prev_op{ 
   char *prev_op_addr; 
-  unsigned long prev_op_type; 
+  unsigned int prev_op_type; 
+  unsigned long long prev_op_rs_insert_cycle; 
 } rs_prev_op; 
+
+typedef struct rs_mapping_entry{
+  char *instr1; 
+  char *instr2; 
+  unsigned int instr1_op_type; 
+  unsigned int instr2_op_type; 
+} rs_mapping_entry; 
 
 
 // starlab_hash_table* global_starlab_ht_ptr;
