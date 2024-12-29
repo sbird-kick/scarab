@@ -217,6 +217,10 @@ Scarab's source code is organized as follows:
 
 #include "general.param.h"
 
+#define MAX(A, B) (((A) > (B)) ? (A) : (B))
+#define MIN(A, B) (((A) < (B)) ? (A) : (B))
+
+void print_hash_table_values(const char* table_name, starlab_hash_table* table_ptr);
 /**************************************************************************************/
 
 void* voided_global_starlab_ht_ptr = NULL;
@@ -239,6 +243,9 @@ void* voided_jmp_mov_rs_cycles_table = NULL;
 void* voided_jmp_alu_rs_cycles_table = NULL; 
 
 void* voided_metadata_rs_cycles_table = NULL; 
+
+void* voided_mapping_rs_instr1_to_instr2 = NULL; 
+void* voided_mapping_rs_instr2_to_instr1 = NULL; 
 
 // const char starlab_do_write = 1;
 
@@ -354,28 +361,60 @@ int main(int argc, char* argv[], char* envp[]) {
   if(opt2_in_use())
     opt2_sim_complete();
 
-  if(starlab_do_write)
-  {
-    char** keys;
-    void** values;
-    // Open the file specified by NOP_FILE for writing
-    FILE *file = fopen(NOP_FILE, "w");
-    if (file == NULL) {
-        perror("Error opening file for writing");
-        return 1;
-    }
+  print_hash_table_values("mov_mov", voided_mov_mov_rs_cycles_table);
+  print_hash_table_values("mov_alu", voided_mov_alu_rs_cycles_table);
+  print_hash_table_values("mov_jmp", voided_mov_jmp_rs_cycles_table);
+  print_hash_table_values("alu_alu", voided_alu_alu_rs_cycles_table);
+  print_hash_table_values("alu_mov", voided_alu_mov_rs_cycles_table);
+  print_hash_table_values("alu_jmp", voided_alu_jmp_rs_cycles_table);
+  print_hash_table_values("jmp_jmp", voided_jmp_mov_rs_cycles_table);
+  print_hash_table_values("jmp_mov", voided_jmp_mov_rs_cycles_table);
+  print_hash_table_values("jmp_alu", voided_jmp_alu_rs_cycles_table);
 
-    if (is_candidate_ptr) {
-        long count = get_count(is_candidate_ptr);  // Replace with the actual function to get count
-        starlab_return_key_value_arr(is_candidate_ptr, &keys, &values);  // Replace with the actual function to get keys and values
-
-        for (long i = 0; i < count; i++) {
-            fprintf(file, "%s\n", keys[i]);
-        }
-    }
-
-    fclose(file);
-  }
 
   return 0;
+}
+
+void print_hash_table_values(const char* table_name, starlab_hash_table* table_ptr){
+  if (table_ptr == NULL) {
+        printf("Table %s is not initialized.\n", table_name);
+        return;
+    }
+
+    char **keys;
+    void **values_array;
+    long count = get_count(table_ptr);
+
+    if (count == 0) {
+        printf("Table %s is empty.\n", table_name);
+        return;
+    }
+
+    // printf("Summary for table: %s\n", table_name);
+
+    // Allocate space for keys and values
+    keys = malloc(count * sizeof(char*));
+    values_array = malloc(count * sizeof(void*));
+    starlab_return_key_value_arr(table_ptr, &keys, &values_array);
+
+    KeyValuePair *key_value_pairs = malloc(count * sizeof(KeyValuePair));
+    for (long i = 0; i < count; i++) {
+        key_value_pairs[i].key = keys[i];
+        key_value_pairs[i].value = values_array[i];
+    }
+
+    qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+
+    unsigned long total_cc_count = 0;
+    for (long i = 0; i < count; i++) {
+        rs_cycles_entry *tuple = (rs_cycles_entry *)key_value_pairs[i].value;
+        total_cc_count += MAX(tuple->instr1_rs_issue_to_fu_cycle, tuple->instr2_rs_issue_to_fu_cycle) - MIN(tuple->instr1_rs_insertion_cycle, tuple->instr2_rs_insertion_cycle); 
+        // printf("Key: %s, RS Cycles Consumed: %llu\n", key_value_pairs[i].key, tuple->rob_cycles_consumed);
+    }
+
+    printf("Total RS Cycles Consumed for %s: %lu\n", table_name, total_cc_count);
+
+    free(keys);
+    free(values_array);
+    free(key_value_pairs);
 }
