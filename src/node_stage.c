@@ -74,6 +74,7 @@ Rob_Block_Issue_Reason rob_block_issue_reason = ROB_BLOCK_ISSUE_NONE;
 
 static bool is_first_op = true; 
 
+
 /**************************************************************************************/
 /* Prototypes */
 
@@ -90,6 +91,7 @@ Flag is_node_table_empty(void);
 void collect_not_ready_to_retire_stats(Op* op);
 Flag is_node_table_full(void);
 void collect_node_table_full_stats(Op* op);
+int is_alu_op(unsigned int op_type); 
 
 /**************************************************************************************/
 /* set_node_stage:*/
@@ -1370,162 +1372,89 @@ void node_fill_rs() {
       op->in_rdy_list = TRUE;
     }
 
-    if(is_first_op){ 
-      // just track its op type and address
-      char address[21]; 
-      sprintf(address, "%lld", op->inst_info->addr);
+    if (is_first_op) {
+    // Track the first op type and address
+    char address[21];
+    sprintf(address, "%lld", op->inst_info->addr);
 
-      rs_prev_op* prev_op; 
-      prev_op->prev_op_addr = address; 
-      prev_op->prev_op_type = op->table_info->op_type; 
-      prev_op->prev_op_rs_insert_cycle = cycle_count; 
-
-      starlab_insert(metadata_ptr, "prev_op", &prev_op);
-
-      is_first_op = false; 
+    // Allocate memory for rs_prev_op
+    rs_prev_op* prev_op = (rs_prev_op*)malloc(sizeof(rs_prev_op));
+    if (!prev_op) {
+        fprintf(stderr, "Memory allocation failed for prev_op\n");
+        exit(EXIT_FAILURE);
     }
 
-    else{ 
+    strcpy(prev_op->prev_op_addr, address);
+    prev_op->prev_op_type = op->table_info->op_type;
+    prev_op->prev_op_rs_insert_cycle = cycle_count;
 
-      // this is not the first op 
-      // create a tuple and insert into the hash table 
-      char tuple_addr_concatenated[42]; 
-      char curr_addr_as_string[21]; 
-      sprintf(curr_addr_as_string, "%lld", op->inst_info->addr);
+    starlab_insert(metadata_ptr, "prev_op", prev_op);
 
-      // fetch instruction 1
-      rs_prev_op* prev_op = (rs_prev_op*) starlab_search(metadata_ptr, "prev_op"); 
-      if(prev_op){ 
-        printf("oops, there is no previous op.\n"); 
-      }
+    is_first_op = false;
+} else {
+    // This is not the first op
+    char tuple_addr_concatenated[42];
+    char curr_addr_as_string[21];
+    sprintf(curr_addr_as_string, "%lld", op->inst_info->addr);
 
-      else{
-        sprintf(tuple_addr_concatenated, "%s%s", prev_op->prev_op_addr, curr_addr_as_string); 
-      }
+    // Fetch previous operation
+    rs_prev_op* prev_op = (rs_prev_op*)starlab_search(metadata_ptr, "prev_op");
+    if (!prev_op) {
+        fprintf(stderr, "Error: No previous operation found.\n");
+        return; // Exit early to avoid further issues
+    }
 
-      unsigned int prev_op_type = prev_op->prev_op_type; 
+    // Concatenate addresses for the tuple
+    sprintf(tuple_addr_concatenated, "%s%s", prev_op->prev_op_addr, curr_addr_as_string);
+    unsigned int prev_op_type = prev_op->prev_op_type;
 
-      // insert into mappings 
+    // Allocate and populate rs_mapping_entry
+    rs_mapping_entry mapping_entry;
+    strcpy(mapping_entry.instr1, prev_op->prev_op_addr);
+    strcpy(mapping_entry.instr2, curr_addr_as_string);
 
-      rs_mapping_entry mapping_entry; 
-      strcpy(mapping_entry.instr1, prev_op->prev_op_addr); 
-      strcpy(mapping_entry.instr2, curr_addr_as_string);
+    starlab_insert(map1_ptr, prev_op->prev_op_addr, &mapping_entry);
+    starlab_insert(map2_ptr, curr_addr_as_string, &mapping_entry);
 
-      starlab_insert(map1_ptr, prev_op->prev_op_addr, &mapping_entry); 
-      starlab_insert(map2_ptr, curr_addr_as_string, &mapping_entry); 
+    // Allocate memory for rs_cycles_entry
+    rs_cycles_entry* rs_entry = (rs_cycles_entry*)malloc(sizeof(rs_cycles_entry));
+    if (!rs_entry) {
+        fprintf(stderr, "Memory allocation failed for rs_entry\n");
+        exit(EXIT_FAILURE);
+    }
 
-      // Based on the op type of instr1 (prev_op) and instr2 (current instruction) insert them 
-      // into the appropriate hash tables 
+    rs_entry->instr1_addr = strdup(prev_op->prev_op_addr); // Duplicate strings for safety
+    rs_entry->instr2_addr = strdup(curr_addr_as_string);
+    rs_entry->instr1_rs_insertion_cycle = prev_op->prev_op_rs_insert_cycle;
+    rs_entry->instr2_rs_insertion_cycle = cycle_count;
+    rs_entry->instr1_rs_issue_to_fu_cycle = 0;
+    rs_entry->instr2_rs_issue_to_fu_cycle = 0;
 
-      rs_cycles_entry* rs_entry; 
+    // Insert into appropriate hash tables based on op types
+    if (prev_op_type == 3 && op->table_info->op_type == 3) {
+        starlab_insert(mov_mov_ptr, tuple_addr_concatenated, rs_entry);
+    } else if (prev_op_type == 3 && is_alu_op(op->table_info->op_type)) {
+        starlab_insert(mov_alu_ptr, tuple_addr_concatenated, rs_entry);
+    } else if (prev_op_type == 3 && op->table_info->op_type == 2) {
+        starlab_insert(mov_jmp_ptr, tuple_addr_concatenated, rs_entry);
+    } else if (is_alu_op(prev_op_type) && is_alu_op(op->table_info->op_type)) {
+        starlab_insert(alu_alu_ptr, tuple_addr_concatenated, rs_entry);
+    } else if (is_alu_op(prev_op_type) && op->table_info->op_type == 3) {
+        starlab_insert(alu_mov_ptr, tuple_addr_concatenated, rs_entry);
+    } else if (is_alu_op(prev_op_type) && op->table_info->op_type == 2) {
+        starlab_insert(alu_jmp_ptr, tuple_addr_concatenated, rs_entry);
+    } else if (prev_op_type == 2 && op->table_info->op_type == 2) {
+        starlab_insert(jmp_jmp_ptr, tuple_addr_concatenated, rs_entry);
+    } else if (prev_op_type == 2 && op->table_info->op_type == 3) {
+        starlab_insert(jmp_mov_ptr, tuple_addr_concatenated, rs_entry);
+    } else if (prev_op_type == 2 && is_alu_op(op->table_info->op_type)) {
+        starlab_insert(jmp_alu_ptr, tuple_addr_concatenated, rs_entry);
+    }
 
-      rs_entry->instr1_addr = prev_op->prev_op_addr;
-      rs_entry->instr2_addr = curr_addr_as_string; 
-      rs_entry->instr1_rs_insertion_cycle = prev_op->prev_op_rs_insert_cycle; 
-      rs_entry->instr2_rs_insertion_cycle = cycle_count; 
-      // issue to functional unit (FU) cycle will be updated in the node_sched_ops()
-      rs_entry->instr1_rs_issue_to_fu_cycle = 0; 
-      rs_entry->instr2_rs_issue_to_fu_cycle = 0; 
-
-      // <MOV, MOV> 
-      if(prev_op_type == 3 && op->table_info->op_type == 3){
-        starlab_insert(mov_mov_ptr, tuple_addr_concatenated, &rs_entry);
-        }
-
-      // <MOV, ALU>
-      else if(prev_op_type == 3 && (op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
-      op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
-      op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
-      op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
-      op->table_info->op_type == 21)){
-
-        starlab_insert(mov_alu_ptr, tuple_addr_concatenated, &rs_entry);
-      }
-
-      // <MOV, JMP>
-      else if(prev_op_type == 3 && op->table_info->op_type == 2){
-
-        starlab_insert(mov_jmp_ptr, tuple_addr_concatenated, &rs_entry);
-      }
-
-      // <ALU, ALU>
-      else if( (prev_op_type == 8 || prev_op_type == 9 ||
-      prev_op_type == 10 || prev_op_type == 11 || prev_op_type == 12 ||
-      prev_op_type == 13 || prev_op_type == 16 || prev_op_type == 17 ||
-      prev_op_type == 18 || prev_op_type == 19 || prev_op_type == 20 ||
-      prev_op_type == 21) 
-      
-      && 
-
-      (op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
-      op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
-      op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
-      op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
-      op->table_info->op_type == 21)
-      ){
-
-        starlab_insert(alu_alu_ptr, tuple_addr_concatenated, &rs_entry);
-      }
-
-      // <ALU, MOV>
-      else if((prev_op_type == 8 || prev_op_type == 9 ||
-      prev_op_type == 10 || prev_op_type == 11 || prev_op_type == 12 ||
-      prev_op_type == 13 || prev_op_type == 16 || prev_op_type == 17 ||
-      prev_op_type == 18 || prev_op_type == 19 || prev_op_type == 20 ||
-      prev_op_type == 21) 
-      
-      && 
-      
-      op->table_info->op_type == 3
-
-      ){
-
-        starlab_insert(alu_mov_ptr, tuple_addr_concatenated, &rs_entry);
-      }
-
-      // <ALU, JMP>
-      else if((prev_op_type == 8 || prev_op_type == 9 ||
-      prev_op_type == 10 || prev_op_type == 11 || prev_op_type == 12 ||
-      prev_op_type == 13 || prev_op_type == 16 || prev_op_type == 17 ||
-      prev_op_type == 18 || prev_op_type == 19 || prev_op_type == 20 ||
-      prev_op_type == 21) 
-      
-      && 
-      
-      op->table_info->op_type == 2
-      
-      ){
-
-        starlab_insert(alu_jmp_ptr, tuple_addr_concatenated, &rs_entry);
-      }
-
-      // <JMP, JMP>
-      else if(prev_op_type == 2 && op->table_info->op_type == 2){
-
-        starlab_insert(jmp_jmp_ptr, tuple_addr_concatenated, &rs_entry);
-      }
-
-      // <JMP, MOV>
-      else if(prev_op_type == 2 && op->table_info->op_type == 3){
-
-        starlab_insert(jmp_mov_ptr, tuple_addr_concatenated, &rs_entry);
-      }
-
-      // <JMP, ALU> 
-      else if(prev_op_type == 2 &&   (op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
-      op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
-      op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
-      op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
-      op->table_info->op_type == 21)){
-
-        starlab_insert(jmp_alu_ptr, tuple_addr_concatenated, &rs_entry); 
-      }
-
-      // Update the current op as the prev op 
-      strcpy(prev_op->prev_op_addr, curr_addr_as_string); 
-      prev_op->prev_op_type = op->table_info->op_type; 
-      prev_op->prev_op_rs_insert_cycle = cycle_count; 
-
+    // Update the current op as the previous op
+    strcpy(prev_op->prev_op_addr, curr_addr_as_string);
+    prev_op->prev_op_type = op->table_info->op_type;
+    prev_op->prev_op_rs_insert_cycle = cycle_count;
     }
 
     // This is the max number of ops we can fill into the RS per cycle.
@@ -1690,4 +1619,10 @@ void collect_node_table_full_stats(Op* op) {
   }
 
   STAT_EVENT(node->proc_id, FULL_WINDOW_STALL);
+}
+
+int is_alu_op(unsigned int op_type) {
+    return (op_type == 8 || op_type == 9 || op_type == 10 || op_type == 11 ||
+            op_type == 12 || op_type == 13 || op_type == 16 || op_type == 17 ||
+            op_type == 18 || op_type == 19 || op_type == 20 || op_type == 21);
 }
