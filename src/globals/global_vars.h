@@ -112,6 +112,9 @@ extern void* voided_jmp_alu_rs_cycles_table;
 // Hash table to track the previous instruction's metadata (for forming a tuple)
 extern void* voided_metadata_rs_cycles_table; 
 
+extern void* voided_mapping_rs_instr1_to_instr2; 
+extern void* voided_mapping_rs_instr2_to_instr1; 
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */
