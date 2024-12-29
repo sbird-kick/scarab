@@ -1326,7 +1326,7 @@ void node_fill_rs() {
 
   starlab_hash_table* jmp_mov_ptr = (starlab_hash_table*) voided_jmp_mov_rs_cycles_table; 
   if(jmp_mov_ptr == NULL){
-    jmp_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+    jmp_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
   }
 
   starlab_hash_table* jmp_alu_ptr = (starlab_hash_table*) voided_jmp_alu_rs_cycles_table; 
