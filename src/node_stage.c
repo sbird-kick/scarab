@@ -1374,7 +1374,7 @@ void node_fill_rs() {
     }
 
    if (is_first_op) {
-    printf("[node_fill_rs()] in if\n");
+    // printf("[node_fill_rs()] in if\n");
     // Track the first op type and address
     char address[22]; // 21 characters + null terminator
     sprintf(address, "%lld", op->inst_info->addr);
@@ -1395,7 +1395,7 @@ void node_fill_rs() {
   } 
 
 else {
-    printf("[node_fill_rs()] in else\n");
+    // printf("[node_fill_rs()] in else\n");
     char curr_addr_as_string[21];  // 20 characters for address + null terminator
     sprintf(curr_addr_as_string, "%lld", op->inst_info->addr);
 
@@ -1492,22 +1492,22 @@ else {
   // had to stop issuing, this is the next node that should be issued to the RS
   node->next_op_into_rs = op;
 
-  // voided_metadata_rs_cycles_table = (void*) metadata_ptr; 
+  voided_metadata_rs_cycles_table = (void*) metadata_ptr; 
 
-  // voided_mapping_rs_instr1_to_instr2 = (void*) map1_ptr; 
-  // voided_mapping_rs_instr2_to_instr1 = (void*) map2_ptr; 
+  voided_mapping_rs_instr1_to_instr2 = (void*) map1_ptr; 
+  voided_mapping_rs_instr2_to_instr1 = (void*) map2_ptr; 
 
-  // voided_mov_mov_rs_cycles_table = (void*) mov_mov_ptr; 
-  // voided_mov_alu_rs_cycles_table = (void*) mov_alu_ptr; 
-  // voided_mov_jmp_rs_cycles_table = (void*) mov_jmp_ptr; 
+  voided_mov_mov_rs_cycles_table = (void*) mov_mov_ptr; 
+  voided_mov_alu_rs_cycles_table = (void*) mov_alu_ptr; 
+  voided_mov_jmp_rs_cycles_table = (void*) mov_jmp_ptr; 
 
-  // voided_alu_alu_rs_cycles_table = (void*) alu_alu_ptr; 
-  // voided_alu_mov_rs_cycles_table = (void*) alu_mov_ptr; 
-  // voided_alu_jmp_rs_cycles_table = (void*) alu_jmp_ptr; 
+  voided_alu_alu_rs_cycles_table = (void*) alu_alu_ptr; 
+  voided_alu_mov_rs_cycles_table = (void*) alu_mov_ptr; 
+  voided_alu_jmp_rs_cycles_table = (void*) alu_jmp_ptr; 
 
-  // voided_jmp_jmp_rs_cycles_table = (void*) jmp_jmp_ptr; 
-  // voided_jmp_mov_rs_cycles_table = (void*) jmp_mov_ptr; 
-  // voided_jmp_alu_rs_cycles_table = (void*) jmp_alu_ptr; 
+  voided_jmp_jmp_rs_cycles_table = (void*) jmp_jmp_ptr; 
+  voided_jmp_mov_rs_cycles_table = (void*) jmp_mov_ptr; 
+  voided_jmp_alu_rs_cycles_table = (void*) jmp_alu_ptr; 
 
 }
 
