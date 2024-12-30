@@ -1409,16 +1409,42 @@ else {
     if (prev_op) {
            char tuple_addr_concatenated[64];  
            sprintf(tuple_addr_concatenated, "%s%s", prev_op->prev_op_addr, curr_addr_as_string);
-               rs_mapping_entry* mapping_entry = (rs_mapping_entry*)malloc(sizeof(rs_mapping_entry));
-
+            rs_mapping_entry* mapping_entry = (rs_mapping_entry*)malloc(sizeof(rs_mapping_entry));
                 if (mapping_entry) {
-                    strcpy(mapping_entry->instr1, prev_op->prev_op_addr);
-                    strcpy(mapping_entry->instr2, curr_addr_as_string);
-                    mapping_entry->instr1_op_type = prev_op->prev_op_type; 
-                    mapping_entry->instr2_op_type = op->table_info->op_type; 
-                    starlab_insert(map1_ptr, prev_op->prev_op_addr, &mapping_entry);
-                    starlab_insert(map2_ptr, curr_addr_as_string, &mapping_entry);
 
+                        // check whether instructions already exist in mapping entries, if so just update it
+                        // there is no need to create a new entry  
+                        rs_mapping_entry* test = (rs_mapping_entry*) starlab_search(map1_ptr, prev_op->prev_op_addr); 
+                        if(test){
+                          // address already exists, just update it 
+                          strcpy(test->instr1, prev_op->prev_op_addr); 
+                          strcpy(test->instr2, curr_addr_as_string); 
+                          test->instr1_op_type = prev_op->prev_op_type; 
+                          test->instr2_op_type = op->table_info->op_type; 
+                        }
+
+                        // similarly check in map2 
+                        rs_mapping_entry* test2 = (rs_mapping_entry*) starlab_search(map2_ptr, curr_addr_as_string); 
+                        if(test2){
+                          // address already exists, just update it 
+                          strcpy(test2->instr1, prev_op->prev_op_addr); 
+                          strcpy(test2->instr2, curr_addr_as_string); 
+                          test2->instr1_op_type = prev_op->prev_op_type; 
+                          test2->instr2_op_type = op->table_info->op_type; 
+                        }
+
+                        if((!test) && (!test2)){
+
+                           strcpy(mapping_entry->instr1, prev_op->prev_op_addr);
+                            strcpy(mapping_entry->instr2, curr_addr_as_string);
+                            mapping_entry->instr1_op_type = prev_op->prev_op_type; 
+                            mapping_entry->instr2_op_type = op->table_info->op_type; 
+                            starlab_insert(map1_ptr, prev_op->prev_op_addr, &mapping_entry);
+                          
+
+                        }
+
+                      
 
                         // Allocate and initialize RS entry
                         rs_cycles_entry* rs_entry = (rs_cycles_entry*)malloc(sizeof(rs_cycles_entry));
@@ -1431,50 +1457,87 @@ else {
                         rs_entry->instr1_rs_issue_to_fu_cycle = 0;
                         rs_entry->instr2_rs_issue_to_fu_cycle = 0;
 
-                        // Insert into appropriate hash tables based on instruction types
-                        if (prev_op->prev_op_type == 3 && op->table_info->op_type == 3) {
-                            // Both instructions are MOV
+                        // printf("prev op type: %d, curr op type: %d\n", prev_op->prev_op_type, op->table_info->op_type); 
+                    
+                        // <MOV, MOV>
+                       if (prev_op->prev_op_type == 3 && op->table_info->op_type == 3) {
+                      
+                            printf("inserting into mov mov\n");
                             starlab_insert(mov_mov_ptr, tuple_addr_concatenated, rs_entry);
-                        } else if (prev_op->prev_op_type == 3 && is_alu_op(op->table_info->op_type)) {
-                            // Previous is MOV, current is ALU
+                        } 
+                        // <MOV, ALU>
+                        else if (prev_op->prev_op_type == 3 && is_alu_op(op->table_info->op_type)) {
+                          
+                            printf("inserting into mov alu\n");
                             starlab_insert(mov_alu_ptr, tuple_addr_concatenated, rs_entry);
-                        } else if (prev_op->prev_op_type == 3 && op->table_info->op_type == 2) {
-                            // Previous is MOV, current is JMP
+                        } 
+                        // <MOV, JMP>
+                        else if (prev_op->prev_op_type == 3 && op->table_info->op_type == 2) {
+                          
+                            printf("inserting into mov jmp\n");
                             starlab_insert(mov_jmp_ptr, tuple_addr_concatenated, rs_entry);
-                        } else if (is_alu_op(prev_op->prev_op_type) && is_alu_op(op->table_info->op_type)) {
-                            // Both instructions are ALU
+                        } 
+                        
+                        // <ALU, ALU>
+                        else if (is_alu_op(prev_op->prev_op_type) && is_alu_op(op->table_info->op_type)) {
+                           
+                            printf("inserting into alu alu\n");
                             starlab_insert(alu_alu_ptr, tuple_addr_concatenated, rs_entry);
-                        } else if (is_alu_op(prev_op->prev_op_type) && op->table_info->op_type == 3) {
-                            // Previous is ALU, current is MOV
+                        } 
+                        
+                        // <ALU, MOV>
+                        else if (is_alu_op(prev_op->prev_op_type) && op->table_info->op_type == 3) {
+                          
+                            printf("insreting into alu mov\n");
                             starlab_insert(alu_mov_ptr, tuple_addr_concatenated, rs_entry);
-                        } else if (is_alu_op(prev_op->prev_op_type) && op->table_info->op_type == 2) {
-                            // Previous is ALU, current is JMP
+                        } 
+                        
+                        // <ALU, JMP>
+                        else if (is_alu_op(prev_op->prev_op_type) && op->table_info->op_type == 2) {
+                          
+                            printf("inserting into alu jmp\n");
                             starlab_insert(alu_jmp_ptr, tuple_addr_concatenated, rs_entry);
-                        } else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 2) {
-                            // Both instructions are JMP
+                        } 
+                        
+                        // <JMP, JMP>
+                        else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 2) {
+                           
+                            printf("inserting into jmp jmp\n");
                             starlab_insert(jmp_jmp_ptr, tuple_addr_concatenated, rs_entry);
-                        } else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 3) {
-                            // Previous is JMP, current is MOV
+                        } 
+                        
+                        // <JMP, MOV>
+                        else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 3) {
+                           
+                            printf("inserting into jmp mov\n");
                             starlab_insert(jmp_mov_ptr, tuple_addr_concatenated, rs_entry);
-                        } else if (prev_op->prev_op_type == 2 && is_alu_op(op->table_info->op_type)) {
-                            // Previous is JMP, current is ALU
+                        } 
+                        
+                        // <JMP, ALU>
+                        else if (prev_op->prev_op_type == 2 && is_alu_op(op->table_info->op_type)) {
+                           
+                            printf("inserting into jmp alu\n");
                             starlab_insert(jmp_alu_ptr, tuple_addr_concatenated, rs_entry);
-                        } else {
-                            // Default case: log unhandled combinations
-                            fprintf(stderr, "Warning: Unhandled instruction pair (type %d, type %d)\n",
-                                    prev_op->prev_op_type, op->table_info->op_type);
+                        } 
+                        
+
+                        else {
+                            // do nothing
                         }
+                        
 
                         // Update the current op as the previous op
 
-                        strcpy(prev_op->prev_op_addr, curr_addr_as_string); 
+                        if (strlen(curr_addr_as_string) >= sizeof(prev_op->prev_op_addr)) {
+                            printf("Error: Buffer overflow detected in strcpy\n");
+                            return;
+                        }
+                        strcpy(prev_op->prev_op_addr, curr_addr_as_string);
                         prev_op->prev_op_type = op->table_info->op_type;
                         prev_op->prev_op_rs_insert_cycle = cycle_count;
 
-                        // Free dynamically allocated memory before returning
-                        free(mapping_entry);
-                        free(rs_entry);
-                        free(prev_op);
+                        
+
                         }
                     }
                 }
