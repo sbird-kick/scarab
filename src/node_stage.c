@@ -674,60 +674,60 @@ void node_sched_ops() {
   // Check to see if the L1 Q is (still) full
   check_if_mem_blocked();
 
-  // starlab_hash_table* map1_ptr = (starlab_hash_table*) voided_mapping_rs_instr1_to_instr2;
-  // if(map1_ptr == NULL){
-  //   map1_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_mapping_entry));
-  // }
+  starlab_hash_table* map1_ptr = (starlab_hash_table*) voided_mapping_rs_instr1_to_instr2;
+  if(map1_ptr == NULL){
+    map1_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_mapping_entry));
+  }
 
-  // starlab_hash_table* map2_ptr = (starlab_hash_table*) voided_mapping_rs_instr2_to_instr1; 
-  // if(map2_ptr == NULL){
-  //   map2_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_mapping_entry)); 
-  // }
+  starlab_hash_table* map2_ptr = (starlab_hash_table*) voided_mapping_rs_instr2_to_instr1; 
+  if(map2_ptr == NULL){
+    map2_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_mapping_entry)); 
+  }
 
-  // starlab_hash_table* mov_mov_ptr = (starlab_hash_table*) voided_mov_mov_rs_cycles_table; 
-  // if(mov_mov_ptr == NULL){
-  //   mov_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
-  // }
+  starlab_hash_table* mov_mov_ptr = (starlab_hash_table*) voided_mov_mov_rs_cycles_table; 
+  if(mov_mov_ptr == NULL){
+    mov_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+  }
 
-  // starlab_hash_table* mov_alu_ptr = (starlab_hash_table*) voided_mov_alu_rs_cycles_table; 
-  // if(mov_alu_ptr == NULL){ 
-  //   mov_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
-  // }
+  starlab_hash_table* mov_alu_ptr = (starlab_hash_table*) voided_mov_alu_rs_cycles_table; 
+  if(mov_alu_ptr == NULL){ 
+    mov_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+  }
 
-  // starlab_hash_table* mov_jmp_ptr = (starlab_hash_table*) voided_mov_jmp_rs_cycles_table; 
-  // if(mov_alu_ptr == NULL){ 
-  //   mov_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
-  // }
+  starlab_hash_table* mov_jmp_ptr = (starlab_hash_table*) voided_mov_jmp_rs_cycles_table; 
+  if(mov_alu_ptr == NULL){ 
+    mov_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+  }
 
-  // starlab_hash_table* alu_alu_ptr = (starlab_hash_table*) voided_alu_alu_rs_cycles_table; 
-  // if(alu_alu_ptr == NULL){ 
-  //   alu_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
-  // }
+  starlab_hash_table* alu_alu_ptr = (starlab_hash_table*) voided_alu_alu_rs_cycles_table; 
+  if(alu_alu_ptr == NULL){ 
+    alu_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
+  }
 
-  // starlab_hash_table* alu_mov_ptr = (starlab_hash_table*) voided_alu_mov_rs_cycles_table; 
-  // if(alu_mov_ptr == NULL){ 
-  //   alu_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
-  // }
+  starlab_hash_table* alu_mov_ptr = (starlab_hash_table*) voided_alu_mov_rs_cycles_table; 
+  if(alu_mov_ptr == NULL){ 
+    alu_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
+  }
 
-  // starlab_hash_table* alu_jmp_ptr = (starlab_hash_table*) voided_alu_jmp_rs_cycles_table; 
-  // if(alu_jmp_ptr == NULL){ 
-  //   alu_jmp_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
-  // }
+  starlab_hash_table* alu_jmp_ptr = (starlab_hash_table*) voided_alu_jmp_rs_cycles_table; 
+  if(alu_jmp_ptr == NULL){ 
+    alu_jmp_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
+  }
 
-  // starlab_hash_table* jmp_jmp_ptr = (starlab_hash_table*) voided_jmp_jmp_rs_cycles_table; 
-  // if(jmp_jmp_ptr == NULL){ 
-  //   jmp_jmp_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
-  // }
+  starlab_hash_table* jmp_jmp_ptr = (starlab_hash_table*) voided_jmp_jmp_rs_cycles_table; 
+  if(jmp_jmp_ptr == NULL){ 
+    jmp_jmp_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
+  }
 
-  // starlab_hash_table* jmp_mov_ptr = (starlab_hash_table*) voided_jmp_mov_rs_cycles_table; 
-  // if(jmp_mov_ptr == NULL){
-  //   jmp_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
-  // }
+  starlab_hash_table* jmp_mov_ptr = (starlab_hash_table*) voided_jmp_mov_rs_cycles_table; 
+  if(jmp_mov_ptr == NULL){
+    jmp_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+  }
 
-  // starlab_hash_table* jmp_alu_ptr = (starlab_hash_table*) voided_jmp_alu_rs_cycles_table; 
-  // if(jmp_alu_ptr == NULL){
-  //   jmp_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
-  // }
+  starlab_hash_table* jmp_alu_ptr = (starlab_hash_table*) voided_jmp_alu_rs_cycles_table; 
+  if(jmp_alu_ptr == NULL){
+    jmp_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry));
+  }
 
   for(op = node->rdy_head; op; op = op->next_rdy) {
     ASSERT(node->proc_id, node->proc_id == op->proc_id);
@@ -777,302 +777,264 @@ void node_sched_ops() {
       count in two different tuples.
    */
 
-  //   char curr_op_addr[21], tuple_as_key[42], fetched_addr[21]; 
+    char curr_op_addr[21], tuple_as_key[42], fetched_addr[21]; 
 
-  //   sprintf(curr_op_addr, "%lld", op->inst_info->addr); 
+    sprintf(curr_op_addr, "%lld", op->inst_info->addr); 
 
-  //   // Case 1: when op is the first instruction in a tuple
-  //   rs_mapping_entry* map_entry = (rs_mapping_entry*) starlab_search(map1_ptr, curr_op_addr); 
-  //   if(map_entry != NULL){
-  //     strcpy(fetched_addr, map_entry->instr2); 
-  //     sprintf(tuple_as_key, "%s%s", curr_op_addr, fetched_addr); 
+    // Case 1: when op is the first instruction in a tuple
+    rs_mapping_entry* map_entry = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry));
+    map_entry = starlab_search(map1_ptr, curr_op_addr); 
+    if(map_entry != NULL){
+      strcpy(fetched_addr, map_entry->instr2); 
+      sprintf(tuple_as_key, "%s%s", curr_op_addr, fetched_addr); 
 
-  //     unsigned int fetched_op_type = map_entry->instr2_op_type; 
-  //     if(map_entry->instr1_op_type == op->table_info->op_type){
+      unsigned int fetched_op_type = map_entry->instr2_op_type; 
+      if(map_entry->instr1_op_type == op->table_info->op_type){
 
-  //     // <MOV, MOV> 
-  //     if(op->table_info->op_type == 3 && fetched_op_type == 3){
-  //       rs_cycles_entry* temp_entry = (rs_cycles_entry*) starlab_search(mov_mov_ptr, tuple_as_key); 
+      // <MOV, MOV> 
+      if(op->table_info->op_type == 3 && fetched_op_type == 3){
+        rs_cycles_entry* temp_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry));
+        temp_entry = starlab_search(mov_mov_ptr, tuple_as_key); 
 
-  //       if(temp_entry){
-  //         temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //       }
+        if(temp_entry){
+          temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
+        }
+        }
 
-  //     // <MOV, ALU>
-  //     else if(op->table_info->op_type == 3 && (fetched_op_type == 8 || fetched_op_type == 9 ||
-  //     fetched_op_type == 10 || fetched_op_type == 11 || fetched_op_type == 12 ||
-  //     fetched_op_type == 13 || fetched_op_type == 16 || fetched_op_type == 17 ||
-  //     fetched_op_type == 18 || fetched_op_type == 19 || fetched_op_type == 20 ||
-  //     fetched_op_type == 21)){
+      // <MOV, ALU>
+      else if(op->table_info->op_type == 3 && is_alu_op(fetched_op_type)){
+        rs_cycles_entry* temp_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry));
+        temp_entry = starlab_search(mov_alu_ptr, tuple_as_key);
+        if(temp_entry){
+          temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
 
-  //       rs_cycles_entry* temp_entry = (rs_cycles_entry*) starlab_search(mov_alu_ptr, tuple_as_key);
-  //       if(temp_entry){
-  //         temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
+      // <MOV, JMP>
+      else if(op->table_info->op_type == 3 && fetched_op_type == 2){
+         rs_cycles_entry* temp_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry));
+         temp_entry = starlab_search(mov_jmp_ptr, tuple_as_key);
+          if(temp_entry){
+          temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
 
-  //     // <MOV, JMP>
-  //     else if(op->table_info->op_type == 3 && fetched_op_type == 2){
+      // <ALU, ALU>
+      else if( (is_alu_op(op->table_info->op_type)) && is_alu_op(fetched_op_type)){
+        rs_cycles_entry* temp_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry));
+        temp_entry =  starlab_search(alu_alu_ptr, tuple_as_key);
+         if(temp_entry){
+          temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
 
-  //        rs_cycles_entry* temp_entry = (rs_cycles_entry*) starlab_search(mov_jmp_ptr, tuple_as_key);
-  //         if(temp_entry){
-  //         temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
+      // <ALU, MOV>
+      else if((is_alu_op(op->table_info->op_type)) && fetched_op_type == 3){
+        rs_cycles_entry* temp_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry));
+        temp_entry = starlab_search(alu_mov_ptr, tuple_as_key);
+         if(temp_entry){
+          temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
 
-  //     // <ALU, ALU>
-  //     else if( (op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
-  //     op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
-  //     op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
-  //     op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
-  //     op->table_info->op_type == 21) 
+      // <ALU, JMP>
+      else if((is_alu_op(op->table_info->op_type)) && fetched_op_type == 2)
+      {
+        rs_cycles_entry* temp_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry));
+        temp_entry = starlab_search(alu_jmp_ptr, tuple_as_key);
+         if(temp_entry){
+          temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
+
+      // <JMP, JMP>
+      else if(op->table_info->op_type == 2 && fetched_op_type == 2){
+        rs_cycles_entry* temp_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry));
+        temp_entry =  starlab_search(jmp_jmp_ptr, tuple_as_key);
+         if(temp_entry){
+          temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
+
+      // <JMP, MOV>
+      else if(op->table_info->op_type == 2 && fetched_op_type == 3){
+        rs_cycles_entry* temp_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry));
+        temp_entry = starlab_search(jmp_mov_ptr, tuple_as_key);
+         if(temp_entry){
+          temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
+
+      // <JMP, ALU> 
+      else if(op->table_info->op_type == 2 && is_alu_op(fetched_op_type)){
+        rs_cycles_entry* temp_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry));
+        temp_entry = starlab_search(jmp_alu_ptr, tuple_as_key);
+         if(temp_entry){
+          temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
+
+      }
+
+    }
+
+    // Case 2: when the current op is a second instruction in a tuple (both cases likely exist, except if this is the first op)
+    // if an entry is found, we know that this op is the second instruction in the tuple 
+    rs_mapping_entry* new_map_entry = (rs_mapping_entry*) starlab_search(map2_ptr, curr_op_addr); 
+    if(map_entry != NULL){
+      // since this is the second instruction, we need to fetch the first instruction
+      strcpy(fetched_addr, new_map_entry->instr1); 
+      sprintf(tuple_as_key, "%s%s", fetched_addr, curr_op_addr ); 
+
+      unsigned int fetched_op_type = new_map_entry->instr1_op_type; 
+      if(new_map_entry->instr2_op_type == op->table_info->op_type){
+
+      // <MOV, MOV> 
+      if(op->table_info->op_type == 3 && fetched_op_type == 3){
+        rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(mov_mov_ptr, tuple_as_key); 
+
+        if(new_temp_entry){
+          new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
+        }
+        }
+
+      // <MOV, ALU>
+      else if(op->table_info->op_type == 3 && (fetched_op_type == 8 || fetched_op_type == 9 ||
+      fetched_op_type == 10 || fetched_op_type == 11 || fetched_op_type == 12 ||
+      fetched_op_type == 13 || fetched_op_type == 16 || fetched_op_type == 17 ||
+      fetched_op_type == 18 || fetched_op_type == 19 || fetched_op_type == 20 ||
+      fetched_op_type == 21)){
+
+        rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(mov_alu_ptr, tuple_as_key);
+        if(new_temp_entry){
+          new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
+
+      // <MOV, JMP>
+      else if(op->table_info->op_type == 3 && fetched_op_type == 2){
+
+         rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(mov_jmp_ptr, tuple_as_key);
+          if(new_temp_entry){
+          new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
+
+      // <ALU, ALU>
+      else if( (op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
+      op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
+      op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
+      op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
+      op->table_info->op_type == 21) 
       
-  //     && 
+      && 
 
-  //     (fetched_op_type == 8 || fetched_op_type == 9 ||
-  //     fetched_op_type == 10 || fetched_op_type == 11 || fetched_op_type == 12 ||
-  //     fetched_op_type == 13 || fetched_op_type == 16 || fetched_op_type == 17 ||
-  //     fetched_op_type == 18 || fetched_op_type == 19 || fetched_op_type == 20 ||
-  //     fetched_op_type == 21)
-  //     ){
+      (fetched_op_type == 8 || fetched_op_type == 9 ||
+      fetched_op_type == 10 || fetched_op_type == 11 || fetched_op_type == 12 ||
+      fetched_op_type == 13 || fetched_op_type == 16 || fetched_op_type == 17 ||
+      fetched_op_type == 18 || fetched_op_type == 19 || fetched_op_type == 20 ||
+      fetched_op_type == 21)
+      ){
 
-  //       rs_cycles_entry* temp_entry = (rs_cycles_entry*) starlab_search(alu_alu_ptr, tuple_as_key);
-  //        if(temp_entry){
-  //         temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
+        rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(alu_alu_ptr, tuple_as_key);
+         if(new_temp_entry){
+          new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
 
-  //     // <ALU, MOV>
-  //     else if((op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
-  //     op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
-  //     op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
-  //     op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
-  //     op->table_info->op_type == 21) 
+      // <ALU, MOV>
+      else if((op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
+      op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
+      op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
+      op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
+      op->table_info->op_type == 21) 
       
-  //     && 
+      && 
       
-  //     fetched_op_type == 3
+      fetched_op_type == 3
 
-  //     ){
+      ){
 
-  //       rs_cycles_entry* temp_entry = (rs_cycles_entry*) starlab_search(alu_mov_ptr, tuple_as_key);
-  //        if(temp_entry){
-  //         temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
+        rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(alu_mov_ptr, tuple_as_key);
+         if(new_temp_entry){
+          new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
 
-  //     // <ALU, JMP>
-  //     else if((op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
-  //     op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
-  //     op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
-  //     op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
-  //     op->table_info->op_type == 21) 
+      // <ALU, JMP>
+      else if((op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
+      op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
+      op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
+      op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
+      op->table_info->op_type == 21) 
       
-  //     && 
+      && 
       
-  //     fetched_op_type == 2
+      fetched_op_type == 2
       
-  //     ){
+      ){
 
-  //       rs_cycles_entry* temp_entry = (rs_cycles_entry*) starlab_search(alu_jmp_ptr, tuple_as_key);
-  //        if(temp_entry){
-  //         temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
+        rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(alu_jmp_ptr, tuple_as_key);
+         if(new_temp_entry){
+          new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
 
-  //     // <JMP, JMP>
-  //     else if(op->table_info->op_type == 2 && fetched_op_type == 2){
+      // <JMP, JMP>
+      else if(op->table_info->op_type == 2 && fetched_op_type == 2){
 
-  //       rs_cycles_entry* temp_entry = (rs_cycles_entry*) starlab_search(jmp_jmp_ptr, tuple_as_key);
-  //        if(temp_entry){
-  //         temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
+        rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(jmp_jmp_ptr, tuple_as_key);
+         if(new_temp_entry){
+          new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
 
-  //     // <JMP, MOV>
-  //     else if(op->table_info->op_type == 2 && fetched_op_type == 3){
+      // <JMP, MOV>
+      else if(op->table_info->op_type == 2 && fetched_op_type == 3){
 
-  //       rs_cycles_entry* temp_entry = (rs_cycles_entry*) starlab_search(jmp_mov_ptr, tuple_as_key);
-  //        if(temp_entry){
-  //         temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
+        rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(jmp_mov_ptr, tuple_as_key);
+         if(new_temp_entry){
+          new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
 
-  //     // <JMP, ALU> 
-  //     else if(op->table_info->op_type == 2 &&   (fetched_op_type == 8 || fetched_op_type == 9 ||
-  //     fetched_op_type == 10 || fetched_op_type == 11 || fetched_op_type == 12 ||
-  //     fetched_op_type == 13 || fetched_op_type == 16 || fetched_op_type == 17 ||
-  //     fetched_op_type == 18 || fetched_op_type == 19 || fetched_op_type == 20 ||
-  //     fetched_op_type == 21)){
+      // <JMP, ALU> 
+      else if(op->table_info->op_type == 2 &&   (fetched_op_type == 8 || fetched_op_type == 9 ||
+      fetched_op_type == 10 || fetched_op_type == 11 || fetched_op_type == 12 ||
+      fetched_op_type == 13 || fetched_op_type == 16 || fetched_op_type == 17 ||
+      fetched_op_type == 18 || fetched_op_type == 19 || fetched_op_type == 20 ||
+      fetched_op_type == 21)){
 
-  //       rs_cycles_entry* temp_entry = (rs_cycles_entry*) starlab_search(jmp_alu_ptr, tuple_as_key);
-  //        if(temp_entry){
-  //         temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
+        rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(jmp_alu_ptr, tuple_as_key);
+         if(new_temp_entry){
+          new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
+        }
+      }
 
-  //     }
+      }
 
-  //   }
+    }
 
-  //   // Case 2: when the current op is a second instruction in a tuple (both cases likely exist, except if this is the first op)
-  //   // if an entry is found, we know that this op is the second instruction in the tuple 
-  //   rs_mapping_entry* new_map_entry = (rs_mapping_entry*) starlab_search(map2_ptr, curr_op_addr); 
-  //   if(map_entry != NULL){
-  //     // since this is the second instruction, we need to fetch the first instruction
-  //     strcpy(fetched_addr, new_map_entry->instr1); 
-  //     sprintf(tuple_as_key, "%s%s", fetched_addr, curr_op_addr ); 
+   }
 
-  //     unsigned int fetched_op_type = new_map_entry->instr1_op_type; 
-  //     if(new_map_entry->instr2_op_type == op->table_info->op_type){
+  voided_mapping_rs_instr1_to_instr2 = (void*) map1_ptr; 
+  voided_mapping_rs_instr2_to_instr1 = (void*) map2_ptr; 
 
-  //     // <MOV, MOV> 
-  //     if(op->table_info->op_type == 3 && fetched_op_type == 3){
-  //       rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(mov_mov_ptr, tuple_as_key); 
+  voided_mov_mov_rs_cycles_table = (void*) mov_mov_ptr; 
+  voided_mov_alu_rs_cycles_table = (void*) mov_alu_ptr; 
+  voided_mov_jmp_rs_cycles_table = (void*) mov_jmp_ptr; 
 
-  //       if(new_temp_entry){
-  //         new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //       }
+  voided_alu_alu_rs_cycles_table = (void*) alu_alu_ptr; 
+  voided_alu_mov_rs_cycles_table = (void*) alu_mov_ptr; 
+  voided_alu_jmp_rs_cycles_table = (void*) alu_jmp_ptr; 
 
-  //     // <MOV, ALU>
-  //     else if(op->table_info->op_type == 3 && (fetched_op_type == 8 || fetched_op_type == 9 ||
-  //     fetched_op_type == 10 || fetched_op_type == 11 || fetched_op_type == 12 ||
-  //     fetched_op_type == 13 || fetched_op_type == 16 || fetched_op_type == 17 ||
-  //     fetched_op_type == 18 || fetched_op_type == 19 || fetched_op_type == 20 ||
-  //     fetched_op_type == 21)){
-
-  //       rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(mov_alu_ptr, tuple_as_key);
-  //       if(new_temp_entry){
-  //         new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
-
-  //     // <MOV, JMP>
-  //     else if(op->table_info->op_type == 3 && fetched_op_type == 2){
-
-  //        rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(mov_jmp_ptr, tuple_as_key);
-  //         if(new_temp_entry){
-  //         new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
-
-  //     // <ALU, ALU>
-  //     else if( (op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
-  //     op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
-  //     op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
-  //     op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
-  //     op->table_info->op_type == 21) 
-      
-  //     && 
-
-  //     (fetched_op_type == 8 || fetched_op_type == 9 ||
-  //     fetched_op_type == 10 || fetched_op_type == 11 || fetched_op_type == 12 ||
-  //     fetched_op_type == 13 || fetched_op_type == 16 || fetched_op_type == 17 ||
-  //     fetched_op_type == 18 || fetched_op_type == 19 || fetched_op_type == 20 ||
-  //     fetched_op_type == 21)
-  //     ){
-
-  //       rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(alu_alu_ptr, tuple_as_key);
-  //        if(new_temp_entry){
-  //         new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
-
-  //     // <ALU, MOV>
-  //     else if((op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
-  //     op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
-  //     op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
-  //     op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
-  //     op->table_info->op_type == 21) 
-      
-  //     && 
-      
-  //     fetched_op_type == 3
-
-  //     ){
-
-  //       rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(alu_mov_ptr, tuple_as_key);
-  //        if(new_temp_entry){
-  //         new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
-
-  //     // <ALU, JMP>
-  //     else if((op->table_info->op_type == 8 || op->table_info->op_type == 9 ||
-  //     op->table_info->op_type == 10 || op->table_info->op_type == 11 || op->table_info->op_type == 12 ||
-  //     op->table_info->op_type == 13 || op->table_info->op_type == 16 || op->table_info->op_type == 17 ||
-  //     op->table_info->op_type == 18 || op->table_info->op_type == 19 || op->table_info->op_type == 20 ||
-  //     op->table_info->op_type == 21) 
-      
-  //     && 
-      
-  //     fetched_op_type == 2
-      
-  //     ){
-
-  //       rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(alu_jmp_ptr, tuple_as_key);
-  //        if(new_temp_entry){
-  //         new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
-
-  //     // <JMP, JMP>
-  //     else if(op->table_info->op_type == 2 && fetched_op_type == 2){
-
-  //       rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(jmp_jmp_ptr, tuple_as_key);
-  //        if(new_temp_entry){
-  //         new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
-
-  //     // <JMP, MOV>
-  //     else if(op->table_info->op_type == 2 && fetched_op_type == 3){
-
-  //       rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(jmp_mov_ptr, tuple_as_key);
-  //        if(new_temp_entry){
-  //         new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
-
-  //     // <JMP, ALU> 
-  //     else if(op->table_info->op_type == 2 &&   (fetched_op_type == 8 || fetched_op_type == 9 ||
-  //     fetched_op_type == 10 || fetched_op_type == 11 || fetched_op_type == 12 ||
-  //     fetched_op_type == 13 || fetched_op_type == 16 || fetched_op_type == 17 ||
-  //     fetched_op_type == 18 || fetched_op_type == 19 || fetched_op_type == 20 ||
-  //     fetched_op_type == 21)){
-
-  //       rs_cycles_entry* new_temp_entry = (rs_cycles_entry*) starlab_search(jmp_alu_ptr, tuple_as_key);
-  //        if(new_temp_entry){
-  //         new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
-  //       }
-  //     }
-
-  //     }
-
-  //   }
-
-  //  }
-
-  // voided_mapping_rs_instr1_to_instr2 = (void*) map1_ptr; 
-  // voided_mapping_rs_instr2_to_instr1 = (void*) map2_ptr; 
-
-  // voided_mov_mov_rs_cycles_table = (void*) mov_mov_ptr; 
-  // voided_mov_alu_rs_cycles_table = (void*) mov_alu_ptr; 
-  // voided_mov_jmp_rs_cycles_table = (void*) mov_jmp_ptr; 
-
-  // voided_alu_alu_rs_cycles_table = (void*) alu_alu_ptr; 
-  // voided_alu_mov_rs_cycles_table = (void*) alu_mov_ptr; 
-  // voided_alu_jmp_rs_cycles_table = (void*) alu_jmp_ptr; 
-
-  // voided_jmp_jmp_rs_cycles_table = (void*) jmp_jmp_ptr; 
-  // voided_jmp_mov_rs_cycles_table = (void*) jmp_mov_ptr; 
-  // voided_jmp_alu_rs_cycles_table = (void*) jmp_alu_ptr; 
+  voided_jmp_jmp_rs_cycles_table = (void*) jmp_jmp_ptr; 
+  voided_jmp_mov_rs_cycles_table = (void*) jmp_mov_ptr; 
+  voided_jmp_alu_rs_cycles_table = (void*) jmp_alu_ptr; 
 
   }
 
-}
+
 
 /**************************************************************************************/
 /* node_retire:*/
@@ -1444,8 +1406,6 @@ else {
 
                         }
 
-                      
-
                         // Allocate and initialize RS entry
                         rs_cycles_entry* rs_entry = (rs_cycles_entry*)malloc(sizeof(rs_cycles_entry));
                         if (rs_entry) {
@@ -1528,10 +1488,6 @@ else {
 
                         // Update the current op as the previous op
 
-                        if (strlen(curr_addr_as_string) >= sizeof(prev_op->prev_op_addr)) {
-                            printf("Error: Buffer overflow detected in strcpy\n");
-                            return;
-                        }
                         strcpy(prev_op->prev_op_addr, curr_addr_as_string);
                         prev_op->prev_op_type = op->table_info->op_type;
                         prev_op->prev_op_rs_insert_cycle = cycle_count;
