@@ -768,7 +768,7 @@ void node_sched_ops() {
       }
     }
 
-    printf("[in node_sched_ops()] op address: %lld\t op type: %d\t cycle: %lld\n", op->inst_info->addr, op->table_info->op_type, cycle_count);
+    printf("[in node_sched_ops()] op address: %lld\t op type: %d\t retire cycle: %lld\n", op->inst_info->addr, op->table_info->op_type, cycle_count);
 
     /* here, we update the cycle count for when this op was scheduled to a FU 
        find the corresponding tuple entry of this op in either  
@@ -786,8 +786,10 @@ void node_sched_ops() {
 
     // Case 1: when op is the first instruction in a tuple
     rs_mapping_entry* map_entry = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry));
+    printf("[in node_sched_ops()] Case 1: looking for address: %s\n", curr_op_addr);
     map_entry = starlab_search(map1_ptr, curr_op_addr); 
-    if(map_entry != NULL){
+    if(map_entry){
+      printf("[in node_sched_ops()] Case 1: found address: %s\n", curr_op_addr);
       strcpy(fetched_addr, map_entry->instr2); 
       sprintf(tuple_as_key, "%s%s", curr_op_addr, fetched_addr); 
     
@@ -888,9 +890,11 @@ void node_sched_ops() {
     // Case 2: when the current op is a second instruction in a tuple (both cases likely exist, except if this is the first op)
     // if an entry is found, we know that this op is the second instruction in the tuple 
     rs_mapping_entry* new_map_entry = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry)); 
+    printf("[in node_sched_ops()] Case 2: looking for address: %s\n", curr_op_addr);
     new_map_entry = starlab_search(map2_ptr, curr_op_addr); 
 
     if(new_map_entry){
+       printf("[in node_sched_ops()] Case 2: found address: %s\n", curr_op_addr);
       // since this is the second instruction, we need to fetch the first instruction
       strcpy(fetched_addr, new_map_entry->instr1); 
       sprintf(tuple_as_key, "%s%s", fetched_addr, curr_op_addr ); 
@@ -1322,6 +1326,8 @@ void node_fill_rs() {
     }
 
     char temp_addr[21];
+    char curr_addr_as_string[21]; 
+    sprintf(curr_addr_as_string, "%lld", op->inst_info->addr);
 
    if (is_first_op) {
 
@@ -1340,8 +1346,6 @@ void node_fill_rs() {
 
 else {
     // printf("[node_fill_rs()] in else\n");
-    char curr_addr_as_string[21]; 
-    sprintf(curr_addr_as_string, "%lld", op->inst_info->addr);
 
     // there is a prev op since this is not the first op 
     rs_prev_op* prev_op = (rs_prev_op*)malloc(sizeof(rs_prev_op));
@@ -1489,6 +1493,9 @@ else {
     }
 
    // Update the current op as the previous op
+   rs_prev_op* prev_op = (rs_prev_op*)malloc(sizeof(rs_prev_op));
+   prev_op = starlab_search(metadata_ptr, "prev_op");
+
    // Print details of prev_op before updating
     if (prev_op) {
         printf("[in node_fill_rs()] Before updating prev_op:\n");
@@ -1500,6 +1507,7 @@ else {
     }
 
     // Update prev_op
+    strcpy(temp_addr, curr_addr_as_string);
     strcpy(prev_op->prev_op_addr, temp_addr);
     prev_op->prev_op_type = op->table_info->op_type;
     prev_op->prev_op_rs_insert_cycle = cycle_count;
@@ -1509,6 +1517,7 @@ else {
     printf("  prev_op_addr: %s\n", prev_op->prev_op_addr);
     printf("  prev_op_type: %d\n", prev_op->prev_op_type);
     printf("  prev_op_rs_insert_cycle: %lld\n", prev_op->prev_op_rs_insert_cycle);
+   
 
    // This is the max number of ops we can fill into the RS per cycle.
     // 0 means infinite.
