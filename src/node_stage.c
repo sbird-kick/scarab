@@ -777,16 +777,18 @@ void node_sched_ops() {
       count in two different tuples.
    */
 
-    char curr_op_addr[21], tuple_as_key[42], fetched_addr[21]; 
+    char curr_op_addr[21];
+    char tuple_as_key[64], fetched_addr[21]; 
 
     sprintf(curr_op_addr, "%lld", op->inst_info->addr); 
 
-    // Case 1: when op is the first instruction in a tuple
+  //   // Case 1: when op is the first instruction in a tuple
     rs_mapping_entry* map_entry = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry));
     map_entry = starlab_search(map1_ptr, curr_op_addr); 
     if(map_entry != NULL){
       strcpy(fetched_addr, map_entry->instr2); 
       sprintf(tuple_as_key, "%s%s", curr_op_addr, fetched_addr); 
+    
 
       unsigned int fetched_op_type = map_entry->instr2_op_type; 
       if(map_entry->instr1_op_type == op->table_info->op_type){
@@ -827,6 +829,7 @@ void node_sched_ops() {
           temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
         }
       }
+           
 
       // <ALU, MOV>
       else if((is_alu_op(op->table_info->op_type)) && fetched_op_type == 3){
@@ -835,7 +838,7 @@ void node_sched_ops() {
          if(temp_entry){
           temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
         }
-      }
+      }          
 
       // <ALU, JMP>
       else if((is_alu_op(op->table_info->op_type)) && fetched_op_type == 2)
@@ -845,7 +848,7 @@ void node_sched_ops() {
          if(temp_entry){
           temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
         }
-      }
+      }           
 
       // <JMP, JMP>
       else if(op->table_info->op_type == 2 && fetched_op_type == 2){
@@ -854,7 +857,7 @@ void node_sched_ops() {
          if(temp_entry){
           temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
         }
-      }
+      }           
 
       // <JMP, MOV>
       else if(op->table_info->op_type == 2 && fetched_op_type == 3){
@@ -880,10 +883,10 @@ void node_sched_ops() {
 
     // Case 2: when the current op is a second instruction in a tuple (both cases likely exist, except if this is the first op)
     // if an entry is found, we know that this op is the second instruction in the tuple 
-    rs_mapping_entry* new_map_entry = (rs_mapping_entry*) malloc(sizeof(new_map_entry)); 
+    rs_mapping_entry* new_map_entry = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry)); 
     new_map_entry = starlab_search(map2_ptr, curr_op_addr); 
 
-    if(map_entry != NULL){
+    if(new_map_entry != NULL){
       // since this is the second instruction, we need to fetch the first instruction
       strcpy(fetched_addr, new_map_entry->instr1); 
       sprintf(tuple_as_key, "%s%s", fetched_addr, curr_op_addr ); 
@@ -899,7 +902,7 @@ void node_sched_ops() {
         if(new_temp_entry){
           new_temp_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
         }
-        }
+        } 
 
       // <MOV, ALU>
         else if(op->table_info->op_type == 3 && is_alu_op(fetched_op_type)){
@@ -1001,8 +1004,8 @@ void node_sched_ops() {
   voided_jmp_jmp_rs_cycles_table = (void*) jmp_jmp_ptr; 
   voided_jmp_mov_rs_cycles_table = (void*) jmp_mov_ptr; 
   voided_jmp_alu_rs_cycles_table = (void*) jmp_alu_ptr; 
-
   }
+
 
 
 
@@ -1477,10 +1480,6 @@ else {
 
   }
 
-
-  // had to stop issuing, this is the next node that should be issued to the RS
-  node->next_op_into_rs = op;
-
   voided_metadata_rs_cycles_table = (void*) metadata_ptr; 
 
   voided_mapping_rs_instr1_to_instr2 = (void*) map1_ptr; 
@@ -1497,6 +1496,10 @@ else {
   voided_jmp_jmp_rs_cycles_table = (void*) jmp_jmp_ptr; 
   voided_jmp_mov_rs_cycles_table = (void*) jmp_mov_ptr; 
   voided_jmp_alu_rs_cycles_table = (void*) jmp_alu_ptr; 
+
+
+  // had to stop issuing, this is the next node that should be issued to the RS
+  node->next_op_into_rs = op;
 
 }
 
