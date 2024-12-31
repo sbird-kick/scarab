@@ -1308,99 +1308,94 @@ void node_fill_rs() {
       op->in_rdy_list = TRUE;
     }
 
+    char temp_addr[21];
+
    if (is_first_op) {
-    // printf("[node_fill_rs()] in if\n");
+
     // Track the first op type and address
-    char address[22]; // 21 characters + null terminator
+    char address[21]; 
     sprintf(address, "%lld", op->inst_info->addr);
-
-    // Allocate memory for rs_prev_op
     rs_prev_op* prev_op = (rs_prev_op*)malloc(sizeof(rs_prev_op));
-    if (!prev_op) {
-        fprintf(stderr, "Memory allocation failed for prev_op\n");
-        exit(EXIT_FAILURE);
+
+    if(prev_op){
+       strcpy(prev_op->prev_op_addr, address);
+       prev_op->prev_op_type = op->table_info->op_type; 
+       starlab_insert(metadata_ptr, "prev_op", &prev_op);
     }
-
-    // Allocate memory for prev_op->prev_op_addr
-    strcpy(prev_op->prev_op_addr, address);
-
-    starlab_insert(metadata_ptr, "prev_op", prev_op);
     is_first_op = false;
-
   } 
 
 else {
     // printf("[node_fill_rs()] in else\n");
-    char curr_addr_as_string[21];  // 20 characters for address + null terminator
+    char curr_addr_as_string[21]; 
     sprintf(curr_addr_as_string, "%lld", op->inst_info->addr);
 
+    // there is a prev op since this is not the first op 
     rs_prev_op* prev_op = (rs_prev_op*)malloc(sizeof(rs_prev_op));
-    if (!prev_op) {
-        fprintf(stderr, "Memory allocation failed for prev_op\n");
-        exit(EXIT_FAILURE);
-    }
-
     prev_op = starlab_search(metadata_ptr, "prev_op");
+
     if (prev_op) {
-           char tuple_addr_concatenated[64];  
+           char tuple_addr_concatenated[42];  
            sprintf(tuple_addr_concatenated, "%s%s", prev_op->prev_op_addr, curr_addr_as_string);
-            rs_mapping_entry* mapping_entry = (rs_mapping_entry*)malloc(sizeof(rs_mapping_entry));
-                if (mapping_entry) {
+            
+          // check whether instructions already exist in mapping entries, if so just update it
+          // there is no need to create a new entry  
+          rs_mapping_entry* test = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry));
+          test = starlab_search(map1_ptr, prev_op->prev_op_addr); 
+           if(test){
+             // address already exists, just update it 
+             strcpy(test->instr1, prev_op->prev_op_addr); 
+             strcpy(test->instr2, curr_addr_as_string); 
+             test->instr1_op_type = prev_op->prev_op_type; 
+             test->instr2_op_type = op->table_info->op_type; 
+           }
 
-                        // check whether instructions already exist in mapping entries, if so just update it
-                        // there is no need to create a new entry  
-                        rs_mapping_entry* test = (rs_mapping_entry*) starlab_search(map1_ptr, prev_op->prev_op_addr); 
-                        if(test){
-                          // address already exists, just update it 
-                          strcpy(test->instr1, prev_op->prev_op_addr); 
-                          strcpy(test->instr2, curr_addr_as_string); 
-                          test->instr1_op_type = prev_op->prev_op_type; 
-                          test->instr2_op_type = op->table_info->op_type; 
-                        }
+           // similarly check in map2 
+           rs_mapping_entry* test2 = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry));
+           test2 = starlab_search(map2_ptr, curr_addr_as_string); 
+           if(test2){
+             // address already exists, just update it 
+             strcpy(test2->instr1, prev_op->prev_op_addr); 
+             strcpy(test2->instr2, curr_addr_as_string); 
+             test2->instr1_op_type = prev_op->prev_op_type; 
+             test2->instr2_op_type = op->table_info->op_type; 
+           }
 
-                        // similarly check in map2 
-                        rs_mapping_entry* test2 = (rs_mapping_entry*) starlab_search(map2_ptr, curr_addr_as_string); 
-                        if(test2){
-                          // address already exists, just update it 
-                          strcpy(test2->instr1, prev_op->prev_op_addr); 
-                          strcpy(test2->instr2, curr_addr_as_string); 
-                          test2->instr1_op_type = prev_op->prev_op_type; 
-                          test2->instr2_op_type = op->table_info->op_type; 
-                        }
+           if((test == NULL) && (test2 == NULL)){
+             rs_mapping_entry* mapping_entry = (rs_mapping_entry*)malloc(sizeof(rs_mapping_entry));
+             if(mapping_entry)
+             {
+               strcpy(mapping_entry->instr1, prev_op->prev_op_addr);
+               strcpy(mapping_entry->instr2, curr_addr_as_string);
+               mapping_entry->instr1_op_type = prev_op->prev_op_type; 
+               mapping_entry->instr2_op_type = op->table_info->op_type; 
+               starlab_insert(map1_ptr, prev_op->prev_op_addr, &mapping_entry);
+             }     
+             
+           }
 
-                        if((!test) && (!test2)){
+            // Allocate and initialize RS entry
+            rs_cycles_entry* rs_entry = (rs_cycles_entry*)malloc(sizeof(rs_cycles_entry));
+            if (rs_entry){
 
-                           strcpy(mapping_entry->instr1, prev_op->prev_op_addr);
-                            strcpy(mapping_entry->instr2, curr_addr_as_string);
-                            mapping_entry->instr1_op_type = prev_op->prev_op_type; 
-                            mapping_entry->instr2_op_type = op->table_info->op_type; 
-                            starlab_insert(map1_ptr, prev_op->prev_op_addr, &mapping_entry);
-                          
-
-                        }
-
-                        // Allocate and initialize RS entry
-                        rs_cycles_entry* rs_entry = (rs_cycles_entry*)malloc(sizeof(rs_cycles_entry));
-                        if (rs_entry) {
-
-                        rs_entry->instr1_addr = strdup(prev_op->prev_op_addr);
-                        rs_entry->instr2_addr = strdup(curr_addr_as_string);
-                        rs_entry->instr1_rs_insertion_cycle = prev_op->prev_op_rs_insert_cycle;
-                        rs_entry->instr2_rs_insertion_cycle = cycle_count;
-                        rs_entry->instr1_rs_issue_to_fu_cycle = 0;
-                        rs_entry->instr2_rs_issue_to_fu_cycle = 0;
-
-                        // printf("prev op type: %d, curr op type: %d\n", prev_op->prev_op_type, op->table_info->op_type); 
-                    
-                        // <MOV, MOV>
-                       if (prev_op->prev_op_type == 3 && op->table_info->op_type == 3) {
-                      
-                            printf("inserting into mov mov\n");
-                            starlab_insert(mov_mov_ptr, tuple_addr_concatenated, rs_entry);
-                        } 
-                        // <MOV, ALU>
-                        else if (prev_op->prev_op_type == 3 && is_alu_op(op->table_info->op_type)) {
-                          
+              strcpy(rs_entry->instr1_addr, prev_op->prev_op_addr); 
+              strcpy(rs_entry->instr2_addr, curr_addr_as_string); 
+              rs_entry->instr1_rs_insertion_cycle = prev_op->prev_op_rs_insert_cycle;
+              rs_entry->instr2_rs_insertion_cycle = cycle_count;
+              rs_entry->instr1_rs_issue_to_fu_cycle = 0;
+              rs_entry->instr2_rs_issue_to_fu_cycle = 0; 
+            // printf("prev op type: %d, curr op type: %d\n", prev_op->prev_op_type, op->table_info->op_type); 
+            strcpy(temp_addr, curr_addr_as_string);
+        
+            // <MOV, MOV>
+           if (prev_op->prev_op_type == 3 && op->table_info->op_type == 3) {
+          
+                printf("inserting into mov mov\n");
+                starlab_insert(mov_mov_ptr, tuple_addr_concatenated, rs_entry);
+            } 
+            // <MOV, ALU>
+            else if (prev_op->prev_op_type == 3 && is_alu_op(op->table_info->op_type)) {
+              
                             printf("inserting into mov alu\n");
                             starlab_insert(mov_alu_ptr, tuple_addr_concatenated, rs_entry);
                         } 
@@ -1459,19 +1454,21 @@ else {
                         }
                         
 
-                        // Update the current op as the previous op
-
-                        strcpy(prev_op->prev_op_addr, curr_addr_as_string);
-                        prev_op->prev_op_type = op->table_info->op_type;
-                        prev_op->prev_op_rs_insert_cycle = cycle_count;
-
-                        
+             
 
                         }
-                    }
+                      
+                    
                 }
 
     }
+
+   // Update the current op as the previous op
+   rs_prev_op* prev_op = (rs_prev_op*)malloc(sizeof(rs_prev_op));
+   prev_op = starlab_search(metadata_ptr, "prev_op");
+   strcpy(prev_op->prev_op_addr, temp_addr);
+   prev_op->prev_op_type = op->table_info->op_type;
+   prev_op->prev_op_rs_insert_cycle = cycle_count;
 
    // This is the max number of ops we can fill into the RS per cycle.
     // 0 means infinite.
