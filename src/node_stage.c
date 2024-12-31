@@ -1334,7 +1334,9 @@ else {
     rs_prev_op* prev_op = (rs_prev_op*)malloc(sizeof(rs_prev_op));
     prev_op = starlab_search(metadata_ptr, "prev_op");
 
-    if (prev_op) {
+    if (prev_op) 
+    {
+          printf("prev op addr: %s\top_type:%d\n", prev_op->prev_op_addr, prev_op->prev_op_type);
            char tuple_addr_concatenated[42];  
            sprintf(tuple_addr_concatenated, "%s%s", prev_op->prev_op_addr, curr_addr_as_string);
             
@@ -1376,90 +1378,88 @@ else {
 
             // Allocate and initialize RS entry
             rs_cycles_entry* rs_entry = (rs_cycles_entry*)malloc(sizeof(rs_cycles_entry));
-            if (rs_entry){
+            if (rs_entry)
+            {
 
-              strcpy(rs_entry->instr1_addr, prev_op->prev_op_addr); 
-              strcpy(rs_entry->instr2_addr, curr_addr_as_string); 
-              rs_entry->instr1_rs_insertion_cycle = prev_op->prev_op_rs_insert_cycle;
-              rs_entry->instr2_rs_insertion_cycle = cycle_count;
-              rs_entry->instr1_rs_issue_to_fu_cycle = 0;
-              rs_entry->instr2_rs_issue_to_fu_cycle = 0; 
-            // printf("prev op type: %d, curr op type: %d\n", prev_op->prev_op_type, op->table_info->op_type); 
-            strcpy(temp_addr, curr_addr_as_string);
-        
-            // <MOV, MOV>
-           if (prev_op->prev_op_type == 3 && op->table_info->op_type == 3) {
-          
-                printf("inserting into mov mov\n");
-                starlab_insert(mov_mov_ptr, tuple_addr_concatenated, rs_entry);
-            } 
-            // <MOV, ALU>
-            else if (prev_op->prev_op_type == 3 && is_alu_op(op->table_info->op_type)) {
+                  strcpy(rs_entry->instr1_addr, prev_op->prev_op_addr); 
+                  strcpy(rs_entry->instr2_addr, curr_addr_as_string); 
+                  rs_entry->instr1_rs_insertion_cycle = prev_op->prev_op_rs_insert_cycle;
+                  rs_entry->instr2_rs_insertion_cycle = cycle_count;
+                  rs_entry->instr1_rs_issue_to_fu_cycle = 0;
+                  rs_entry->instr2_rs_issue_to_fu_cycle = 0; 
+                  // printf("prev op type: %d, curr op type: %d\n", prev_op->prev_op_type, op->table_info->op_type); 
+                  strcpy(temp_addr, curr_addr_as_string);
               
-                            printf("inserting into mov alu\n");
-                            starlab_insert(mov_alu_ptr, tuple_addr_concatenated, rs_entry);
-                        } 
-                        // <MOV, JMP>
-                        else if (prev_op->prev_op_type == 3 && op->table_info->op_type == 2) {
-                          
-                            printf("inserting into mov jmp\n");
-                            starlab_insert(mov_jmp_ptr, tuple_addr_concatenated, rs_entry);
-                        } 
-                        
-                        // <ALU, ALU>
-                        else if (is_alu_op(prev_op->prev_op_type) && is_alu_op(op->table_info->op_type)) {
-                           
-                            printf("inserting into alu alu\n");
-                            starlab_insert(alu_alu_ptr, tuple_addr_concatenated, rs_entry);
-                        } 
-                        
-                        // <ALU, MOV>
-                        else if (is_alu_op(prev_op->prev_op_type) && op->table_info->op_type == 3) {
-                          
-                            printf("insreting into alu mov\n");
-                            starlab_insert(alu_mov_ptr, tuple_addr_concatenated, rs_entry);
-                        } 
-                        
-                        // <ALU, JMP>
-                        else if (is_alu_op(prev_op->prev_op_type) && op->table_info->op_type == 2) {
-                          
-                            printf("inserting into alu jmp\n");
-                            starlab_insert(alu_jmp_ptr, tuple_addr_concatenated, rs_entry);
-                        } 
-                        
-                        // <JMP, JMP>
-                        else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 2) {
-                           
-                            printf("inserting into jmp jmp\n");
-                            starlab_insert(jmp_jmp_ptr, tuple_addr_concatenated, rs_entry);
-                        } 
-                        
-                        // <JMP, MOV>
-                        else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 3) {
-                           
-                            printf("inserting into jmp mov\n");
-                            starlab_insert(jmp_mov_ptr, tuple_addr_concatenated, rs_entry);
-                        } 
-                        
-                        // <JMP, ALU>
-                        else if (prev_op->prev_op_type == 2 && is_alu_op(op->table_info->op_type)) {
-                           
-                            printf("inserting into jmp alu\n");
-                            starlab_insert(jmp_alu_ptr, tuple_addr_concatenated, rs_entry);
-                        } 
-                        
-
-                        else {
-                            // do nothing
-                        }
-                        
-
+                  // <MOV, MOV>
+                if (prev_op->prev_op_type == 3 && op->table_info->op_type == 3) {
+                
+                      printf("inserting into mov mov\n");
+                      starlab_insert(mov_mov_ptr, tuple_addr_concatenated, rs_entry);
+                  } 
+                  // <MOV, ALU>
+                  else if (prev_op->prev_op_type == 3 && is_alu_op(op->table_info->op_type)) 
+                  {
+                    
+                    printf("inserting into mov alu\n");
+                    starlab_insert(mov_alu_ptr, tuple_addr_concatenated, rs_entry);
+                  } 
+                  // <MOV, JMP>
+                  else if (prev_op->prev_op_type == 3 && op->table_info->op_type == 2) {
+                    
+                      printf("inserting into mov jmp\n");
+                      starlab_insert(mov_jmp_ptr, tuple_addr_concatenated, rs_entry);
+                  } 
+                  
+                  // <ALU, ALU>
+                  else if (is_alu_op(prev_op->prev_op_type) && is_alu_op(op->table_info->op_type)) {
+                    
+                      printf("inserting into alu alu\n");
+                      starlab_insert(alu_alu_ptr, tuple_addr_concatenated, rs_entry);
+                  } 
+                  
+                  // <ALU, MOV>
+                  else if (is_alu_op(prev_op->prev_op_type) && op->table_info->op_type == 3) {
+                    
+                      printf("insreting into alu mov\n");
+                      starlab_insert(alu_mov_ptr, tuple_addr_concatenated, rs_entry);
+                  } 
+                              
+                // <ALU, JMP>
+                else if (is_alu_op(prev_op->prev_op_type) && op->table_info->op_type == 2) {
+                  
+                    printf("inserting into alu jmp\n");
+                    starlab_insert(alu_jmp_ptr, tuple_addr_concatenated, rs_entry);
+                } 
+                
+                // <JMP, JMP>
+                else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 2) {
+                    
+                    printf("inserting into jmp jmp\n");
+                    starlab_insert(jmp_jmp_ptr, tuple_addr_concatenated, rs_entry);
+                } 
+                
+                // <JMP, MOV>
+                else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 3) {
+                    
+                    printf("inserting into jmp mov\n");
+                    starlab_insert(jmp_mov_ptr, tuple_addr_concatenated, rs_entry);
+                } 
+                              
+                // <JMP, ALU>
+                else if (prev_op->prev_op_type == 2 && is_alu_op(op->table_info->op_type)) {
+                  
+                    printf("inserting into jmp alu\n");
+                    starlab_insert(jmp_alu_ptr, tuple_addr_concatenated, rs_entry);
+                } 
+              
+                else {
+                    // do nothing
+                }
              
-
-                        }
+          }
                       
                     
-                }
+       }
 
     }
 
