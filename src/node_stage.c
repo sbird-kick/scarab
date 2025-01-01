@@ -786,10 +786,10 @@ void node_sched_ops() {
 
     // Case 1: when op is the first instruction in a tuple
     rs_mapping_entry* map_entry = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry));
-    printf("[in node_sched_ops()] Case 1: looking for address: %s\n", curr_op_addr);
+
     map_entry = starlab_search(map1_ptr, curr_op_addr); 
     if(map_entry){
-      printf("[in node_sched_ops()] Case 1: found address: %s\n", curr_op_addr);
+
       strcpy(fetched_addr, map_entry->instr2); 
       sprintf(tuple_as_key, "%s%s", curr_op_addr, fetched_addr); 
     
@@ -841,15 +841,7 @@ void node_sched_ops() {
         temp_entry = starlab_search(alu_mov_ptr, tuple_as_key);
          if(temp_entry){
           temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
-          
-                    printf("[In node_sched_ops()] <ALU, JMP> after updating FU issue count:\n");
-                    printf("Current cycle count: %lld\n", cycle_count);
-                    printf("  instr1_addr: %s\n", temp_entry->instr1_addr);
-                    printf("  instr2_addr: %s\n", temp_entry->instr2_addr);
-                    printf("  instr1_rs_insertion_cycle: %lld\n", temp_entry->instr1_rs_insertion_cycle);
-                    printf("  instr2_rs_insertion_cycle: %lld\n", temp_entry->instr2_rs_insertion_cycle);
-                    printf("  instr1_rs_issue_to_fu_cycle: %lld\n", temp_entry->instr1_rs_issue_to_fu_cycle);
-                    printf("  instr2_rs_issue_to_fu_cycle: %lld\n", temp_entry->instr2_rs_issue_to_fu_cycle);
+  
         }
       }          
 
@@ -861,7 +853,6 @@ void node_sched_ops() {
         rs_cycles_entry* temp_entry = starlab_search(alu_jmp_ptr, tuple_as_key);
          if(temp_entry){
           temp_entry->instr1_rs_issue_to_fu_cycle = cycle_count; 
-          printf("[in node_sched_ops()] updated %s issue to %lld, current cycle count: %lld\n", temp_entry->instr1_addr, temp_entry->instr1_rs_issue_to_fu_cycle, cycle_count);
         }
       }           
 
@@ -899,24 +890,19 @@ void node_sched_ops() {
     // Case 2: when the current op is a second instruction in a tuple (both cases likely exist, except if this is the first op)
     // if an entry is found, we know that this op is the second instruction in the tuple 
     rs_mapping_entry* new_map_entry = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry)); 
-    printf("[in node_sched_ops()] Case 2: looking for address: %s\n", curr_op_addr);
     new_map_entry = starlab_search(map2_ptr, curr_op_addr); 
 
     if(new_map_entry){
-       printf("[in node_sched_ops()] Case 2: found address: %s\n", curr_op_addr);
       // since this is the second instruction, we need to fetch the first instruction
       strcpy(fetched_addr, new_map_entry->instr1); 
       sprintf(tuple_as_key, "%s%s", fetched_addr, curr_op_addr ); 
 
-      printf("In case 2, op addr: %lld, and cycle count: %lld op type: %d\n", op->inst_info->addr, cycle_count, op->table_info->op_type);
 
       unsigned int fetched_op_type = new_map_entry->instr1_op_type; 
-      printf("fetched op type: %d\n", fetched_op_type);
       // if(new_map_entry->instr2_op_type == op->table_info->op_type){
 
       // <MOV, MOV> 
       if(op->table_info->op_type == 3 && fetched_op_type == 3){
-        printf("[In case 2: <MOV, MOV>]");
         rs_cycles_entry* map2_cycles_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry)); 
         map2_cycles_entry = starlab_search(mov_mov_ptr, tuple_as_key); 
 
@@ -927,7 +913,6 @@ void node_sched_ops() {
 
       // <MOV, ALU>
         else if(op->table_info->op_type == 3 && is_alu_op(fetched_op_type)){
-        printf("[In case 2: <MOV, ALU>]");
         rs_cycles_entry* map2_cycles_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry)); 
         map2_cycles_entry = starlab_search(mov_alu_ptr, tuple_as_key); 
         if(map2_cycles_entry){
@@ -948,11 +933,9 @@ void node_sched_ops() {
       // <ALU, ALU>
        else if( (is_alu_op(op->table_info->op_type)) && is_alu_op(fetched_op_type)){
 
-        printf("in <ALU, ALU> op addr: %lld\n", op->inst_info->addr);
         rs_cycles_entry* map2_cycles_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry)); 
         map2_cycles_entry = starlab_search(alu_alu_ptr, tuple_as_key); 
          if(map2_cycles_entry){
-          printf("before changing the instr2 FU issue cycle: %lld\n", map2_cycles_entry->instr2_rs_issue_to_fu_cycle); 
           map2_cycles_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
         }
       }
@@ -970,12 +953,10 @@ void node_sched_ops() {
       // <ALU, JMP>
          else if((is_alu_op(op->table_info->op_type)) && fetched_op_type == 2)
       {
-        printf("[in node_sched_ops()] <ALU, JMP>\n");
         rs_cycles_entry* map2_cycles_entry = (rs_cycles_entry*) malloc(sizeof(rs_cycles_entry)); 
         map2_cycles_entry = starlab_search(alu_jmp_ptr, tuple_as_key); 
          if(map2_cycles_entry){
           map2_cycles_entry->instr2_rs_issue_to_fu_cycle = cycle_count; 
-          printf("[in node_sched_ops()] updated %s issue to %lld\n", map2_cycles_entry->instr2_addr, map2_cycles_entry->instr2_rs_issue_to_fu_cycle);
         }
       }
 
@@ -1366,7 +1347,7 @@ void node_fill_rs() {
       printf("[in node_fill_rs()] printing the prev_op fetched values.\n"); 
       printf("Prev op addr: %s\n", prev_op->prev_op_addr); 
       printf("Prev op type: %d\n", prev_op->prev_op_type); 
-      printf("Prev op insertion cycle: %d\n", prev_op->prev_op_rs_insert_cycle);
+      printf("Prev op insertion cycle: %lld\n", prev_op->prev_op_rs_insert_cycle);
 
       // if prev_op search was successful
       if (prev_op) 
@@ -1411,45 +1392,50 @@ void node_fill_rs() {
 
           // If an op address is already present, then just update its contents 
           rs_mapping_entry* map1_entry = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry));
-          map1_entry = starlab_search(map1_ptr, prev_op->prev_op_addr); 
+          printf("[In node_fill_rs()] Searching map1 for entry with key %s\n", prev_op->prev_op_addr);
+          map1_entry = starlab_search(map1_ptr, prev_op->prev_op_addr);
+
           rs_mapping_entry* map2_entry = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry));
-          map2_entry = starlab_search(map2_ptr, curr_addr_as_string); 
-           if(map1_entry)
-           {
-             // address already exists, just update it 
-             strcpy(map1_entry->instr1, prev_op->prev_op_addr); 
-             strcpy(map1_entry->instr2, curr_addr_as_string); 
-             map1_entry->instr1_op_type = prev_op->prev_op_type; 
-             map1_entry->instr2_op_type = op->table_info->op_type; 
+          printf("[In node_fill_rs()] Searching map2 for entry with key %s\n", curr_addr_as_string);
+          map2_entry = starlab_search(map2_ptr, curr_addr_as_string);
 
-             // say prev_op was op1 and curr op is op2 
-             // we will need to create map2 entry here itself? 
-             if(map2_entry)
-             {
-              strcpy(map2_entry->instr1, prev_op->prev_op_addr); 
-              strcpy(map2_entry->instr2, curr_addr_as_string); 
-              map2_entry->instr1_op_type = prev_op->prev_op_type; 
-              map2_entry->instr2_op_type = op->table_info->op_type; 
-             }
+          if(map1_entry)
+          {
+            printf("[In node_fill_rs()] Found existing entry in map1, updating fields\n");
+            strcpy(map1_entry->instr1, prev_op->prev_op_addr);
+            strcpy(map1_entry->instr2, curr_addr_as_string);
+            map1_entry->instr1_op_type = prev_op->prev_op_type;
+            map1_entry->instr2_op_type = op->table_info->op_type;
 
-           }
+            if(map2_entry)
+            {
+                printf("[In node_fill_rs()] Found existing entry in map2, updating fields\n");
+                strcpy(map2_entry->instr1, prev_op->prev_op_addr);
+                strcpy(map2_entry->instr2, curr_addr_as_string);
+                map2_entry->instr1_op_type = prev_op->prev_op_type;
+                map2_entry->instr2_op_type = op->table_info->op_type;
+            }
+          }
 
-           if((map1_entry == NULL) && (map2_entry == NULL))
-           {
-             rs_mapping_entry* new_entry = (rs_mapping_entry*)malloc(sizeof(rs_mapping_entry));
-             if(new_entry)
-             {
-               strcpy(new_entry->instr1, prev_op->prev_op_addr);
-               strcpy(new_entry->instr2, curr_addr_as_string);
-               new_entry->instr1_op_type = prev_op->prev_op_type; 
-               new_entry->instr2_op_type = op->table_info->op_type; 
-               starlab_insert(map1_ptr, prev_op->prev_op_addr, &new_entry);
-               starlab_insert(map2_ptr, curr_addr_as_string, &new_entry); 
-             }     
-             
-           }
+          if((map1_entry == NULL) && (map2_entry == NULL))
+          {
+            printf("[In node_fill_rs()] No existing entries found, creating new entry\n");
+            rs_mapping_entry* new_entry = (rs_mapping_entry*)malloc(sizeof(rs_mapping_entry));
+            if(new_entry)
+            {
+                strcpy(new_entry->instr1, prev_op->prev_op_addr);
+                strcpy(new_entry->instr2, curr_addr_as_string);
+                new_entry->instr1_op_type = prev_op->prev_op_type;
+                new_entry->instr2_op_type = op->table_info->op_type;
+                
+                printf("[In node_fill_rs()] Inserting new entry into map1 with key %s\n", prev_op->prev_op_addr);
+                starlab_insert(map1_ptr, prev_op->prev_op_addr, &new_entry);
+                
+                printf("[In node_fill_rs()] Inserting new entry into map2 with key %s\n", curr_addr_as_string);
+                starlab_insert(map2_ptr, curr_addr_as_string, &new_entry);
+            }
+          }
 
-            // Allocate and initialize RS entry
             rs_cycles_entry* rs_entry = (rs_cycles_entry*)malloc(sizeof(rs_cycles_entry));
             if (rs_entry)
             {
@@ -1470,72 +1456,63 @@ void node_fill_rs() {
                   printf("  instr2_rs_issue_to_fu_cycle: %lld\n", rs_entry->instr2_rs_issue_to_fu_cycle);
 
                   // <MOV, MOV>
-                if (prev_op->prev_op_type == 3 && op->table_info->op_type == 3) {
-                
-                      printf("inserting into mov mov\n");
-                      starlab_insert(mov_mov_ptr, instr_tuple_as_key, rs_entry);
-                  } 
+                  if (prev_op->prev_op_type == 3 && op->table_info->op_type == 3) {
+                    printf("[In node_fill_rs()] Inserted into %s : %s into <MOV, MOV>\n",
+                        rs_entry->instr1_addr, rs_entry->instr2_addr);
+                    starlab_insert(mov_mov_ptr, instr_tuple_as_key, rs_entry);
+                  }
                   // <MOV, ALU>
-                  else if (prev_op->prev_op_type == 3 && is_alu_op(op->table_info->op_type)) 
-                  {
-                    
-                    printf("inserting into mov alu\n");
+                  else if (prev_op->prev_op_type == 3 && is_alu_op(op->table_info->op_type)) {
+                    printf("[In node_fill_rs()] Inserted into %s : %s into <MOV, ALU>\n",
+                        rs_entry->instr1_addr, rs_entry->instr2_addr);
                     starlab_insert(mov_alu_ptr, instr_tuple_as_key, rs_entry);
-                  } 
+                  }
                   // <MOV, JMP>
                   else if (prev_op->prev_op_type == 3 && op->table_info->op_type == 2) {
-                    
-                      printf("inserting into mov jmp\n");
-                      starlab_insert(mov_jmp_ptr, instr_tuple_as_key, rs_entry);
-                  } 
-                  
+                    printf("[In node_fill_rs()] Inserted into %s : %s into <MOV, JMP>\n",
+                        rs_entry->instr1_addr, rs_entry->instr2_addr);
+                    starlab_insert(mov_jmp_ptr, instr_tuple_as_key, rs_entry);
+                  }
                   // <ALU, ALU>
                   else if (is_alu_op(prev_op->prev_op_type) && is_alu_op(op->table_info->op_type)) {
-                    
-                      printf("inserting into alu alu\n");
-                      starlab_insert(alu_alu_ptr, instr_tuple_as_key, rs_entry);
-                  } 
-                  
+                    printf("[In node_fill_rs()] Inserted into %s : %s into <ALU, ALU>\n",
+                        rs_entry->instr1_addr, rs_entry->instr2_addr);
+                    starlab_insert(alu_alu_ptr, instr_tuple_as_key, rs_entry);
+                  }
                   // <ALU, MOV>
                   else if (is_alu_op(prev_op->prev_op_type) && op->table_info->op_type == 3) {
-                    
-                      printf("insreting into alu mov\n");
-                      starlab_insert(alu_mov_ptr, instr_tuple_as_key, rs_entry);
-                  } 
-                              
-                // <ALU, JMP>
-                else if (is_alu_op(prev_op->prev_op_type) && op->table_info->op_type == 2) {
-                  
-                    printf("inserting into alu jmp\n");
+                    printf("[In node_fill_rs()] Inserted into %s : %s into <ALU, MOV>\n",
+                        rs_entry->instr1_addr, rs_entry->instr2_addr);
+                    starlab_insert(alu_mov_ptr, instr_tuple_as_key, rs_entry);
+                  }
+                  // <ALU, JMP>
+                  else if (is_alu_op(prev_op->prev_op_type) && op->table_info->op_type == 2) {
+                    printf("[In node_fill_rs()] Inserted into %s : %s into <ALU, JMP>\n",
+                        rs_entry->instr1_addr, rs_entry->instr2_addr);
                     starlab_insert(alu_jmp_ptr, instr_tuple_as_key, rs_entry);
-
-                } 
-                
-                // <JMP, JMP>
-                else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 2) {
-                    
-                    printf("inserting into jmp jmp\n");
+                  }
+                  // <JMP, JMP>
+                  else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 2) {
+                    printf("[In node_fill_rs()] Inserted into %s : %s into <JMP, JMP>\n",
+                        rs_entry->instr1_addr, rs_entry->instr2_addr);
                     starlab_insert(jmp_jmp_ptr, instr_tuple_as_key, rs_entry);
-                } 
-                
-                // <JMP, MOV>
-                else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 3) {
-                    
-                    printf("inserting into jmp mov\n");
-                    printf("tuple: %s\n", instr_tuple_as_key);
+                  }
+                  // <JMP, MOV>
+                  else if (prev_op->prev_op_type == 2 && op->table_info->op_type == 3) {
+                    printf("[In node_fill_rs()] Inserted into %s : %s into <JMP, MOV>\n",
+                        rs_entry->instr1_addr, rs_entry->instr2_addr);
                     starlab_insert(jmp_mov_ptr, instr_tuple_as_key, rs_entry);
-                } 
-                              
-                // <JMP, ALU>
-                else if (prev_op->prev_op_type == 2 && is_alu_op(op->table_info->op_type)) {
-                  
-                    printf("inserting into jmp alu\n");
+                  }
+                  // <JMP, ALU>
+                  else if (prev_op->prev_op_type == 2 && is_alu_op(op->table_info->op_type)) {
+                    printf("[In node_fill_rs()] Inserted into %s : %s into <JMP, ALU>\n",
+                        rs_entry->instr1_addr, rs_entry->instr2_addr);
                     starlab_insert(jmp_alu_ptr, instr_tuple_as_key, rs_entry);
-                } 
-              
-                else {
-                    // do nothing
-                }
+                  }
+                
+                  else {
+                      // do nothing
+                  }
              
           }
                       
