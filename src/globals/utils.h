@@ -407,8 +407,8 @@ typedef struct {
 } KeyValuePair;
 
 typedef struct rs_cycles_entry{
-  char *instr1_addr; 
-  char *instr2_addr; 
+  char instr1_addr[21]; 
+  char instr2_addr[21]; 
   unsigned long long instr1_rs_insertion_cycle; 
   unsigned long long instr2_rs_insertion_cycle; 
   unsigned long long instr1_rs_issue_to_fu_cycle;
@@ -417,18 +417,27 @@ typedef struct rs_cycles_entry{
 
 
 typedef struct rs_prev_op{ 
-  char *prev_op_addr; 
+  char prev_op_addr[21]; 
   unsigned int prev_op_type; 
   unsigned long long prev_op_rs_insert_cycle; 
 } rs_prev_op; 
 
 typedef struct rs_mapping_entry{
-  char *instr1; 
-  char *instr2; 
+  char instr1[21]; 
+  char instr2[21]; 
   unsigned int instr1_op_type; 
   unsigned int instr2_op_type; 
 } rs_mapping_entry; 
 
+typedef struct addr_to_optype{
+  char instr_addr[21]; 
+  unsigned int instr_optype; 
+} addr_to_optype; 
+
+typedef struct rs_total_cycles_entry{
+  unsigned long long op1_rs_insertion_cycle;
+  unsigned long long last_op_rs_issue_to_fu_cycle; 
+} rs_total_cycles_entry; 
 
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);

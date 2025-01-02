@@ -684,6 +684,11 @@ void node_sched_ops() {
     map2_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_mapping_entry)); 
   }
 
+  starlab_hash_table* rs_total_cycles_ptr = (starlab_hash_table*) voided_rs_total_cycles_table;
+  if(rs_total_cycles_ptr == NULL){
+    rs_total_cycles_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+  }
+
   starlab_hash_table* mov_mov_ptr = (starlab_hash_table*) voided_mov_mov_rs_cycles_table; 
   if(mov_mov_ptr == NULL){
     mov_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
@@ -972,9 +977,14 @@ void node_sched_ops() {
     }
     }
    }
+
+  rs_total_cycles_entry* entry = (rs_total_cycles_entry*) malloc(sizeof(rs_total_cycles_entry));
+  entry->last_op_rs_issue_to_fu_cycle = cycle_count; 
   
   voided_mapping_rs_instr1_to_instr2 = (void*) map1_ptr; 
   voided_mapping_rs_instr2_to_instr1 = (void*) map2_ptr; 
+
+  voided_rs_total_cycles_table = (void*) rs_total_cycles_ptr;
 
   voided_mov_mov_rs_cycles_table = (void*) mov_mov_ptr; 
   voided_mov_alu_rs_cycles_table = (void*) mov_alu_ptr; 
@@ -1207,6 +1217,11 @@ void node_fill_rs() {
     map2_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_mapping_entry)); 
   }
 
+  starlab_hash_table* rs_total_cycles_ptr = (starlab_hash_table*) voided_rs_total_cycles_table;
+  if(rs_total_cycles_ptr == NULL){
+    rs_total_cycles_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+  }
+
   starlab_hash_table* mov_mov_ptr = (starlab_hash_table*) voided_mov_mov_rs_cycles_table; 
   if(mov_mov_ptr == NULL){
     mov_mov_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
@@ -1295,7 +1310,6 @@ void node_fill_rs() {
 
    if (is_first_op) 
    {
-
       char address[21] = {0};
 
       if(op->inst_info->addr != 0){
@@ -1319,6 +1333,10 @@ void node_fill_rs() {
 
       is_first_op = false;
 
+      rs_total_cycles_entry *entry = (rs_total_cycles_entry*)malloc(sizeof(rs_total_cycles_entry));
+      entry->op1_rs_insertion_cycle = cycle_count;
+      entry->last_op_rs_issue_to_fu_cycle = 0;
+      free(entry);
     } 
 
   else 
@@ -1549,6 +1567,8 @@ void node_fill_rs() {
 
   voided_mapping_rs_instr1_to_instr2 = (void*) map1_ptr; 
   voided_mapping_rs_instr2_to_instr1 = (void*) map2_ptr; 
+
+  voided_rs_total_cycles_table = (void*) rs_total_cycles_ptr;
 
   voided_mov_mov_rs_cycles_table = (void*) mov_mov_ptr; 
   voided_mov_alu_rs_cycles_table = (void*) mov_alu_ptr; 

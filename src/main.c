@@ -247,7 +247,7 @@ void* voided_metadata_rs_cycles_table = NULL;
 void* voided_mapping_rs_instr1_to_instr2 = NULL; 
 void* voided_mapping_rs_instr2_to_instr1 = NULL; 
 
-void* voided_addr_to_optype = NULL;
+void* voided_rs_total_cycles_table = NULL;
 
 // const char starlab_do_write = 1;
 
@@ -417,7 +417,7 @@ void print_hash_table_values(const char* table_name, starlab_hash_table* table_p
     qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
     unsigned long total_cc_count = 0;
-for (long i = 0; i < count; i++) {
+    for (long i = 0; i < count; i++) {
     rs_cycles_entry *tuple = (rs_cycles_entry *)key_value_pairs[i].value;
 
     // Print key and associated value
