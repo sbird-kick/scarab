@@ -1030,7 +1030,7 @@ void node_sched_ops() {
     }
     }
    }
-
+  
   voided_mapping_rs_instr1_to_instr2 = (void*) map1_ptr; 
   voided_mapping_rs_instr2_to_instr1 = (void*) map2_ptr; 
 
@@ -1046,6 +1046,7 @@ void node_sched_ops() {
   voided_jmp_mov_rs_cycles_table = (void*) jmp_mov_ptr; 
   voided_jmp_alu_rs_cycles_table = (void*) jmp_alu_ptr; 
   }
+
 
 
 
@@ -1279,8 +1280,8 @@ void node_fill_rs() {
   }
 
   starlab_hash_table* mov_jmp_ptr = (starlab_hash_table*) voided_mov_jmp_rs_cycles_table; 
-  if(mov_alu_ptr == NULL){ 
-    mov_alu_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
+  if(mov_jmp_ptr == NULL){ 
+    mov_jmp_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(rs_cycles_entry)); 
   }
 
   starlab_hash_table* alu_alu_ptr = (starlab_hash_table*) voided_alu_alu_rs_cycles_table; 
@@ -1358,130 +1359,118 @@ void node_fill_rs() {
    if (is_first_op) 
    {
 
-      // printf("[in node_fill_rs()] This is the first op\n");
-      // Track the first op type and address
-      char address[21]; 
-      sprintf(address, "%lld", op->inst_info->addr);
-      rs_prev_op* prev_op_in_rs = (rs_prev_op*)malloc(sizeof(rs_prev_op));
-      if(prev_op_in_rs){
+      char address[21] = {0};
+
+      if(op->inst_info->addr != 0){
+        sprintf(address, "%lld", op->inst_info->addr);
+        rs_prev_op* prev_op_in_rs = (rs_prev_op*)malloc(sizeof(rs_prev_op));
+        if (prev_op_in_rs == NULL) {
+            printf("[In node_fill_rs()] Memory allocation for prev_op_in_rs failed\n");
+            exit(1);
+        }
         strcpy(prev_op_in_rs->prev_op_addr, address);
         prev_op_in_rs->prev_op_type = op->table_info->op_type; 
         prev_op_in_rs->prev_op_rs_insert_cycle = cycle_count;
-        starlab_insert(metadata_ptr, "prev_op", prev_op_in_rs);
+
+        if(metadata_ptr != NULL){
+            starlab_insert(metadata_ptr, "prev_op", prev_op_in_rs);
+        } else {
+            printf("[In node_fill_rs()] metadata_ptr is NULL\n");
+        }
+        
       }
+
       is_first_op = false;
-  } 
+
+    } 
 
   else 
   {
 
-      // There is a prev op since this is not the first op 
-      rs_prev_op* prev_op_in_rs = (rs_prev_op*)malloc(sizeof(rs_prev_op));
-      // whatever fetched (at least for the first time), should match 
-      // whatever is inserted in the "if" condition
-      prev_op_in_rs = starlab_search(metadata_ptr, "prev_op");
-      // printf("[in node_fill_rs()] printing the prev_op fetched values.\n"); 
-      // printf("Prev op addr: %s\n", prev_op_in_rs->prev_op_addr); 
-      // printf("Prev op type: %d\n", prev_op_in_rs->prev_op_type); 
-      // printf("Prev op insertion cycle: %lld\n", prev_op_in_rs->prev_op_rs_insert_cycle);
+      rs_prev_op* prev_op_in_rs = starlab_search(metadata_ptr, "prev_op");
+      if(prev_op_in_rs == NULL){
+        printf("[In node_fill_rs()] prev_op_in_rs search failed\n");
+        exit(1);
+      }
 
-      // if prev_op search was successful
       if (prev_op_in_rs) 
-      {      
-           char instr_tuple_as_key[55], curr_op_type[4];
+      {     
+
+           char instr_tuple_as_key[64], curr_op_type[4];
            sprintf(curr_op_type, "%d", op->table_info->op_type);   
            sprintf(instr_tuple_as_key, "%s%u%s%s", prev_op_in_rs->prev_op_addr, prev_op_in_rs->prev_op_type, curr_addr_as_string, curr_op_type);
-            
-          /* In node_sched_ops(), given an op address, we need to fetch the corresponding
-              tuple, so that we can update the cycle count when it was scheduled 
-              to a given functional unit (FU). It is possible that a given op is the first 
-              op in a tuple 1 and the second op in a tuple 2. Therefore, 
-              we need to updated the op's issue_to_fu_cycle correctly in both places. 
-              To do so, we will need to access the correct entries from the hashtable, 
-              using the tuple key, and hence we create two different mapping tables, which 
-              store an op and its partner op in the tuple, for both cases when an instruction 
-              is first op in a tuple vs second op in a tuple. 
-
-              Note that: A case when a tuple is second op in a tuple, it would not be with 
-              the same op where it was the first op. Therefore, insertion into mapping table 
-              2 needs to handle this case. 
-
-              For example, 
-              <op 1> 
-              <op 2> 
-              <op 3> 
-
-              Tuples: <op1, op2>, <op2, op3>; in this case, op2 was the second op along with 
-              op1 and it was the first op along with op3. Since op2 will be scheduled to a 
-              FU only once, we will need to update op2's issue to FU count correctly in both 
-              these tuples. 
-
-              Map 1: 
-              Key: op1     Value: op1, op2 
-              key: op2     Value: op2, op3
-              Map 2: 
-              Key op2      Value: op1, op2
-
-              If a given op was found in map 2, that means it is the second op, and therefore 
-              we update instr2 cycle count. We also look at map 1 and find its entry when op2 
-              was the first instr, and update its cycle count.
-          */
-
-          // If an op address is already present, then just update its contents 
-          rs_mapping_entry* map1_entry = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry));
-          
+         
           char map1_concatenate[30], map2_concatenate[30], prev_op_type_as_string[4]; 
+
           sprintf(prev_op_type_as_string, "%u", prev_op_in_rs->prev_op_type);
-          sprintf(map1_concatenate, "%s%s", prev_op_in_rs->prev_op_addr, prev_op_type_as_string); 
-          // printf("[In node_fill_rs()] Searching map1 for entry with key %s\n", map1_concatenate);
+          sprintf(map1_concatenate, "%s%s", prev_op_in_rs->prev_op_addr, prev_op_type_as_string);
+          
+          rs_mapping_entry* map1_entry = (rs_mapping_entry*)malloc(sizeof(rs_mapping_entry));
           map1_entry = starlab_search(map1_ptr, map1_concatenate);
-
-          rs_mapping_entry* map2_entry = (rs_mapping_entry*) malloc(sizeof(rs_mapping_entry));
+   
           sprintf(map2_concatenate, "%s%s", curr_addr_as_string, curr_op_type);
-          // printf("[In node_fill_rs()] Searching map2 for entry with key %s\n", map2_concatenate);
-          map2_entry = starlab_search(map2_ptr, map2_concatenate);
+          rs_mapping_entry* map2_entry = starlab_search(map2_ptr, map2_concatenate);
 
-          if(map1_entry)
+
+          if(map1_entry == NULL)
           {
-            // printf("[In node_fill_rs()] Found existing entry in map1, updating fields\n");
+
+                rs_mapping_entry* new_entry = (rs_mapping_entry*)malloc(sizeof(rs_mapping_entry));
+
+                strcpy(new_entry->instr1, prev_op_in_rs->prev_op_addr);
+                strcpy(new_entry->instr2, curr_addr_as_string);
+                
+                new_entry->instr1_op_type = prev_op_in_rs->prev_op_type;
+                new_entry->instr2_op_type = op->table_info->op_type;
+
+                
+                starlab_insert(map1_ptr, map1_concatenate, new_entry);
+
+                free(new_entry);
+
+          }
+
+
+          if(map2_entry == NULL)
+          {
+
+                rs_mapping_entry* new_entry = (rs_mapping_entry*)malloc(sizeof(rs_mapping_entry));
+
+                strcpy(new_entry->instr1, prev_op_in_rs->prev_op_addr);
+                strcpy(new_entry->instr2, curr_addr_as_string);
+                
+                new_entry->instr1_op_type = prev_op_in_rs->prev_op_type;
+                new_entry->instr2_op_type = op->table_info->op_type;
+
+                starlab_insert(map2_ptr, map2_concatenate, new_entry);
+
+                free(new_entry);
+
+          }
+
+          if(map1_entry != NULL && map2_entry == NULL)
+          {
+
             strcpy(map1_entry->instr1, prev_op_in_rs->prev_op_addr);
             strcpy(map1_entry->instr2, curr_addr_as_string);
             map1_entry->instr1_op_type = prev_op_in_rs->prev_op_type;
             map1_entry->instr2_op_type = op->table_info->op_type;
 
-            if(map2_entry)
+
+            if(map2_entry != NULL)
             {
-                // printf("[In node_fill_rs()] Found existing entry in map2, updating fields\n");
+
                 strcpy(map2_entry->instr1, prev_op_in_rs->prev_op_addr);
                 strcpy(map2_entry->instr2, curr_addr_as_string);
                 map2_entry->instr1_op_type = prev_op_in_rs->prev_op_type;
                 map2_entry->instr2_op_type = op->table_info->op_type;
             }
+           
           }
 
-          if((map1_entry == NULL) && (map2_entry == NULL))
-          {
-            // printf("[In node_fill_rs()] No existing entries found, creating new entry\n");
-            rs_mapping_entry* new_entry = (rs_mapping_entry*)malloc(sizeof(rs_mapping_entry));
-            if(new_entry)
-            {
-                strcpy(new_entry->instr1, prev_op_in_rs->prev_op_addr);
-                strcpy(new_entry->instr2, curr_addr_as_string);
-                new_entry->instr1_op_type = prev_op_in_rs->prev_op_type;
-                new_entry->instr2_op_type = op->table_info->op_type;
-                
-                // printf("[In node_fill_rs()] Inserting new entry into map1 with key %s\t and op type: %d\n", map1_concatenate, new_entry->instr1_op_type);
-                starlab_insert(map1_ptr, map1_concatenate, new_entry);
-
-                // printf("[In node_fill_rs()] Inserting new entry into map2 with key %s\t and op type: %d\n", map2_concatenate, new_entry->instr2_op_type);
-                starlab_insert(map2_ptr, map2_concatenate, new_entry);
-            }
-          }
 
          
-            rs_cycles_entry* rs_entry = (rs_cycles_entry*)malloc(sizeof(rs_cycles_entry));
-            if (rs_entry)
-            {
+                  rs_cycles_entry* rs_entry = (rs_cycles_entry*)malloc(sizeof(rs_cycles_entry));
 
                   strcpy(rs_entry->instr1_addr, prev_op_in_rs->prev_op_addr); 
                   strcpy(rs_entry->instr2_addr, curr_addr_as_string); 
@@ -1490,109 +1479,134 @@ void node_fill_rs() {
                   rs_entry->instr1_rs_issue_to_fu_cycle = 0;
                   rs_entry->instr2_rs_issue_to_fu_cycle = 0; 
                   strcpy(temp_addr, curr_addr_as_string);
-                  // printf("Created rs_entry:\n");
-                  // printf("  instr1_addr: %s\n", rs_entry->instr1_addr);
-                  // printf("  instr2_addr: %s\n", rs_entry->instr2_addr);
-                  // printf("  instr1_rs_insertion_cycle: %lld\n", rs_entry->instr1_rs_insertion_cycle);
-                  // printf("  instr2_rs_insertion_cycle: %lld\n", rs_entry->instr2_rs_insertion_cycle);
-                  // printf("  instr1_rs_issue_to_fu_cycle: %lld\n", rs_entry->instr1_rs_issue_to_fu_cycle);
-                  // printf("  instr2_rs_issue_to_fu_cycle: %lld\n", rs_entry->instr2_rs_issue_to_fu_cycle);
 
-                  // <MOV, MOV>
-                  if (prev_op_in_rs->prev_op_type == 3 && op->table_info->op_type == 3) {
-                    // printf("[In node_fill_rs()] Inserted %s into <MOV, MOV>\n",
-                    //     instr_tuple_as_key);
-                    starlab_insert(mov_mov_ptr, instr_tuple_as_key, rs_entry);
-                  }
-                  // <MOV, ALU>
-                  else if (prev_op_in_rs->prev_op_type == 3 && is_alu_op(op->table_info->op_type)) {
-                    // printf("[In node_fill_rs()] Inserted  %s into <MOV, ALU>\n",
-                    //     instr_tuple_as_key);
-                    starlab_insert(mov_alu_ptr, instr_tuple_as_key, rs_entry);
-                  }
-                  // <MOV, JMP>
-                  else if (prev_op_in_rs->prev_op_type == 3 && op->table_info->op_type == 2) {
-                    // printf("[In node_fill_rs()] Inserted  %s into <MOV, JMP>\n",
-                    //    instr_tuple_as_key);
-                    starlab_insert(mov_jmp_ptr, instr_tuple_as_key, rs_entry);
-                  }
-                  // <ALU, ALU>
-                  else if (is_alu_op(prev_op_in_rs->prev_op_type) && is_alu_op(op->table_info->op_type)) {
-                    // printf("[In node_fill_rs()] Inserted  %s  into <ALU, ALU>\n",
-                    //     instr_tuple_as_key);
-                    starlab_insert(alu_alu_ptr, instr_tuple_as_key, rs_entry);
-                  }
-                  // <ALU, MOV>
-                  else if (is_alu_op(prev_op_in_rs->prev_op_type) && op->table_info->op_type == 3) {
-                    // printf("[In node_fill_rs()] Inserted  %s  into <ALU, MOV>\n",
-                    //     instr_tuple_as_key);
-                    starlab_insert(alu_mov_ptr, instr_tuple_as_key, rs_entry);
-                  }
-                  // <ALU, JMP>
-                  else if (is_alu_op(prev_op_in_rs->prev_op_type) && op->table_info->op_type == 2) {
-                    // printf("[In node_fill_rs()] Inserted  %s  into <ALU, JMP>\n",
-                    //     instr_tuple_as_key);
-                    starlab_insert(alu_jmp_ptr, instr_tuple_as_key, rs_entry);
-                  }
-                  // <JMP, JMP>
-                  else if (prev_op_in_rs->prev_op_type == 2 && op->table_info->op_type == 2) {
-                    // printf("[In node_fill_rs()] Inserted  %s into <JMP, JMP>\n",
-                    //     instr_tuple_as_key);
-                    starlab_insert(jmp_jmp_ptr, instr_tuple_as_key, rs_entry);
-                  }
-                  // <JMP, MOV>
-                  else if (prev_op_in_rs->prev_op_type == 2 && op->table_info->op_type == 3) {
-                    // printf("[In node_fill_rs()] Inserted  %s  into <JMP, MOV>\n",
-                    //     instr_tuple_as_key);
-                    starlab_insert(jmp_mov_ptr, instr_tuple_as_key, rs_entry);
-                  }
-                  // <JMP, ALU>
-                  else if (prev_op_in_rs->prev_op_type == 2 && is_alu_op(op->table_info->op_type)) {
-                    // printf("[In node_fill_rs()] Inserted  %s  into <JMP, ALU>\n",
-                    //     instr_tuple_as_key);
-                    starlab_insert(jmp_alu_ptr, instr_tuple_as_key, rs_entry);
-                  }
-                
-                  else {
-                      // do nothing
-                  }
+
+                      // <MOV, MOV>
+                      if (prev_op_in_rs->prev_op_type == 3 && op->table_info->op_type == 3) {
+
+                        if(mov_mov_ptr == NULL){
+                          printf("[In node_fill_rs()] mov_mov_ptr is NULL\n");
+                          exit(1);
+                        }
+
+                        starlab_insert(mov_mov_ptr, instr_tuple_as_key, rs_entry);
+                      }
+
+                      // <MOV, ALU>
+                      else if (prev_op_in_rs->prev_op_type == 3 && is_alu_op(op->table_info->op_type)) {
+
+
+                        if(mov_alu_ptr == NULL){
+                          printf("[In node_fill_rs()] mov_alu_ptr is NULL\n");
+                          exit(1);
+                        }
+                        starlab_insert(mov_alu_ptr, instr_tuple_as_key, rs_entry);
+                      }
+
+                      // <MOV, JMP>
+                      else if (prev_op_in_rs->prev_op_type == 3 && op->table_info->op_type == 2) {
+
+
+                        if(mov_jmp_ptr == NULL){
+                          printf("[In node_fill_rs()] mov_jmp_ptr is NULL\n");
+                          exit(1);
+                        }
+                        starlab_insert(mov_jmp_ptr, instr_tuple_as_key, rs_entry);
+                      }
+
+                      // <ALU, ALU>
+                      else if (is_alu_op(prev_op_in_rs->prev_op_type) && is_alu_op(op->table_info->op_type)) {
+     
+                        if(alu_alu_ptr == NULL){
+                          printf("[In node_fill_rs()] alu_alu_ptr is NULL\n");
+                          exit(1);
+                        }
+                        starlab_insert(alu_alu_ptr, instr_tuple_as_key, rs_entry);
+                      }
+
+                      // <ALU, MOV>
+                      else if (is_alu_op(prev_op_in_rs->prev_op_type) && op->table_info->op_type == 3) {
+
+                        if(alu_mov_ptr == NULL){
+                          printf("[In node_fill_rs()] alu_mov_ptr is NULL\n");
+                          exit(1);
+                        }
+                        starlab_insert(alu_mov_ptr, instr_tuple_as_key, rs_entry);
+                      }
+
+                      // <ALU, JMP>
+                      else if (is_alu_op(prev_op_in_rs->prev_op_type) && op->table_info->op_type == 2) {
+
+                        if(alu_jmp_ptr == NULL){
+                          printf("[In node_fill_rs()] alu_jmp_ptr is NULL\n");
+                          exit(1);
+                        }
+                        starlab_insert(alu_jmp_ptr, instr_tuple_as_key, rs_entry);
+                      }
+
+                      // <JMP, JMP>
+                      else if (prev_op_in_rs->prev_op_type == 2 && op->table_info->op_type == 2) {
+
+
+                        if(jmp_jmp_ptr == NULL){
+                          printf("[In node_fill_rs()] jmp_jmp_ptr is NULL\n");
+                          exit(1);
+                        }
+                        starlab_insert(jmp_jmp_ptr, instr_tuple_as_key, rs_entry);
+                      }
+
+                      // <JMP, MOV>
+                      else if (prev_op_in_rs->prev_op_type == 2 && op->table_info->op_type == 3) {
+
+
+                        if(jmp_mov_ptr == NULL){
+                          printf("[In node_fill_rs()] jmp_mov_ptr is NULL\n");
+                          exit(1);
+                        }
+                        starlab_insert(jmp_mov_ptr, instr_tuple_as_key, rs_entry);
+                      }
+
+
+                      // <JMP, ALU>
+                      else if (prev_op_in_rs->prev_op_type == 2 && is_alu_op(op->table_info->op_type)) {
+
+
+                        if(jmp_alu_ptr == NULL){
+                          printf("[In node_fill_rs()] jmp_alu_ptr is NULL\n");
+                          exit(1);
+                        }
+                        starlab_insert(jmp_alu_ptr, instr_tuple_as_key, rs_entry);
+                      }
+                    
+                      else {
+                          // do nothing
+                      }
+
              
-          }
-                      
+          free(rs_entry);
+
+         
                     
        }
 
     }
 
-   // Update the current op as the previous op
-   rs_prev_op* prev_op_in_rs = (rs_prev_op*)malloc(sizeof(rs_prev_op));
-   prev_op_in_rs = starlab_search(metadata_ptr, "prev_op");
+   rs_prev_op* prev_op_in_rs = starlab_search(metadata_ptr, "prev_op");
+   if(prev_op_in_rs == NULL){
+      printf("[In node_fill_rs()] prev_op is NULL\n");
+      strcpy(prev_op_in_rs->prev_op_addr, "");
+      prev_op_in_rs->prev_op_type = 0;
+      prev_op_in_rs->prev_op_rs_insert_cycle = 0;
+      starlab_insert(metadata_ptr, "prev_op", prev_op_in_rs);
+   }
 
-   // Print details of prev_op before updating
-    // if (prev_op_in_rs) {
-    //     printf("[in node_fill_rs()] Before updating prev_op:\n");
-    //     printf("  prev_op_addr: %s\n", prev_op_in_rs->prev_op_addr);
-    //     printf("  prev_op_type: %d\n", prev_op_in_rs->prev_op_type);
-    //     printf("  prev_op_rs_insert_cycle: %lld\n", prev_op_in_rs->prev_op_rs_insert_cycle);
-    // } else {
-    //     printf("[in node_fill_rs()] prev_op is NULL\n");
-    // }
 
-    // Update prev_op
     strcpy(temp_addr, curr_addr_as_string);
     strcpy(prev_op_in_rs->prev_op_addr, temp_addr);
     prev_op_in_rs->prev_op_type = op->table_info->op_type;
     prev_op_in_rs->prev_op_rs_insert_cycle = cycle_count;
 
-    // Print details of prev_op after updating
-    // printf("[in node_fill_rs()] After updating prev_op:\n");
-    // printf("  prev_op_addr: %s\n", prev_op_in_rs->prev_op_addr);
-    // printf("  prev_op_type: %d\n", prev_op_in_rs->prev_op_type);
-    // printf("  prev_op_rs_insert_cycle: %lld\n", prev_op_in_rs->prev_op_rs_insert_cycle);
-   
 
-   // This is the max number of ops we can fill into the RS per cycle.
-    // 0 means infinite.
     if(RS_FILL_WIDTH && (num_fill_rs == RS_FILL_WIDTH))
       break;
 
