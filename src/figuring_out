@@ -1,0 +1,258 @@
+Scarab gitrev: b8fee04
+starlab_do_write is: 1
+Scarab started at Wed Jan  1 19:36:13 2025
+
+Initialized Ramulator. 
+[in node_fill_rs()]: op with addr: 140299761704665	 and op type: 11	 cycle: 166
+[in node_fill_rs()] This is the first op
+[in node_fill_rs()] Before updating prev_op:
+  prev_op_addr: 140299761704665
+  prev_op_type: 11
+  prev_op_rs_insert_cycle: 166
+[in node_fill_rs()] After updating prev_op:
+  prev_op_addr: 140299761704665
+  prev_op_type: 11
+  prev_op_rs_insert_cycle: 166
+[in node_fill_rs()]: op with addr: 140299761704671	 and op type: 2	 cycle: 166
+[in node_fill_rs()] printing the prev_op fetched values.
+Prev op addr: 140299761704665
+Prev op type: 11
+Prev op insertion cycle: 166
+[In node_fill_rs()] Searching map1 for entry with key 14029976170466511
+[In node_fill_rs()] Searching map2 for entry with key 1402997617046712
+[In node_fill_rs()] No existing entries found, creating new entry
+[In node_fill_rs()] Inserting new entry into map1 with key 14029976170466511	 and op type: 11
+[In node_fill_rs()] Inserting new entry into map2 with key 1402997617046712	 and op type: 2
+Created rs_entry:
+  instr1_addr: 140299761704665
+  instr2_addr: 140299761704671
+  instr1_rs_insertion_cycle: 166
+  instr2_rs_insertion_cycle: 166
+  instr1_rs_issue_to_fu_cycle: 0
+  instr2_rs_issue_to_fu_cycle: 0
+[In node_fill_rs()] Inserted  140299761704665111402997617046712  into <ALU, JMP>
+[in node_fill_rs()] Before updating prev_op:
+  prev_op_addr: 140299761704665
+  prev_op_type: 11
+  prev_op_rs_insert_cycle: 166
+[in node_fill_rs()] After updating prev_op:
+  prev_op_addr: 140299761704671
+  prev_op_type: 2
+  prev_op_rs_insert_cycle: 166
+[in node_fill_rs()]: op with addr: 140299761704677	 and op type: 3	 cycle: 166
+[in node_fill_rs()] printing the prev_op fetched values.
+Prev op addr: 140299761704671
+Prev op type: 2
+Prev op insertion cycle: 166
+[In node_fill_rs()] Searching map1 for entry with key 1402997617046712
+[In node_fill_rs()] Searching map2 for entry with key 1402997617046773
+[In node_fill_rs()] No existing entries found, creating new entry
+[In node_fill_rs()] Inserting new entry into map1 with key 1402997617046712	 and op type: 2
+[In node_fill_rs()] Inserting new entry into map2 with key 1402997617046773	 and op type: 3
+Created rs_entry:
+  instr1_addr: 140299761704671
+  instr2_addr: 140299761704677
+  instr1_rs_insertion_cycle: 166
+  instr2_rs_insertion_cycle: 166
+  instr1_rs_issue_to_fu_cycle: 0
+  instr2_rs_issue_to_fu_cycle: 0
+[In node_fill_rs()] Inserted  14029976170467121402997617046773  into <JMP, MOV>
+[in node_fill_rs()] Before updating prev_op:
+  prev_op_addr: 140299761704671
+  prev_op_type: 2
+  prev_op_rs_insert_cycle: 166
+[in node_fill_rs()] After updating prev_op:
+  prev_op_addr: 140299761704677
+  prev_op_type: 3
+  prev_op_rs_insert_cycle: 166
+[in node_fill_rs()]: op with addr: 140299761704680	 and op type: 8	 cycle: 166
+[in node_fill_rs()] printing the prev_op fetched values.
+Prev op addr: 140299761704677
+Prev op type: 3
+Prev op insertion cycle: 166
+[In node_fill_rs()] Searching map1 for entry with key 1402997617046773
+[In node_fill_rs()] Searching map2 for entry with key 1402997617046808
+[In node_fill_rs()] No existing entries found, creating new entry
+[In node_fill_rs()] Inserting new entry into map1 with key 1402997617046773	 and op type: 3
+[In node_fill_rs()] Inserting new entry into map2 with key 1402997617046808	 and op type: 8
+Created rs_entry:
+  instr1_addr: 140299761704677
+  instr2_addr: 140299761704680
+  instr1_rs_insertion_cycle: 166
+  instr2_rs_insertion_cycle: 166
+  instr1_rs_issue_to_fu_cycle: 0
+  instr2_rs_issue_to_fu_cycle: 0
+[In node_fill_rs()] Inserted  14029976170467731402997617046808 into <MOV, ALU>
+[in node_fill_rs()] Before updating prev_op:
+  prev_op_addr: 140299761704677
+  prev_op_type: 3
+  prev_op_rs_insert_cycle: 166
+[in node_fill_rs()] After updating prev_op:
+  prev_op_addr: 140299761704680
+  prev_op_type: 8
+  prev_op_rs_insert_cycle: 166
+[in node_fill_rs()]: op with addr: 140299761704680	 and op type: 7	 cycle: 166
+[in node_fill_rs()] printing the prev_op fetched values.
+Prev op addr: 140299761704680
+Prev op type: 8
+Prev op insertion cycle: 166
+[In node_fill_rs()] Searching map1 for entry with key 1402997617046808
+[In node_fill_rs()] Searching map2 for entry with key 1402997617046807
+[In node_fill_rs()] No existing entries found, creating new entry
+[In node_fill_rs()] Inserting new entry into map1 with key 1402997617046808	 and op type: 8
+[In node_fill_rs()] Inserting new entry into map2 with key 1402997617046807	 and op type: 7
+Created rs_entry:
+  instr1_addr: 140299761704680
+  instr2_addr: 140299761704680
+  instr1_rs_insertion_cycle: 166
+  instr2_rs_insertion_cycle: 166
+  instr1_rs_issue_to_fu_cycle: 0
+  instr2_rs_issue_to_fu_cycle: 0
+[in node_fill_rs()] Before updating prev_op:
+  prev_op_addr: 140299761704680
+  prev_op_type: 8
+  prev_op_rs_insert_cycle: 166
+[in node_fill_rs()] After updating prev_op:
+  prev_op_addr: 140299761704680
+  prev_op_type: 7
+  prev_op_rs_insert_cycle: 166
+[In node_sched_ops()] The curr op addr: 140299761704680	 op type: 8	 cycle count: 166
+[In node_sched_ops()] Entry was found in map1
+[In node_sched_ops()] Found entry in map1, fetching second instruction
+[In node_sched_ops()] Found entry contents - instr1: 140299761704680, instr2: 140299761704680, instr1_op_type: 8, instr2_op_type: 7
+Fetched op type: 8 curr op type: 8
+[In node_sched_ops()] Searching map2 for entry with key 1402997617046808 and op type: 8
+[In node_sched_ops()] Entry was found in map2
+[In node_sched_ops()] Found entry in map2, fetching first instruction
+[In node_sched_ops()] Found entry contents - instr1: 140299761704677, instr2: 140299761704680, instr1_op_type: 3, instr2_op_type: 8
+[In node_sched_ops()] Case 2: tuple key: 14029976170467731402997617046808
+Fetched op type: 3 curr op type: 8
+[In node_sched_ops()] Searching mov_alu hash table for tuple 14029976170467731402997617046808
+[In node_sched_ops()] Found entry, updating instr2_rs_issue_to_fu_cycle to 166
+[In node_sched_ops()] The curr op addr: 140299761704677	 op type: 3	 cycle count: 166
+[In node_sched_ops()] Entry was found in map1
+[In node_sched_ops()] Found entry in map1, fetching second instruction
+[In node_sched_ops()] Found entry contents - instr1: 140299761704677, instr2: 140299761704680, instr1_op_type: 3, instr2_op_type: 8
+Fetched op type: 3 curr op type: 3
+[In node_sched_ops()] Searching mov_alu hash table for tuple 14029976170467731402997617046808
+[In node_sched_ops()] Found entry, updating instr1_rs_issue_to_fu_cycle to 166
+[In node_sched_ops()] Searching map2 for entry with key 1402997617046773 and op type: 3
+[In node_sched_ops()] Entry was found in map2
+[In node_sched_ops()] Found entry in map2, fetching first instruction
+[In node_sched_ops()] Found entry contents - instr1: 140299761704671, instr2: 140299761704677, instr1_op_type: 2, instr2_op_type: 3
+[In node_sched_ops()] Case 2: tuple key: 14029976170467121402997617046773
+Fetched op type: 2 curr op type: 3
+[In node_sched_ops()] Case2: Searching jmp_mov hash table for tuple 14029976170467121402997617046773
+[In node_sched_ops()] Found entry, updating instr2_rs_issue_to_fu_cycle to 166
+[In node_sched_ops()] The curr op addr: 140299761704665	 op type: 11	 cycle count: 166
+[In node_sched_ops()] Entry was found in map1
+[In node_sched_ops()] Found entry in map1, fetching second instruction
+[In node_sched_ops()] Found entry contents - instr1: 140299761704665, instr2: 140299761704671, instr1_op_type: 11, instr2_op_type: 2
+Fetched op type: 11 curr op type: 11
+[In node_sched_ops()] Searching alu_jmp hash table for tuple 140299761704665111402997617046712
+[In node_sched_ops()] Found entry, updating instr1_rs_issue_to_fu_cycle to 166
+[In node_sched_ops()] Searching map2 for entry with key 14029976170466511 and op type: 11
+[In node_sched_ops()] Entry was not found in map2
+[in node_fill_rs()]: op with addr: 140299761704680	 and op type: 2	 cycle: 167
+[in node_fill_rs()] printing the prev_op fetched values.
+Prev op addr: 140299761704680
+Prev op type: 7
+Prev op insertion cycle: 166
+[In node_fill_rs()] Searching map1 for entry with key 1402997617046807
+[In node_fill_rs()] Searching map2 for entry with key 1402997617046802
+[In node_fill_rs()] No existing entries found, creating new entry
+[In node_fill_rs()] Inserting new entry into map1 with key 1402997617046807	 and op type: 7
+[In node_fill_rs()] Inserting new entry into map2 with key 1402997617046802	 and op type: 2
+Created rs_entry:
+  instr1_addr: 140299761704680
+  instr2_addr: 140299761704680
+  instr1_rs_insertion_cycle: 166
+  instr2_rs_insertion_cycle: 167
+  instr1_rs_issue_to_fu_cycle: 0
+  instr2_rs_issue_to_fu_cycle: 0
+[in node_fill_rs()] Before updating prev_op:
+  prev_op_addr: 140299761704680
+  prev_op_type: 7
+  prev_op_rs_insert_cycle: 166
+[in node_fill_rs()] After updating prev_op:
+  prev_op_addr: 140299761704680
+  prev_op_type: 2
+  prev_op_rs_insert_cycle: 167
+[In node_sched_ops()] The curr op addr: 140299761704680	 op type: 2	 cycle count: 167
+[In node_sched_ops()] Entry was not found in map1
+[In node_sched_ops()] Searching map2 for entry with key 1402997617046802 and op type: 2
+[In node_sched_ops()] Entry was found in map2
+[In node_sched_ops()] Found entry in map2, fetching first instruction
+[In node_sched_ops()] Found entry contents - instr1: 140299761704680, instr2: 140299761704680, instr1_op_type: 7, instr2_op_type: 2
+[In node_sched_ops()] Case 2: tuple key: 14029976170468071402997617046802
+Fetched op type: 7 curr op type: 2
+[In node_sched_ops()] The curr op addr: 140299761704671	 op type: 2	 cycle count: 167
+[In node_sched_ops()] Entry was found in map1
+[In node_sched_ops()] Found entry in map1, fetching second instruction
+[In node_sched_ops()] Found entry contents - instr1: 140299761704671, instr2: 140299761704677, instr1_op_type: 2, instr2_op_type: 3
+Fetched op type: 2 curr op type: 2
+[In node_sched_ops()] Searching jmp_mov hash table for tuple 14029976170467121402997617046773
+[In node_sched_ops()] Found entry, updating instr1_rs_issue_to_fu_cycle to 167
+[In node_sched_ops()] Searching map2 for entry with key 1402997617046712 and op type: 2
+[In node_sched_ops()] Entry was found in map2
+[In node_sched_ops()] Found entry in map2, fetching first instruction
+[In node_sched_ops()] Found entry contents - instr1: 140299761704665, instr2: 140299761704671, instr1_op_type: 11, instr2_op_type: 2
+[In node_sched_ops()] Case 2: tuple key: 140299761704665111402997617046712
+Fetched op type: 11 curr op type: 2
+[In node_sched_ops()] Case 2: Searching alu_jmp hash table for tuple 140299761704665111402997617046712
+[In node_sched_ops()] Found entry, updating instr2_rs_issue_to_fu_cycle to 167
+[In node_sched_ops()] The curr op addr: 140299761704680	 op type: 7	 cycle count: 167
+[In node_sched_ops()] Entry was found in map1
+[In node_sched_ops()] Found entry in map1, fetching second instruction
+[In node_sched_ops()] Found entry contents - instr1: 140299761704680, instr2: 140299761704680, instr1_op_type: 7, instr2_op_type: 2
+Fetched op type: 7 curr op type: 7
+[In node_sched_ops()] Searching map2 for entry with key 1402997617046807 and op type: 7
+[In node_sched_ops()] Entry was found in map2
+[In node_sched_ops()] Found entry in map2, fetching first instruction
+[In node_sched_ops()] Found entry contents - instr1: 140299761704680, instr2: 140299761704680, instr1_op_type: 8, instr2_op_type: 7
+[In node_sched_ops()] Case 2: tuple key: 14029976170468081402997617046807
+Fetched op type: 8 curr op type: 7
+** Core 0 Finished:    insts:1           cycles:168         time:52500000            -- 0.01 IPC (0.01 IPC) --  N/A  KIPS (inf KIPS)
+Scarab finished at Wed Jan  1 19:36:13 2025
+
+Table mov_mov is empty.
+Key: 14029976170467731402997617046808
+  Instruction 1 Address: 140299761704677
+  Instruction 2 Address: 140299761704680
+  Instruction 1 RS Insertion Cycle: 166
+  Instruction 2 RS Insertion Cycle: 166
+  Instruction 1 RS Issue to FU Cycle: 166
+  Instruction 2 RS Issue to FU Cycle: 166
+  RS Cycles Consumed: 0
+Total RS Cycles Consumed for mov_alu: 0
+Table mov_jmp is not initialized.
+Table alu_alu is empty.
+Table alu_mov is empty.
+Key: 140299761704665111402997617046712
+  Instruction 1 Address: 140299761704665
+  Instruction 2 Address: 140299761704671
+  Instruction 1 RS Insertion Cycle: 166
+  Instruction 2 RS Insertion Cycle: 166
+  Instruction 1 RS Issue to FU Cycle: 166
+  Instruction 2 RS Issue to FU Cycle: 167
+  RS Cycles Consumed: 1
+Total RS Cycles Consumed for alu_jmp: 1
+Key: 14029976170467121402997617046773
+  Instruction 1 Address: 140299761704671
+  Instruction 2 Address: 140299761704677
+  Instruction 1 RS Insertion Cycle: 166
+  Instruction 2 RS Insertion Cycle: 166
+  Instruction 1 RS Issue to FU Cycle: 167
+  Instruction 2 RS Issue to FU Cycle: 166
+  RS Cycles Consumed: 1
+Total RS Cycles Consumed for jmp_jmp: 1
+Key: 14029976170467121402997617046773
+  Instruction 1 Address: 140299761704671
+  Instruction 2 Address: 140299761704677
+  Instruction 1 RS Insertion Cycle: 166
+  Instruction 2 RS Insertion Cycle: 166
+  Instruction 1 RS Issue to FU Cycle: 167
+  Instruction 2 RS Issue to FU Cycle: 166
+  RS Cycles Consumed: 1
+Total RS Cycles Consumed for jmp_mov: 1
+Table jmp_alu is empty.
