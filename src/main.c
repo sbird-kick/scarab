@@ -247,6 +247,8 @@ void* voided_metadata_rs_cycles_table = NULL;
 void* voided_mapping_rs_instr1_to_instr2 = NULL; 
 void* voided_mapping_rs_instr2_to_instr1 = NULL; 
 
+void* voided_addr_to_optype = NULL;
+
 // const char starlab_do_write = 1;
 
 unsigned long long prev_instruction_time = 0;
@@ -361,6 +363,15 @@ int main(int argc, char* argv[], char* envp[]) {
   if(opt2_in_use())
     opt2_sim_complete();
 
+  // char **keys;
+  // void **values_array;
+
+  // starlab_return_key_value_arr(voided_addr_to_optype, &keys, &values_array);
+
+  //   for (int i = 0; i < (get_count(voided_global_starlab_types_ht)); i++) {
+  //       printf("inst addr: %s,op type:%p\n", keys[i], values_array[i]);
+  //   }
+
   print_hash_table_values("mov_mov", voided_mov_mov_rs_cycles_table);
   print_hash_table_values("mov_alu", voided_mov_alu_rs_cycles_table);
   print_hash_table_values("mov_jmp", voided_mov_jmp_rs_cycles_table);
@@ -375,11 +386,12 @@ int main(int argc, char* argv[], char* envp[]) {
   return 0;
 }
 
-void print_hash_table_values(const char* table_name, starlab_hash_table* table_ptr){
-  if (table_ptr == NULL) {
+void print_hash_table_values(const char* table_name, starlab_hash_table* table_ptr) {
+    if (table_ptr == NULL) {
         printf("Table %s is not initialized.\n", table_name);
         return;
     }
+    printf("Table name: %s\n", table_name);
 
     char **keys;
     void **values_array;
@@ -389,8 +401,6 @@ void print_hash_table_values(const char* table_name, starlab_hash_table* table_p
         printf("Table %s is empty.\n", table_name);
         return;
     }
-
-    // printf("Summary for table: %s\n", table_name);
 
     // Allocate space for keys and values
     keys = malloc(count * sizeof(char*));
@@ -403,17 +413,39 @@ void print_hash_table_values(const char* table_name, starlab_hash_table* table_p
         key_value_pairs[i].value = values_array[i];
     }
 
+    // Sort the key-value pairs by key
     qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
 
     unsigned long total_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-        rs_cycles_entry *tuple = (rs_cycles_entry *)key_value_pairs[i].value;
-        total_cc_count += MAX(tuple->instr1_rs_issue_to_fu_cycle, tuple->instr2_rs_issue_to_fu_cycle) - MIN(tuple->instr1_rs_insertion_cycle, tuple->instr2_rs_insertion_cycle); 
-        // printf("Key: %s, RS Cycles Consumed: %llu\n", key_value_pairs[i].key, tuple->rob_cycles_consumed);
+for (long i = 0; i < count; i++) {
+    rs_cycles_entry *tuple = (rs_cycles_entry *)key_value_pairs[i].value;
+
+    // Print key and associated value
+    printf("Key: %s\n", key_value_pairs[i].key);
+    printf("  Instruction 1 Address: %s\n", tuple->instr1_addr);
+    printf("  Instruction 2 Address: %s\n", tuple->instr2_addr);
+    printf("  Instruction 1 RS Insertion Cycle: %llu\n", tuple->instr1_rs_insertion_cycle);
+    printf("  Instruction 2 RS Insertion Cycle: %llu\n", tuple->instr2_rs_insertion_cycle);
+    printf("  Instruction 1 RS Issue to FU Cycle: %llu\n", tuple->instr1_rs_issue_to_fu_cycle);
+    printf("  Instruction 2 RS Issue to FU Cycle: %llu\n", tuple->instr2_rs_issue_to_fu_cycle);
+
+    // Only calculate RS cycles consumed if both instructions have been issued
+    unsigned long rs_cycles = 0;
+    if (tuple->instr1_rs_issue_to_fu_cycle > 0 || tuple->instr2_rs_issue_to_fu_cycle > 0) {
+        rs_cycles = MAX(tuple->instr1_rs_issue_to_fu_cycle, tuple->instr2_rs_issue_to_fu_cycle) - 
+                    MIN(tuple->instr1_rs_insertion_cycle, tuple->instr2_rs_insertion_cycle);
     }
 
-    printf("Total RS Cycles Consumed for %s: %lu\n", table_name, total_cc_count);
+    printf("  RS Cycles Consumed: %lu\n", rs_cycles);
 
+    total_cc_count += rs_cycles;
+  }
+
+  // Print the total RS cycles consumed
+  printf("Total RS Cycles Consumed for %s: %lu\n", table_name, total_cc_count);
+
+
+    // Clean up allocated memory
     free(keys);
     free(values_array);
     free(key_value_pairs);
