@@ -220,7 +220,7 @@ Scarab's source code is organized as follows:
 #define MAX(A, B) (((A) > (B)) ? (A) : (B))
 #define MIN(A, B) (((A) < (B)) ? (A) : (B))
 
-void print_hash_table_values(const char* table_name, starlab_hash_table* table_ptr);
+void print_hash_table_values(const char* table_name, starlab_hash_table* table_ptr, unsigned long long total_cycles_in_rs);
 /**************************************************************************************/
 
 void* voided_global_starlab_ht_ptr = NULL;
@@ -363,90 +363,109 @@ int main(int argc, char* argv[], char* envp[]) {
   if(opt2_in_use())
     opt2_sim_complete();
 
-  // char **keys;
-  // void **values_array;
+  char **keys = malloc(sizeof(char*)); 
+  void **values = malloc(sizeof(void*)); 
 
-  // starlab_return_key_value_arr(voided_addr_to_optype, &keys, &values_array);
+  printf("Printing rs_total_cycles_table\n");
 
-  //   for (int i = 0; i < (get_count(voided_global_starlab_types_ht)); i++) {
-  //       printf("inst addr: %s,op type:%p\n", keys[i], values_array[i]);
-  //   }
+  // Populate keys and values arrays
+  starlab_return_key_value_arr((starlab_hash_table*)voided_rs_total_cycles_table, &keys, &values);
 
-  print_hash_table_values("mov_mov", voided_mov_mov_rs_cycles_table);
-  print_hash_table_values("mov_alu", voided_mov_alu_rs_cycles_table);
-  print_hash_table_values("mov_jmp", voided_mov_jmp_rs_cycles_table);
-  print_hash_table_values("alu_alu", voided_alu_alu_rs_cycles_table);
-  print_hash_table_values("alu_mov", voided_alu_mov_rs_cycles_table);
-  print_hash_table_values("alu_jmp", voided_alu_jmp_rs_cycles_table);
-  print_hash_table_values("jmp_jmp", voided_jmp_mov_rs_cycles_table);
-  print_hash_table_values("jmp_mov", voided_jmp_mov_rs_cycles_table);
-  print_hash_table_values("jmp_alu", voided_jmp_alu_rs_cycles_table);
+  // Allocate memory for key_value_pairs based on the count of entries
+  long count = get_count((starlab_hash_table*)voided_rs_total_cycles_table);
+  KeyValuePair *key_value_pairs = malloc(count * sizeof(KeyValuePair));
 
-
-  return 0;
-}
-
-void print_hash_table_values(const char* table_name, starlab_hash_table* table_ptr) {
-    if (table_ptr == NULL) {
-        printf("Table %s is not initialized.\n", table_name);
-        return;
-    }
-    printf("Table name: %s\n", table_name);
-
-    char **keys;
-    void **values_array;
-    long count = get_count(table_ptr);
-
-    if (count == 0) {
-        printf("Table %s is empty.\n", table_name);
-        return;
-    }
-
-    // Allocate space for keys and values
-    keys = malloc(count * sizeof(char*));
-    values_array = malloc(count * sizeof(void*));
-    starlab_return_key_value_arr(table_ptr, &keys, &values_array);
-
-    KeyValuePair *key_value_pairs = malloc(count * sizeof(KeyValuePair));
-    for (long i = 0; i < count; i++) {
-        key_value_pairs[i].key = keys[i];
-        key_value_pairs[i].value = values_array[i];
-    }
-
-    // Sort the key-value pairs by key
-    qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
-
-    unsigned long total_cc_count = 0;
-    for (long i = 0; i < count; i++) {
-    rs_cycles_entry *tuple = (rs_cycles_entry *)key_value_pairs[i].value;
-
-    // Print key and associated value
-    printf("Key: %s\n", key_value_pairs[i].key);
-    printf("  Instruction 1 Address: %s\n", tuple->instr1_addr);
-    printf("  Instruction 2 Address: %s\n", tuple->instr2_addr);
-    printf("  Instruction 1 RS Insertion Cycle: %llu\n", tuple->instr1_rs_insertion_cycle);
-    printf("  Instruction 2 RS Insertion Cycle: %llu\n", tuple->instr2_rs_insertion_cycle);
-    printf("  Instruction 1 RS Issue to FU Cycle: %llu\n", tuple->instr1_rs_issue_to_fu_cycle);
-    printf("  Instruction 2 RS Issue to FU Cycle: %llu\n", tuple->instr2_rs_issue_to_fu_cycle);
-
-    // Only calculate RS cycles consumed if both instructions have been issued
-    unsigned long rs_cycles = 0;
-    if (tuple->instr1_rs_issue_to_fu_cycle > 0 || tuple->instr2_rs_issue_to_fu_cycle > 0) {
-        rs_cycles = MAX(tuple->instr1_rs_issue_to_fu_cycle, tuple->instr2_rs_issue_to_fu_cycle) - 
-                    MIN(tuple->instr1_rs_insertion_cycle, tuple->instr2_rs_insertion_cycle);
-    }
-
-    printf("  RS Cycles Consumed: %lu\n", rs_cycles);
-
-    total_cc_count += rs_cycles;
+  // Populate key_value_pairs array
+  for (long i = 0; i < count; i++) {
+      key_value_pairs[i].key = keys[i];
+      key_value_pairs[i].value = values[i];
   }
 
-  // Print the total RS cycles consumed
-  printf("Total RS Cycles Consumed for %s: %lu\n", table_name, total_cc_count);
+  unsigned long long total_cycles_in_rs = 0;
 
+  // Print the entries
+  for (int i = 0; i < count; i++) {
+      rs_total_cycles_entry *entry = (rs_total_cycles_entry*)values[i];
+      printf("Key: %s\n", keys[i]);
+      printf("  First Op in RS insertion cycle: %llu\n", entry->op1_rs_insertion_cycle);
+      printf("  Last Op RS issue to functional unit cycle: %llu\n", entry->last_op_rs_issue_to_fu_cycle);
+      total_cycles_in_rs = entry->last_op_rs_issue_to_fu_cycle - entry->op1_rs_insertion_cycle;
+      printf("  Total RS Cycles: %llu\n", total_cycles_in_rs);
+  }
 
-    // Clean up allocated memory
-    free(keys);
-    free(values_array);
-    free(key_value_pairs);
-}
+  // Free allocated memory
+  free(keys);
+  free(values);
+  free(key_value_pairs);
+
+  printf("\nBreakdown of RS cycles (Total cycles in RS: %llu):\n", total_cycles_in_rs);
+  printf("------------------------------------------------\n");
+
+  print_hash_table_values("mov_mov", voided_mov_mov_rs_cycles_table, total_cycles_in_rs);
+  print_hash_table_values("mov_alu", voided_mov_alu_rs_cycles_table, total_cycles_in_rs);
+  print_hash_table_values("mov_jmp", voided_mov_jmp_rs_cycles_table, total_cycles_in_rs);
+  print_hash_table_values("alu_alu", voided_alu_alu_rs_cycles_table, total_cycles_in_rs);
+  print_hash_table_values("alu_mov", voided_alu_mov_rs_cycles_table, total_cycles_in_rs);
+  print_hash_table_values("alu_jmp", voided_alu_jmp_rs_cycles_table, total_cycles_in_rs);
+  print_hash_table_values("jmp_jmp", voided_jmp_mov_rs_cycles_table, total_cycles_in_rs);
+  print_hash_table_values("jmp_mov", voided_jmp_mov_rs_cycles_table, total_cycles_in_rs);
+  print_hash_table_values("jmp_alu", voided_jmp_alu_rs_cycles_table, total_cycles_in_rs);
+  return 0;
+  }
+
+  void print_hash_table_values(const char* table_name, starlab_hash_table* table_ptr, unsigned long long total_cycles_in_rs) {
+      if (table_ptr == NULL) {
+          printf("Table %s is not initialized.\n", table_name);
+          return;
+      }
+      printf("Table name: %s\n", table_name);
+
+      char **keys;
+      void **values_array;
+      long count = get_count(table_ptr);
+
+      if (count == 0) {
+          printf("Table %s is empty.\n", table_name);
+          return;
+      }
+
+      // Allocate space for keys and values
+      keys = malloc(count * sizeof(char*));
+      values_array = malloc(count * sizeof(void*));
+      starlab_return_key_value_arr(table_ptr, &keys, &values_array);
+
+      KeyValuePair *key_value_pairs = malloc(count * sizeof(KeyValuePair));
+      for (long i = 0; i < count; i++) {
+          key_value_pairs[i].key = keys[i];
+          key_value_pairs[i].value = values_array[i];
+      }
+
+      // Sort the key-value pairs by key
+      qsort(key_value_pairs, count, sizeof(KeyValuePair), compare_key_value_pairs);
+
+      unsigned long total_cc_count = 0;
+      for (long i = 0; i < count; i++) {
+          rs_cycles_entry *tuple = (rs_cycles_entry *)key_value_pairs[i].value;
+
+          unsigned long rs_cycles = 0;
+          if (tuple->instr1_rs_issue_to_fu_cycle > 0 || tuple->instr2_rs_issue_to_fu_cycle > 0) {
+              rs_cycles = MAX(tuple->instr1_rs_issue_to_fu_cycle, tuple->instr2_rs_issue_to_fu_cycle) - 
+                          MIN(tuple->instr1_rs_insertion_cycle, tuple->instr2_rs_insertion_cycle);
+          }
+
+          printf("  RS Cycles Consumed: %lu\n", rs_cycles);
+          total_cc_count += rs_cycles;
+      }
+
+      double percentage = 0.0;
+      if (total_cycles_in_rs > 0) {
+          percentage = (double)total_cc_count / total_cycles_in_rs * 100.0;
+      }
+
+      printf("Total RS Cycles Consumed for %s: %lu (%.2f%%)\n", table_name, total_cc_count, percentage);
+
+      // Clean up allocated memory
+      free(keys);
+      free(values_array);
+      free(key_value_pairs);
+  }
