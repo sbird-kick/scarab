@@ -782,6 +782,10 @@ void node_sched_ops() {
       count in two different tuples.
    */
 
+    rs_total_cycles_entry* entry = (rs_total_cycles_entry*) malloc(sizeof(rs_total_cycles_entry));
+    entry = starlab_search(rs_total_cycles_ptr, "entry");
+    entry->last_op_rs_issue_to_fu_cycle = cycle_count; 
+
     char curr_op_addr[21], curr_op_type[4], map1_concatenate[30], map2_concatenate[30]; 
     char tuple_as_key[64], fetched_addr[21], fetched_op[4]; 
 
@@ -977,9 +981,6 @@ void node_sched_ops() {
     }
     }
    }
-
-  rs_total_cycles_entry* entry = (rs_total_cycles_entry*) malloc(sizeof(rs_total_cycles_entry));
-  entry->last_op_rs_issue_to_fu_cycle = cycle_count; 
   
   voided_mapping_rs_instr1_to_instr2 = (void*) map1_ptr; 
   voided_mapping_rs_instr2_to_instr1 = (void*) map2_ptr; 
@@ -1312,6 +1313,11 @@ void node_fill_rs() {
    {
       char address[21] = {0};
 
+      rs_total_cycles_entry *entry = (rs_total_cycles_entry*)malloc(sizeof(rs_total_cycles_entry));
+      entry->op1_rs_insertion_cycle = cycle_count;
+      entry->last_op_rs_issue_to_fu_cycle = 0;
+      starlab_insert(rs_total_cycles_ptr, "entry", entry);
+
       if(op->inst_info->addr != 0){
         sprintf(address, "%lld", op->inst_info->addr);
         rs_prev_op* prev_op_in_rs = (rs_prev_op*)malloc(sizeof(rs_prev_op));
@@ -1332,11 +1338,8 @@ void node_fill_rs() {
       }
 
       is_first_op = false;
-
-      rs_total_cycles_entry *entry = (rs_total_cycles_entry*)malloc(sizeof(rs_total_cycles_entry));
-      entry->op1_rs_insertion_cycle = cycle_count;
-      entry->last_op_rs_issue_to_fu_cycle = 0;
       free(entry);
+
     } 
 
   else 
