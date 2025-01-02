@@ -115,6 +115,8 @@ extern void* voided_metadata_rs_cycles_table;
 extern void* voided_mapping_rs_instr1_to_instr2; 
 extern void* voided_mapping_rs_instr2_to_instr1; 
 
+extern void* voided_rs_total_cycles_table; 
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */
