@@ -77,7 +77,7 @@ extern Uop_Queue_Fill_Time uop_queue_fill_time;
 extern Flag roi_dump_began;
 extern Counter roi_dump_ID;
 
-extern void* voided_global_starlab_ht_ptr;
+extern void* voided_global_starlab_ht;
 extern void* voided_global_starlab_types_ht;
 
 extern void* voided_inst_tuple_ptr;
