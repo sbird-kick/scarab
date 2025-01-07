@@ -98,6 +98,8 @@ static inline void         log_stats_ic_hit(void);
 static inline void         log_stats_mshr_hit(Addr line_addr);
 static inline void         update_stats_bf_retired(void);
 
+static bool total_processor_cycles_icache_init = false; 
+
 /**************************************************************************************/
 /* set_icache_stage: */
 
@@ -862,11 +864,33 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     thread_map_mem_dep(op);
     op->fetch_cycle = cycle_count;
 
+
+    // Hashtable to store total cycles consumed by all ops from icache to execution 
+    starlab_hash_table* voided_total_processor_cycles_ht_ptr = (starlab_hash_table*) voided_total_processor_cycles_ht;
+    if(voided_total_processor_cycles_ht_ptr == NULL)
+    {
+      // printf("Icache stage: creating user space table\n");
+      voided_total_processor_cycles_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+    }
+
+     if(total_processor_cycles_icache_init == false){
+
+      total_proc_cycles temp; 
+      temp.total_processor_cycles_icache = cycle_count; 
+      temp.total_processor_cycles_exec = 0;
+      starlab_insert(voided_total_processor_cycles_ht_ptr, "total_processor_cycles", &temp);
+      total_processor_cycles_icache_init = true;
+    }
+
+    voided_total_processor_cycles_ht = (void *) voided_total_processor_cycles_ht_ptr;
+
+
+
     // Hashtable to store CPU cycles consumed by tuples in user space
     starlab_hash_table* user_space_cpu_cycles_table_ptr = (starlab_hash_table*) voided_user_space_types_ht;
     if(user_space_cpu_cycles_table_ptr == NULL)
     {
-      printf("Icache stage: creating user space table\n");
+      // printf("Icache stage: creating user space table\n");
       user_space_cpu_cycles_table_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
     }
 
@@ -874,7 +898,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     starlab_hash_table* kernel_space_cpu_cycles_table_ptr = (starlab_hash_table*) voided_kernel_space_types_ht;
     if(kernel_space_cpu_cycles_table_ptr == NULL)
     {
-      printf("Icache stage: creating kernel space table\n");
+      // printf("Icache stage: creating kernel space table\n");
       kernel_space_cpu_cycles_table_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(KERNEL_SPACE_HT_SIZE));
     }
 
@@ -885,11 +909,11 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     starlab_hash_table* address_to_prev_address = (starlab_hash_table*) voided_address_to_prev_address;
     if(address_to_prev_address == NULL)
     {
-      printf("Icache stage: creating address to prev address table\n");
+      // printf("Icache stage: creating address to prev address table\n");
       address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
 
-    printf(" [In ICache] [Addr: %016llx] [Op type: %d] [Fetch cycle: %llu] \n", op->inst_info->addr, op->table_info->op_type, op->fetch_cycle);
+    // printf(" [In ICache] [Addr: %016llx] [Op type: %d] [Fetch cycle: %llu] \n", op->inst_info->addr, op->table_info->op_type, op->fetch_cycle);
 
     char current_address_as_string[128] = {0};
     char prev_address_as_string[128] = {0};
@@ -916,13 +940,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     {
       current_inst_in_user_space = true;
       current_inst_in_kernel_space = false;
-      printf("[In ICache] [Current instruction in user space]\n");
+      // printf("[In ICache] [Current instruction in user space]\n");
     }
     else if(starlab_search(kernel_space_inst_iclass_ptr, current_address_as_string))
     {
       current_inst_in_kernel_space = true;
       current_inst_in_user_space = false;
-      printf("[In ICache] [Current instruction in kernel space]\n");
+      // printf("[In ICache] [Current instruction in kernel space]\n");
     }
     else{
           current_inst_in_kernel_space = false; 
@@ -1056,7 +1080,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
           strcpy(prev_iclass, "NOP");
           strcpy(current_iclass, "NOP");
         }
-        
+
+
         // printf("[icache] Adding %lu\n", cc_to_add);
 
         if(prev_tuple_ptr->prev_fetch_cycle == -1)
@@ -1067,6 +1092,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         {
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, current_iclass);
+
+          // printf("[ICache] [Tuple: %s] [CC: %lu]\n", tuple_string, cc_to_add);
 
           // When both instructions lie in user space - we insert them to user space hashtable
           // Otherwise, we insert them to kernel space hashtable

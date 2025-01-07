@@ -406,6 +406,11 @@ typedef struct {
     void *value;
 } KeyValuePair;
 
+typedef struct total_proc_cycles{
+  unsigned long long total_processor_cycles_icache;
+  unsigned long long total_processor_cycles_exec;
+} total_proc_cycles; 
+
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);

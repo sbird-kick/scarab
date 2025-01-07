@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include "globals/global_types.h"
 #include "statistics.h"
+#include "stdbool.h"
 
 #include "libs/hash_lib.h"
 
@@ -106,6 +107,12 @@ extern void* voided_frontend_kernel_space_instructions;
 extern char this_address_as_string[128];
 extern char modified_prev_address_as_string[128];
 extern char modified_this_address_as_string[128];
+
+extern void* voided_total_processor_cycles_ht; 
+extern unsigned long long total_processor_cycles_icache; 
+extern unsigned long long total_processor_cycles_exec;
+
+
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */

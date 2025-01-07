@@ -373,6 +373,19 @@ void update_exec_stage(Stage_Data* src_sd) {
 
     // -----------------------------------------------------------------------
 
+    starlab_hash_table* voided_total_processor_cycles_ht_ptr = (starlab_hash_table*) voided_total_processor_cycles_ht;
+    if(voided_total_processor_cycles_ht_ptr == NULL)
+    {
+      // printf("Icache stage: creating user space table\n");
+      voided_total_processor_cycles_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
+    }
+
+    total_proc_cycles *temp = starlab_search(voided_total_processor_cycles_ht_ptr, "total_processor_cycles");
+    temp->total_processor_cycles_exec = cycle_count;
+
+    voided_total_processor_cycles_ht = (void *) voided_total_processor_cycles_ht_ptr;
+
+
     // Lookup hashtables created in the frontend -- whether a tuple lies in user space or kernel space + their iClass
     starlab_hash_table* user_space_inst_iclass_ptr = (starlab_hash_table*) voided_frontend_user_space_instructions;
     if(user_space_inst_iclass_ptr == NULL)
@@ -409,6 +422,8 @@ void update_exec_stage(Stage_Data* src_sd) {
           // printf("After modification  - address: 0x%016llx\n", address);
     }
     sprintf(current_address_as_string, "%016llX", modified_current_address);
+
+    // printf(" [In Exec] [Addr: %016llx] [Op type: %d] [Fetch cycle: %llu] \n", op->inst_info->addr, op->table_info->op_type, op->exec_cycle);
 
 
     bool first_time_exec = false;
@@ -557,6 +572,8 @@ void update_exec_stage(Stage_Data* src_sd) {
           // printf("Exec: prev_iclass: %s, current_iclass: %s\n", prev_iclass, current_iclass);
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, current_iclass);
+
+          // printf("[Exec] [Tuple: %s] [CC: %lu]\n", tuple_string, cc_to_add);
 
           // If both previous and current instructions lie in user space, look for the tuple in user_space_cpu_cycles_table_ptr
           // Otherwise, look for the tuple in kernel_space_cpu_cycles_table_ptr

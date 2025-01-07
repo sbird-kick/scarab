@@ -228,6 +228,8 @@ void* voided_inst_tuple_ptr = NULL;
 void* voided_user_space_types_ht = NULL;
 void* voided_kernel_space_types_ht = NULL;
 
+void* voided_total_processor_cycles_ht = NULL; 
+
 void* voided_frontend_user_space_instructions = NULL;
 void* voided_frontend_kernel_space_instructions = NULL; 
 
@@ -235,6 +237,10 @@ unsigned long long prev_instruction_time = 0;
 char prev_instruction_class[128];
 char prev_address_as_string[128];
 unsigned long long starlab_prev_address = 0;
+
+unsigned long long total_processor_cycles_icache;
+bool total_processor_cycles_icache_init;  
+// unsigned long long total_processor_cycles_exec;
 
 unsigned long long KERNEL_SPACE_START = 0x00000000000ull;
 unsigned long long KERNEL_SPACE_END = 0x00000000000ull;
@@ -319,9 +325,9 @@ int main(int argc, char* argv[], char* envp[]) {
 }
 if(opt2_in_use())
 {opt2_sim_complete();}
-        
-    char **keys, **new_keys;
-    void **values_array, **new_values_array;
+
+    char **keys, **new_keys, **total_processor_keys;
+    void **values_array, **new_values_array, **total_processor_values;
     KeyValuePair *key_value_pairs, *new_key_value_pairs;
 
     // User space hash table
@@ -342,19 +348,24 @@ if(opt2_in_use())
         new_key_value_pairs[i].value = new_values_array[i];
     }
 
-    // Calculate the total clock cycle count from both user and kernel spaces
-    unsigned long total_cc_count = 0;
+    // Initialize total_cc_count
+    unsigned long long total_cc_count = 0;
+
+    // Calculate total clock cycles excluding <NOP, NOP> for both user and kernel space
     for (long i = 0; i < count; i++) {
-        total_cc_count += *(unsigned long *)key_value_pairs[i].value;
+        if (strcmp(key_value_pairs[i].key, "<NOP,NOP>") != 0) {
+            total_cc_count += *(unsigned long *)key_value_pairs[i].value;
+        }
     }
     for (long i = 0; i < kernel_count; i++) {
-        total_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
+        if (strcmp(new_key_value_pairs[i].key, "<NOP,NOP>") != 0) {
+            total_cc_count += *(unsigned long *)new_key_value_pairs[i].value;
+        }
     }
 
-    // Check if total_cc_count is zero to prevent division errors
+    // Exit early if no valid cycles
     if (total_cc_count == 0) {
-        printf("Error: Total clock cycles count is zero.\n");
-        // Cleanup and exit if there are no cycles
+        printf("No valid cycles found (excluding <NOP,NOP>). Exiting...\n");
         free(keys);
         free(values_array);
         free(key_value_pairs);
@@ -364,27 +375,59 @@ if(opt2_in_use())
         exit(1);
     }
 
-    printf("Combined total clock cycles (User + Kernel): %lu\n", total_cc_count);
-
     // Process and print cumulative clock cycles for user space
     unsigned long running_cc_count_user = 0;
+    unsigned long running_cc_count_kernel = 0;
+    unsigned long combined_cc_count = 0;
+
+    // Compute and print total execution and icache cycles
+    starlab_return_key_value_arr(voided_total_processor_cycles_ht, &total_processor_keys, &total_processor_values);
+    unsigned long long total_exec_cycles = 0, total_icache_cycles = 0;
+    for (long i = 0; i < get_count(voided_total_processor_cycles_ht); i++) {
+        total_exec_cycles += ((total_proc_cycles *)total_processor_values[i])->total_processor_cycles_exec;
+        total_icache_cycles += ((total_proc_cycles *)total_processor_values[i])->total_processor_cycles_icache;
+    }
+
+    printf("Total exec cycles: %llu\n", total_exec_cycles);
+    printf("Total icache cycles: %llu\n", total_icache_cycles);
+    printf("Total cycles: %llu\n", total_exec_cycles - total_icache_cycles);
+
+    unsigned long long total_cycles = total_exec_cycles - total_icache_cycles;
+
     for (long i = 0; i < count; i++) {
-        double percentage = ((double)(*(unsigned long *)key_value_pairs[i].value) / (double)total_cc_count) * 100.0;
-        printf("inst tuple (User): %s, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, percentage);
-        running_cc_count_user += *(unsigned long *)key_value_pairs[i].value;
-        if (running_cc_count_user > ((total_cc_count * 99) / 100))
-            break; // Stop if we've reached 99% of total cycles
+      if (strcmp(key_value_pairs[i].key, "<NOP,NOP>") == 0) {
+      continue; // Skip NOP instructions
+      }
+      unsigned long cycles = *(unsigned long *)key_value_pairs[i].value;
+      double percentage = ((double)cycles / (double)total_cycles) * 100.0;
+      printf("\tinst tuple (User): %s, cycles: %lu, cumulative CCs: %.2f%%\n", key_value_pairs[i].key, cycles, percentage);
+      running_cc_count_user += cycles;
+      combined_cc_count += cycles;
+      if (running_cc_count_user > ((total_cycles * 99) / 100)) {
+      break; // Stop if we've reached 99% of total cycles
+      }
     }
 
     // Process and print cumulative clock cycles for kernel space
-    unsigned long running_cc_count_kernel = 0;
     for (long i = 0; i < kernel_count; i++) {
-        double percentage = ((double)(*(unsigned long *)new_key_value_pairs[i].value) / (double)total_cc_count) * 100.0;
-        printf("inst tuple (Kernel): %s, cumulative CCs: %.2f%%\n", new_key_value_pairs[i].key, percentage);
-        running_cc_count_kernel += *(unsigned long *)new_key_value_pairs[i].value;
-        if (running_cc_count_kernel > ((total_cc_count * 99) / 100))
-            break;
+      if (strcmp(new_key_value_pairs[i].key, "<NOP,NOP>") == 0) {
+      continue; // Skip NOP instructions
+      }
+      unsigned long cycles = *(unsigned long *)new_key_value_pairs[i].value;
+      double percentage = ((double)cycles / (double)total_cycles) * 100.0;
+      printf("\tinst tuple (Kernel): %s, cycles: %lu, cumulative CCs: %.2f%%\n", new_key_value_pairs[i].key, cycles, percentage);
+      running_cc_count_kernel += cycles;
+      combined_cc_count += cycles;
+      if (running_cc_count_kernel > ((total_cycles * 99) / 100)) {
+      break;
+      }
     }
+
+    // Print combined user + kernel cycles
+    printf("Combined user + kernel cycles (excluding <NOP,NOP>): %lu\n", combined_cc_count);
+    printf("User cycles (excluding <NOP,NOP>): %lu\n", running_cc_count_user);
+    printf("Kernel cycles (excluding <NOP,NOP>): %lu\n", running_cc_count_kernel);
+
 
     // Cleanup memory
     free(keys);
@@ -394,8 +437,5 @@ if(opt2_in_use())
     free(new_values_array);
     free(new_key_value_pairs);
 
-
-
-  return 0;
- 
+    return 0;
 }
