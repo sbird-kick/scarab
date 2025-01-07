@@ -546,6 +546,8 @@ void update_exec_stage(Stage_Data* src_sd) {
 
         else if(prev_inst_in_kernel_space == false && prev_inst_in_user_space == false && current_inst_in_kernel_space == false && current_inst_in_user_space == false)
         {
+          prev_iclass = (char*)malloc(4 * sizeof(char));
+          current_iclass = (char*)malloc(4 * sizeof(char));
           strcpy(prev_iclass, "NOP");
           strcpy(current_iclass, "NOP");
         }

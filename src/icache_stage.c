@@ -1051,6 +1051,8 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
 
         else if(prev_inst_in_kernel_space == false && prev_inst_in_user_space == false && current_inst_in_kernel_space == false && current_inst_in_user_space == false)
         {
+          prev_iclass = (char*)malloc(4 * sizeof(char));
+          current_iclass = (char*)malloc(4 * sizeof(char));
           strcpy(prev_iclass, "NOP");
           strcpy(current_iclass, "NOP");
         }
