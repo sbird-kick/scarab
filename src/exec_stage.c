@@ -544,6 +544,12 @@ void update_exec_stage(Stage_Data* src_sd) {
           current_iclass = (char*) starlab_search(user_space_inst_iclass_ptr, current_address_as_string);
         }
 
+        else if(prev_inst_in_kernel_space == false && prev_inst_in_user_space == false && current_inst_in_kernel_space == false && current_inst_in_user_space == false)
+        {
+          strcpy(prev_iclass, "NOP");
+          strcpy(current_iclass, "NOP");
+        }
+
         if(prev_iclass != NULL && current_iclass != NULL)
         {
           // printf("Exec: prev_iclass: %s, current_iclass: %s\n", prev_iclass, current_iclass);
