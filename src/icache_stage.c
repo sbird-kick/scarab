@@ -866,7 +866,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     starlab_hash_table* user_space_cpu_cycles_table_ptr = (starlab_hash_table*) voided_user_space_types_ht;
     if(user_space_cpu_cycles_table_ptr == NULL)
     {
-      // printf("Icache stage: creating user space table\n");
+      printf("Icache stage: creating user space table\n");
       user_space_cpu_cycles_table_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
     }
 
@@ -874,7 +874,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     starlab_hash_table* kernel_space_cpu_cycles_table_ptr = (starlab_hash_table*) voided_kernel_space_types_ht;
     if(kernel_space_cpu_cycles_table_ptr == NULL)
     {
-      // printf("Icache stage: creating kernel space table\n");
+      printf("Icache stage: creating kernel space table\n");
       kernel_space_cpu_cycles_table_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(KERNEL_SPACE_HT_SIZE));
     }
 
@@ -885,10 +885,11 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     starlab_hash_table* address_to_prev_address = (starlab_hash_table*) voided_address_to_prev_address;
     if(address_to_prev_address == NULL)
     {
+      printf("Icache stage: creating address to prev address table\n");
       address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
 
-    // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
+    printf(" [In ICache] [Addr: %016llx] [Op type: %d] [Fetch cycle: %llu] \n", op->inst_info->addr, op->table_info->op_type, op->fetch_cycle);
 
     char current_address_as_string[128] = {0};
     char prev_address_as_string[128] = {0};
@@ -898,10 +899,12 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     {
           // printf("Before modification - address: 0x%016llx\n", address);
           modified_current_address = (0xFF00000000000000ULL) | (modified_current_address & 0x00FFFFFFFFFFFFFFULL);
-          // printf("After modification  - address: 0x%016llx\n", address);
+          // printf("[In ICache] [Modified Addr: 0x%016llx]\n", modified_current_address);
     }
     sprintf(current_address_as_string, "%016llX", modified_current_address);
+    // printf("[In ICache] [Current Addr: %s]\n", current_address_as_string);
     sprintf(prev_address_as_string, "%016llX", starlab_prev_address);
+    // printf("[In ICache] [Prev Addr: %s]\n", prev_address_as_string);
 
     // The modified address was inserted as key into a hashtable in the frontend 
     // to determine whether the instruction lies in user space or kernel space
@@ -912,10 +915,18 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     if(starlab_search(user_space_inst_iclass_ptr, current_address_as_string))
     {
       current_inst_in_user_space = true;
+      current_inst_in_kernel_space = false;
+      printf("[In ICache] [Current instruction in user space]\n");
     }
     else if(starlab_search(kernel_space_inst_iclass_ptr, current_address_as_string))
     {
       current_inst_in_kernel_space = true;
+      current_inst_in_user_space = false;
+      printf("[In ICache] [Current instruction in kernel space]\n");
+    }
+    else{
+          current_inst_in_kernel_space = false; 
+          current_inst_in_user_space = false;
     }
 
     // Check whether this instruction has a previous instruction
@@ -924,6 +935,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         starlab_insert(address_to_prev_address, current_address_as_string, &starlab_prev_address);
     }
 
+    // if this is not the first op, just copy the current address into prev
     if(modified_current_address != starlab_prev_address) 
       starlab_prev_address = modified_current_address;
 
@@ -936,10 +948,17 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     if(starlab_search(user_space_inst_iclass_ptr, prev_address_as_string))
     {
       prev_inst_in_user_space = true;
+      prev_inst_in_kernel_space = false;
     }
     else if(starlab_search(kernel_space_inst_iclass_ptr, prev_address_as_string))
     {
       prev_inst_in_kernel_space = true;
+      prev_inst_in_user_space = false;
+    }
+
+    else{
+          prev_inst_in_kernel_space = false; 
+          prev_inst_in_user_space = false;
     }
 
     // update the inst_fetch_exec_tuple
@@ -1029,8 +1048,13 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
           prev_iclass = (char*) starlab_search(user_space_inst_iclass_ptr, prev_address_as_string);
           current_iclass = (char*) starlab_search(user_space_inst_iclass_ptr, current_address_as_string);
         }
-        
 
+        else if(prev_inst_in_kernel_space == false && prev_inst_in_user_space == false && current_inst_in_kernel_space == false && current_inst_in_user_space == false)
+        {
+          strcpy(prev_iclass, "NOP");
+          strcpy(current_iclass, "NOP");
+        }
+        
         // printf("[icache] Adding %lu\n", cc_to_add);
 
         if(prev_tuple_ptr->prev_fetch_cycle == -1)
