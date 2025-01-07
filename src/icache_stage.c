@@ -98,7 +98,6 @@ static inline void         log_stats_ic_hit(void);
 static inline void         log_stats_mshr_hit(Addr line_addr);
 static inline void         update_stats_bf_retired(void);
 
-static bool total_processor_cycles_icache_init = false; 
 
 /**************************************************************************************/
 /* set_icache_stage: */
@@ -865,27 +864,6 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     op->fetch_cycle = cycle_count;
 
 
-    // Hashtable to store total cycles consumed by all ops from icache to execution 
-    starlab_hash_table* voided_total_processor_cycles_ht_ptr = (starlab_hash_table*) voided_total_processor_cycles_ht;
-    if(voided_total_processor_cycles_ht_ptr == NULL)
-    {
-      // printf("Icache stage: creating user space table\n");
-      voided_total_processor_cycles_ht_ptr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(USER_SPACE_HT_SIZE));
-    }
-
-     if(total_processor_cycles_icache_init == false){
-
-      total_proc_cycles temp; 
-      temp.total_processor_cycles_icache = cycle_count; 
-      temp.total_processor_cycles_exec = 0;
-      starlab_insert(voided_total_processor_cycles_ht_ptr, "total_processor_cycles", &temp);
-      total_processor_cycles_icache_init = true;
-    }
-
-    voided_total_processor_cycles_ht = (void *) voided_total_processor_cycles_ht_ptr;
-
-
-
     // Hashtable to store CPU cycles consumed by tuples in user space
     starlab_hash_table* user_space_cpu_cycles_table_ptr = (starlab_hash_table*) voided_user_space_types_ht;
     if(user_space_cpu_cycles_table_ptr == NULL)
@@ -1012,8 +990,11 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         temp_tuple_to_insert.prev_fetch_cycle = -1;
       }
       else
+      {
         temp_tuple_to_insert.prev_fetch_cycle = ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, current_address_as_string))->fetch_cycle;
-      temp_tuple_to_insert.exec_cycle = -1; // should be -1
+        temp_tuple_to_insert.exec_cycle = -1; // should be -1
+      }
+        
       if(op->eom)
       {
         // printf("Replaced fetch cycle %lu -> %lu\n", ((inst_fetch_exec_tuple*) starlab_search(inst_tuple_ptr, address_as_string))->fetch_cycle, temp_tuple_to_insert.fetch_cycle);
@@ -1088,11 +1069,12 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
         {
           // do nothing
         }
-        else if(prev_iclass != NULL && current_iclass != NULL)
+        else if(prev_iclass != NULL && current_iclass != NULL && (this_tuple_ptr->fetch_cycle > prev_tuple_ptr->prev_fetch_cycle))
         {
           char tuple_string[128] = {0};
           sprintf(tuple_string, "<%s,%s>", prev_iclass, current_iclass);
 
+        
           // printf("[ICache] [Tuple: %s] [CC: %lu]\n", tuple_string, cc_to_add);
 
           // When both instructions lie in user space - we insert them to user space hashtable
