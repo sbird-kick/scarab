@@ -5,7 +5,7 @@ from matplotlib.cm import ScalarMappable
 from matplotlib.colors import Normalize
 
 # Define the directory containing the text files
-results_dir = "/users/deepmish/scarab/src/result"
+results_dir = "/users/deepmish/reorder_buffer/scarab/src/result"
 
 # Initialize data structures
 applications = []
@@ -22,8 +22,9 @@ for filename in os.listdir(results_dir):
         with open(file_path, "r") as file:
             lines = file.readlines()
             tuple_cycle_counts = {}
-            total_cycles_rob = 0
+            total_cycles_rob = 0  # This will be computed dynamically
             
+            # Read data from the file
             for line in lines:
                 if line.startswith("Total ROB Cycles Consumed for"):
                     parts = line.split(":")
@@ -31,15 +32,24 @@ for filename in os.listdir(results_dir):
                     cycles = int(parts[1].strip())
                     tuple_cycle_counts[tuple_name] = cycles
                     instruction_tuples.add(tuple_name)
-                if "Total cycles spent by all ops in ROB" in line:
-                    total_cycles_rob = int(line.split(":")[1].strip())
+                    print(f"Found tuple: {tuple_name} with cycles: {cycles}")
+                
+            # Compute total cycles spent by all tuples in ROB
+            total_cycles_rob = sum(tuple_cycle_counts.values())
+            print(f"Computed Total cycles spent in ROB for {app_name}: {total_cycles_rob}")
             
-            # Normalize cycle counts
+            # Normalize cycle counts (percentage calculation)
             if total_cycles_rob > 0:
-                data[app_name] = {
-                    t: (tuple_cycle_counts.get(t, 0) / total_cycles_rob) * 100
-                    for t in instruction_tuples
-                }
+                print(f"Normalizing cycle counts for {app_name}...")
+                data[app_name] = {}
+                for t in instruction_tuples:
+                    tuple_cycles = tuple_cycle_counts.get(t, 0)
+                    percentage = (tuple_cycles / total_cycles_rob) * 100
+                    
+                    # Print detailed information for each tuple
+                    print(f"Tuple: {t} - Total Cycles: {tuple_cycles} - Total ROB Cycles: {total_cycles_rob} - Percentage: {percentage:.2f}%")
+                    
+                    data[app_name][t] = percentage
             else:
                 data[app_name] = {t: 0 for t in instruction_tuples}
 
@@ -65,22 +75,12 @@ for i, t in enumerate(instruction_tuples):
     bottoms += heights
 
 # Add labels and formatting
-ax.set_xlabel("Data Center Applications", fontsize=14)
-ax.set_ylabel("Percentage of Total ROB Cycles", fontsize=14)
-ax.set_title("Stacked Bar Chart of ROB Cycles Consumed by Instruction Tuples (Gradient Colors)", fontsize=16)
+ax.set_xlabel("Datacenter Applications", fontsize=14)
+ax.set_ylabel("% Cycles in ROB", fontsize=14)
+ax.set_title("ROB Cycles Consumed by OP Tuples", fontsize=16)
 ax.set_xticks(x)
 ax.set_xticklabels(applications, rotation=45, ha="right", fontsize=12)
 ax.legend(title="Instruction Tuples", fontsize=10, loc="upper left", bbox_to_anchor=(1, 1))
-
-# Add percentage labels for each bar segment
-for i, app in enumerate(applications):
-    cumulative_height = 0
-    for t in instruction_tuples:
-        height = data[app].get(t, 0)
-        if height > 0:
-            ax.text(x[i], cumulative_height + height / 2, f"{height:.1f}%", 
-                    ha="center", va="center", fontsize=8)
-        cumulative_height += height
 
 # Set aesthetics
 ax.spines["top"].set_visible(False)
