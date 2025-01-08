@@ -51,7 +51,15 @@ tuple_colors = [
 colors = tuple_colors[:len(tuples)]
 
 # Calculate percentages for stacked bars
-bars_data = {t: [data[app].get(t, 0) / total_rs_cycles * 100 for app in applications] for t in tuples}
+bars_data = {}
+for t in tuples:
+    bars_data[t] = []
+    for app in applications:
+        rs_cycles = data[app].get(t, 0)
+        percentage = rs_cycles / total_rs_cycles * 100 if total_rs_cycles > 0 else 0
+        # Debug statement
+        print(f"Computing % for Tuple: {t}, Application: {app}, rs_cycles: {rs_cycles}, Total RS Cycles: {total_rs_cycles}, Percentage: {percentage:.2f}%")
+        bars_data[t].append(percentage)
 
 # Create figure with adjusted dimensions and spacing
 plt.figure(figsize=(14, 9))  # Slightly taller to accommodate proper spacing
@@ -66,10 +74,10 @@ for t, color in zip(tuples, colors):
 
 # Customize the plot
 plt.xlabel("Datacenter Applications", fontsize=12)
-plt.ylabel("% Cycles in Reorder Buffer (ROB)", fontsize=12)
+plt.ylabel("% Cycles in Reservation Station", fontsize=12)
 
 # Add title with increased padding
-plt.title("ROB Cycles Consumed by OP Tuples", fontsize=16, pad=70)  # Reduced padding for title
+plt.title("CPU Cycles Consumed by OP Tuples in Reservation Station", fontsize=16, pad=70)  # Reduced padding for title
 
 # Move legend above title
 plt.legend(
@@ -83,7 +91,6 @@ plt.legend(
     borderaxespad=0.5
 )
 
-
 # Adjust x and y ticks
 plt.xticks(rotation=45, ha="right", fontsize=10)
 plt.yticks(fontsize=10)
@@ -92,6 +99,6 @@ plt.yticks(fontsize=10)
 plt.grid(axis="y", linestyle="--", alpha=0.7)
 
 # Save and display the plot with extra padding to prevent cutoff
-output_path = "/users/deepmish/scarab/src/rob_cycles_op_tuples_top_legend.png"
+output_path = "/users/deepmish/scarab/src/rs_cycles_op_tuples_top_legend.png"
 plt.savefig(output_path, bbox_inches='tight', dpi=300, pad_inches=0.2)
 plt.show()
