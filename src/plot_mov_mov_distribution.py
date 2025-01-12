@@ -117,11 +117,15 @@ plt.rcParams['font.family'] = font_family
 
 # Set x-axis labels
 ax.set_xticks(positions)
-ax.set_xticklabels(applications, rotation=45, ha="right", fontsize=12)
+ax.set_xticklabels(applications, rotation=45, ha="right", fontsize=17, color='black')
 
 # Set labels for axes
-ax.set_ylabel("% of CPU Cycles Consumed", fontsize=14)
-ax.set_xlabel("Datacenter Applications", fontsize=14)
+
+
+# Set labels for axes with font weight for better visibility
+ax.set_ylabel("% of CPU Cycles Consumed", fontsize=17, color='#000000', fontweight='bold')
+ax.set_xlabel("Datacenter Applications", fontsize=17, color='#000000', fontweight='bold')
+
 
 # Create more detailed legend labels using arrows and line breaks
 category_labels = {
@@ -148,8 +152,8 @@ ax.spines['left'].set_color('#333333')
 ax.spines['bottom'].set_color('#333333')
 ax.yaxis.label.set_color('#333333')
 ax.xaxis.label.set_color('#333333')
-ax.tick_params(axis='x', colors='#333333')
-ax.tick_params(axis='y', colors='#333333')
+ax.tick_params(axis='x', colors='black')
+ax.tick_params(axis='y', colors='black')
 ax.yaxis.grid(True, color='#EAEAEA')
 ax.xaxis.grid(False)
 
@@ -157,26 +161,32 @@ ax.xaxis.grid(False)
 fig.patch.set_facecolor('#FFFFFF')
 ax.set_facecolor('#FFFFFF')
 
+
+
 # Create the legend with updated styling and more space for the two-line labels
 legend = ax.legend(legend_labels, 
-                  bbox_to_anchor=(1.05, 0.5),
-                  loc='center left',
-                  fontsize=10,
+                  bbox_to_anchor=(0.5, 1.0),  # Position the legend just above the plot
+                  loc='lower center',          # Place it at the center bottom of the axes
+                  ncol=3,                      # Set the number of columns to 3
+                  fontsize=13,
                   frameon=False,
-                  title='Instruction Access Patterns',
-                  title_fontsize=12)
+                  title_fontsize=12,
+                  columnspacing=2,           # Increase spacing between columns
+                  handletextpad=2,
+                  borderaxespad=2)         # Add space between legend title and legend
 
 # Style the legend
 legend.get_title().set_fontweight('bold')
 for text in legend.get_texts():
-    text.set_color('#333333')
-    text.set_fontfamily('serif')
+    text.set_color('black')
+
+
 
 # Adjust layout for better spacing
 plt.tight_layout()
 
 # Save the plot as a high-resolution PNG file with a white background
-output_plot = os.path.join(root_dir, "datacenter_cycles_stacked_bar.png")
+output_plot = os.path.join(root_dir, "cpu_cycles_mov_mov.png")
 plt.savefig(output_plot, dpi=300, bbox_inches='tight', facecolor=fig.get_facecolor())
 print(f"Plot saved as {output_plot}")
 
