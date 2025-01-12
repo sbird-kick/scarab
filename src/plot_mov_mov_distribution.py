@@ -2,6 +2,13 @@ import os
 import re
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.font_manager
+
+# Check available fonts on the system
+available_fonts = matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
+print("Available fonts on your system:")
+for font in available_fonts:
+    print(font)
 
 print("Starting to process application directories...")
 
@@ -42,13 +49,11 @@ for app_dir in os.listdir(root_dir):
                 data[app_dir] = percentages
             else:
                 print(f"No 'Final percentages' section found in {output_file}")
-                # just break out of the loop
                 break
         else:
             print(f"Missing: {output_file}")
     else:
         print(f"Skipping non-directory: {app_path}")
-
 
 # Check if data is populated
 if not data:
@@ -57,11 +62,12 @@ if not data:
 # Extract categories (keys) from the first application's data
 categories = list(next(iter(data.values())).keys())
 
-# Create a figure and axis
-fig, ax = plt.subplots(figsize=(12, 6))
+# Create a figure and axis with larger size for better readability
+plt.rcParams['figure.dpi'] = 300
+fig, ax = plt.subplots(figsize=(14, 8))
 
 # Define the bar width
-bar_width = 0.8
+bar_width = 0.6
 
 # Define application names and bar positions
 applications = list(data.keys())
@@ -70,47 +76,70 @@ positions = np.arange(len(applications))
 # Initialize the bottom positions for stacking bars
 bottoms = np.zeros(len(applications))
 
-# Define colors for each category (ensure enough unique colors)
+# Define the new color palette
 colors = [
-    "#2E8B57", "#ADFF2F", "#FFD700", "#FF4500", "#8A2BE2", 
-    "#6495ED", "#DC143C", "#7FFF00", "#FF69B4", "#20B2AA"
+    '#186158',  # dark green
+    '#26e910',  # neon green
+    '#444444',  # dark gray
+    '#d3d3d3',  # light gray
+    '#faf300',  # bright yellow
+    '#fffacd',  # pastel yellow
+    '#097991',  # dark teal
+    '#8fdde7',  # light teal
+    '#351c75',  # orange-red
 ]
+
+# Set the colors directly
+ax.set_prop_cycle('color', colors)
 
 # Plot the stacked bars
 for i, category in enumerate(categories):
     values = [data[app][category] for app in applications]
-    ax.bar(
+    bars = ax.bar(
         positions,
         values,
         bar_width,
         bottom=bottoms,
-        label=category,
-        color=colors[i % len(colors)]
+        label=category
     )
     bottoms += values
+    
+    # Add thin black border to bars
+    for bar in bars:
+        bar.set_edgecolor('black')
+        bar.set_linewidth(0.5)
+
+# Fallback to 'DejaVu Serif' if 'Times New Roman' is not available
+font_family = 'Times New Roman' if 'Times New Roman' in available_fonts else 'DejaVu Serif'
+
+# Change font to the selected font
+plt.rcParams['font.family'] = font_family
 
 # Set x-axis labels
 ax.set_xticks(positions)
-ax.set_xticklabels(applications, rotation=45, ha="right", fontsize=10)
+ax.set_xticklabels(applications, rotation=45, ha="right", fontsize=12)
 
-# Set labels and title
-ax.set_ylabel("% of CPU Cycles Consumed", fontsize=12)
-ax.set_xlabel("Datacenter Applications", fontsize=12)
-ax.set_title("% Cycles in Reorder Buffer (ROB) by Instruction Tuple Type", fontsize=14)
+# Set labels for axes
+ax.set_ylabel("% of CPU Cycles Consumed", fontsize=14)
+ax.set_xlabel("Datacenter Applications", fontsize=14)
 
-# Add a legend
-ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
+# Create more detailed legend labels using arrows and line breaks
+category_labels = {
+    'cc_prev_mem_mem_curr_mem_mem': 'Instr. 1: MEM→MEM\nInstr. 2: MEM→MEM',
+    'cc_prev_mem_mem_curr_reg_reg': 'Instr. 1: MEM→MEM\nInstr. 2: REG→REG',
+    'cc_prev_mem_mem_curr_reg_mem': 'Instr. 1: MEM→MEM\nInstr. 2: REG↔MEM',
+    
+    'cc_prev_reg_reg_curr_reg_reg': 'Instr. 1: REG→REG\nInstr. 2: REG→REG',
+    'cc_prev_reg_reg_curr_mem_mem': 'Instr. 1: REG→REG\nInstr. 2: MEM→MEM',
+    'cc_prev_reg_reg_curr_reg_mem': 'Instr. 1: REG→REG\nInstr. 2: REG↔MEM',
+    
+    'cc_prev_reg_mem_curr_mem_mem': 'Instr. 1: REG↔MEM\nInstr. 2: MEM→MEM',
+    'cc_prev_reg_mem_curr_reg_reg': 'Instr. 1: REG↔MEM\nInstr. 2: REG→REG',
+    'cc_prev_reg_mem_curr_reg_mem': 'Instr. 1: REG↔MEM\nInstr. 2: REG↔MEM'
+}
 
-# Adjust layout for better spacing
-plt.tight_layout()
-
-# Save the plot as a PNG file
-output_plot = os.path.join(root_dir, "datacenter_cycles_stacked_bar.png")
-plt.savefig(output_plot, dpi=300)
-print(f"Plot saved as {output_plot}")
-
-# Show the plot
-plt.show()
+# Update legend labels
+legend_labels = [category_labels.get(category, category) for category in categories]
 
 # Customize the plot aesthetics
 ax.spines['top'].set_visible(False)
@@ -128,15 +157,26 @@ ax.xaxis.grid(False)
 fig.patch.set_facecolor('#FFFFFF')
 ax.set_facecolor('#FFFFFF')
 
-# Set the title color
-ax.title.set_color('#333333')
+# Create the legend with updated styling and more space for the two-line labels
+legend = ax.legend(legend_labels, 
+                  bbox_to_anchor=(1.05, 0.5),
+                  loc='center left',
+                  fontsize=10,
+                  frameon=False,
+                  title='Instruction Access Patterns',
+                  title_fontsize=12)
 
-# Adjust legend aesthetics
-legend = ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10, frameon=False)
+# Style the legend
+legend.get_title().set_fontweight('bold')
 for text in legend.get_texts():
     text.set_color('#333333')
+    text.set_fontfamily('serif')
 
-# Save the plot as a PNG file with a white background
+# Adjust layout for better spacing
+plt.tight_layout()
+
+# Save the plot as a high-resolution PNG file with a white background
+output_plot = os.path.join(root_dir, "datacenter_cycles_stacked_bar.png")
 plt.savefig(output_plot, dpi=300, bbox_inches='tight', facecolor=fig.get_facecolor())
 print(f"Plot saved as {output_plot}")
 
