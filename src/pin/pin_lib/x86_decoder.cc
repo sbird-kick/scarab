@@ -779,6 +779,8 @@ void init_pin_opcode_convert(void) {
   iclass_to_scarab_map[XED_ICLASS_XRSTORS64] = {OP_NOTPIPELINED_SLOW, -1, -1, NONE};
   iclass_to_scarab_map[XED_ICLASS_XSAVES64] = {OP_NOTPIPELINED_SLOW, -1, -1, NONE};
   iclass_to_scarab_map[XED_ICLASS_VPERMI2D] = {OP_PIPELINED_SLOW, -1, -1, NONE};
+  iclass_to_scarab_map[XED_ICLASS_INVPCID] = {OP_PIPELINED_MEDIUM, -1, -1, NONE};
+  iclass_to_scarab_map[XED_ICLASS_VPRORD] = {OP_PIPELINED_SLOW, -1, -1, NONE};
   iclass_to_scarab_map[XED_ICLASS_BZHI] = {OP_LOGIC, -1, 1, NONE}; 
   iclass_to_scarab_map[XED_ICLASS_VPTESTMB] = {OP_LOGIC, -1, 1, NONE}; 
   iclass_to_scarab_map[XED_ICLASS_VPCMPUB] = {OP_LOGIC, -1, 1, NONE};  
