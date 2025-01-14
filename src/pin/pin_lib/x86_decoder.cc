@@ -776,8 +776,9 @@ void init_pin_opcode_convert(void) {
   assert(OP_INV == 0);
   iclass_to_scarab_map[XED_ICLASS_RDFSBASE] = {OP_MOV, -1, 1, NONE}; 
   iclass_to_scarab_map[XED_ICLASS_WRGSBASE] = {OP_MOV, -1, 1, NONE};
-  iclass_to_scarab+map[XED_ICLASS_WRFSBASE] = {OP_MOV, -1, 1, NONE};
+  iclass_to_scarab_map[XED_ICLASS_WRFSBASE] = {OP_MOV, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_WRPKRU] = {OP_MOV, -1, 1, NONE};
+  iclass_to_scarab_map[XED_ICLASS_KORTESTD] = {OP_LOGIC, -1, 1, NONE}; 
   iclass_to_scarab_map[XED_ICLASS_XRSTORS64] = {OP_NOTPIPELINED_SLOW, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_XSAVES64] = {OP_NOTPIPELINED_SLOW, -1, 1, NONE};
   iclass_to_scarab_map[XED_ICLASS_VPERMI2D] = {OP_PIPELINED_SLOW, -1, 8, NONE};
