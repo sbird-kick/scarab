@@ -406,6 +406,31 @@ typedef struct {
     void *value;
 } KeyValuePair;
 
+
+/**
+ * Track the cycles consumed by
+ * <ALU, ALU> micro-op pairs. 
+ * The following cycles are tracked:
+ * - instr1_rob_insert_cycle: The cycle when the first ALU micro-op is inserted into the ROB.
+ * - instr2_rob_insert_cycle: The cycle when the second ALU micro-op is inserted into the ROB.
+ * - rob_instr1_finish_cycle: The cycle when the first ALU micro-op finishes execution.
+ * - rob_instr2_finish_cycle: The cycle when the second ALU micro-op finishes execution.
+ */
+
+typedef struct rob_total_cycles_entry{
+  unsigned long long instr1_rob_insert_cycle;
+  unsigned long long instr2_rob_insert_cycle;
+  unsigned long long rob_instr1_finish_cycle;
+  unsigned long long rob_instr2_finish_cycle;
+} rob_total_cycles_entry;
+
+// Track metadata about each instruction entering the ROB
+typedef struct rob_entry_metadata{
+  char  *micro_op_addr; 
+  unsigned long long rob_insert_cycle;
+  unsigned int op_type; 
+} rob_entry_metadata;
+
 // starlab_hash_table* global_starlab_ht_ptr;
 const char* starlab_get_opcode_string(int op_type);
 unsigned int starlab_hash(const char *key, int table_size);
