@@ -224,6 +224,7 @@ void* voided_global_starlab_types_ht = NULL;
 void* voided_address_to_type_ptr = NULL;
 void* voided_address_to_prev_address = NULL;
 void* voided_inst_truple_ptr = NULL;
+void* voided_memory_load_addresses_ht = NULL; 
 
 // char prev_address_as_string[128];
 // char prev_prev_address_as_string[128];

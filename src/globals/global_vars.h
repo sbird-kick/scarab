@@ -87,6 +87,8 @@ extern void* voided_address_to_prev_address;
 
 extern unsigned long long starlab_prev_address;
 extern unsigned long long starlab_prev_prev_address;
+
+extern void* voided_memory_load_addresses_ht; 
 /**************************************************************************************/
 
 #endif /* #ifndef __GLOBAL_VARS_H__ */

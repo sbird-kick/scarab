@@ -401,6 +401,12 @@ typedef struct starlab_table_value {
     unsigned long exec_cycle;
 } inst_fetch_exec_truple;
 
+typedef struct mem_load_metadata {
+  unsigned long effective_addr; 
+  unsigned long pc_addr; 
+  unsigned long micro_op_num; 
+} mem_load_metadata; 
+
 typedef struct {
     char *key;
     void *value;

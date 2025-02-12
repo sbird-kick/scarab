@@ -98,6 +98,8 @@ static inline void         log_stats_ic_hit(void);
 static inline void         log_stats_mshr_hit(Addr line_addr);
 static inline void         update_stats_bf_retired(void);
 
+static unsigned long microop_num = 0; 
+
 /**************************************************************************************/
 /* set_icache_stage: */
 
@@ -870,6 +872,26 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
       address_to_prev_address = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
     }
 
+    starlab_hash_table* mem_load_addr = (starlab_hash_table*) voided_memory_load_addresses_ht;
+    if(mem_load_addr == NULL)
+    {
+      mem_load_addr = starlab_create_table(INITIAL_TABLE_SIZE, sizeof(unsigned long));
+    }
+
+
+    if(op->table_info->mem_type == MEM_LD) {
+      char mem_load_addr_var[128], pc_addr[128] = {0}; 
+      mem_load_metadata mem_metadata_entry; 
+      sprintf(mem_load_addr_var, "%016llX", op->oracle_info.va); 
+      microop_num++; 
+
+      mem_metadata_entry.effective_addr = op->oracle_info.va; 
+      mem_metadata_entry.pc_addr = op->inst_info->addr; 
+      mem_metadata_entry.micro_op_num = microop_num; 
+      starlab_insert(mem_load_addr, pc_addr, &mem_metadata_entry); 
+
+    }
+
     // printf("[%016llx] fetched: %llu\n", op->inst_info->addr, op->fetch_cycle);
 
     char address_as_string[128] = {0};
@@ -994,6 +1016,7 @@ static inline void icache_process_ops(Stage_Data* cur_data) {
     }
 
     voided_inst_truple_ptr = (void *) inst_truple_ptr;
+    voided_memory_load_addresses_ht = (void *) mem_load_addr; 
 
     // ENDS HERE 
 
